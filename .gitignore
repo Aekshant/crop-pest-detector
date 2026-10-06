@@ -1,0 +1,13 @@
+.gradle/
+build/
+.cxx/
+local.properties
+*.iml
+.idea/
+captures/
+.DS_Store
+/out/
+__pycache__/
+
+# Training data downloads (see ml/data/README.md)
+ml/data/_downloads/

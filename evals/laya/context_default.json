@@ -1,0 +1,17 @@
+{
+  "now": "2026-10-20T09:00:00+05:30",
+  "location": "Nashik, Maharashtra",
+  "network": "ONLINE",
+  "current_field": "f1",
+  "fields": [
+    {"id": "f1", "name": "Upar wala khet"},
+    {"id": "f2", "name": "Nadi wala khet"}
+  ],
+  "recent_scans": [
+    {"id": "s101", "field_id": "f1", "label": "early_blight", "taken_at": "2026-10-18T08:10:00+05:30"},
+    {"id": "s102", "field_id": "f2", "label": "healthy",      "taken_at": "2026-10-15T17:40:00+05:30"},
+    {"id": "s103", "field_id": "f1", "label": "early_blight", "taken_at": "2026-10-11T07:55:00+05:30"},
+    {"id": "s104", "field_id": "f2", "label": "whitefly",     "taken_at": "2026-10-02T09:20:00+05:30"}
+  ],
+  "last_diagnosis": null
+}

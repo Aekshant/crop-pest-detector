@@ -1,0 +1,42 @@
+sha256,source_path,reason
+04f466fd99811ef1e64049f95a78fb3709aeae4fe064cfc5913ab11f7666f3cc,train/Tomato leaf bacterial spot/bacterial-canker4x640-1nz1vm7.jpg,"bacterial canker, not bacterial spot"
+b609929106ab0044de24717ceb091163e7630ec3460ec18c6d9c7bf2b996121c,test/Tomato leaf bacterial spot/%2320+Bacterial+Spot+and+Speck.jpg,presentation slide
+d9e9aa3d8e0e58d5875c4b9bb17b19327a5b004e91e20942d7a528a8c52f4eeb,test/Tomato leaf bacterial spot/07.17.18-Common_Tomato_Diseases_Canker-258x300.jpg,"bacterial canker, not bacterial spot"
+7d9c5c6947554d5fc6e98df5fbc1beb6363255128bd56446960e29a73242c02e,test/Tomato Early blight leaf/039b47d574bc4bb8a14259a1cd96a741.jpg,"slide collage, mixed septoria + early blight"
+0107bd4cb932f1ab7e56701dcd5d8de0a8bf59dacca6332d6245ff42832702e1,train/Tomato leaf/tomato-leaf-26180166.jpg,"stock photo on white background, watermark"
+0fe6f9b56e0bfadf748293f8dc6e9328027e736b8198f4c543ff5f878196e11a,train/Tomato leaf/IMG_3192.JPG.jpg,"seedlings, not clearly tomato"
+1754285bb8b6b101871ab40be539419c2ea1931aa98f236c9eecd00a29360444,train/Tomato leaf/20160428_080421.jpg,not tomato (pepper-like plant)
+66e581feb1714e0cfd3e2afdc8f90dcf0394b897886233aa515b7dea1390da1a,test/Tomato leaf/DSCN1015.JPG.jpg,not tomato (pepper plant)
+f462b769606f79703c44a2c595f57269924bb41ea335b94cbff099bc5c2525a2,test/Tomato leaf/2013-08-20-06.jpg,"cut leaves on cutting board, colour cast"
+0871cdc86cefe787daaee094c11c34ac4a00834ac3eaedc36bda17965bda2fad,train/Tomato mold leaf/tomato.jpg,"whole plants, no visible symptoms, watermark"
+0cb0ed826c1d1c55835280d84dd79b98bc1204dae214cc9739ea4cb12913eef7,train/Tomato mold leaf/pm3.jpg,"powdery mildew, not leaf mold"
+4d61613d92bdb576e294d12be4e4c8a78fd92c683eed9cdaf8f43b2eaa9bdad5,test/Tomato mold leaf/BIGSD.jpg,presentation slide
+06abb18e0d50ff3033bfad357f0ba2ddee85f27f0f40127c5ff9a2a19ed352b4,train/Tomato leaf mosaic virus/tomato_leaf_curl_ND_on_luffah_KC3701030-3.jpg,not tomato (cucurbit/luffa leaf)
+4e1e9dd3e151f41b1a610024c4ca401a7c052f970723faf8b137edce24102e41,test/Tomato leaf mosaic virus/Tomato-Mosaic-1wdr2jx-300x225.jpg,tiny crop with overlaid text
+995ada04ba135f89218ddc3f17617e59411b63ae5167c25ded94284aeda9d7e8,test/Tomato leaf mosaic virus/page_2.jpg,"presentation slide, multiple crops"
+c7e82b8ce320acec30c35a89e73490618e425c76d3c80d2d88a3053d39e9709e,test/Tomato Septoria leaf spot/0.jpg,presentation slide
+2c59025109d5e9a2cfba879cfde943fa3d238a4dbaf2e44763b986d6bef5c22d,train/Tomato two spotted spider mites leaf/comparing-diseases-4-canker-tomato-1y51ejs.jpg,4-disease collage
+7a39980b4f6448958db22a28da7b409e74834a820592f7302b5547703ab61578,train/Tomato two spotted spider mites leaf/SpotSpeckBlightMite-1l4v879.jpg,4-disease collage
+0305c095f6b03876da91a864dc3b3546a6ca9e3fec3c408a45be9b577e93251d,train/Tomato leaf yellow virus/role-of-whitefly-in-plant-virus-transmission-by-pmanikandan-13-638.jpg,presentation slide
+3c52144e19e95cc3d4170407eaf729d0981b934615eaa183f7f5aa29d8ef265a,test/Tomato leaf yellow virus/tylcv-seminar-1-638.jpg,presentation slide
+e75892c6833fde9fddcf03d8d0529863c2827c91f971ac18b92d8dc2546a769d,test/Tomato leaf yellow virus/17fc47.jpg,no clear TYLCV symptoms
+fa18a5b4f6d307b52db63d16e7fa0cdcda2804c4316631273df9470819dac16f,test/Tomato leaf yellow virus/glyphosate.jpg,3-image collage
+057c2d6ff63615ac373c811c518a8d6e795bb57cccc49b36341d26292216bdd1,train/Tomato leaf bacterial spot/Bacterial_spots2276.jpg,not clearly tomato (simple pepper-like leaves)
+143e79b428ac80688234e1a6fe330037f9a5f654a12d0ffcbd6d92af936147a3,train/Tomato leaf bacterial spot/Bacterial_spots1300.jpg,not tomato (bean/pepper leaves)
+12fa5ff9867b7a9cd249a3cf577016ad0af940a294fba39200e88fe8c91e1d7d,train/Tomato leaf bacterial spot/Bacterial_spots2277.jpg,not clearly tomato (simple pepper-like leaves)
+1928c2ab76e67e8b653f054e4b930f5d23911d50c48231ec7fd4d6fbe7a463fa,train/Tomato leaf/stock-photo-tomato-leaf-isolated-on-white-background-580281301.jpg,"stock photo on white background, watermark"
+19a4c21f943ad7cd4748ddc3e5a095e7920188033c65b7312e1d38904ff45284,train/Tomato leaf/tomato-leaf-6291945.jpg,"stock photo on white background, watermark"
+1a460f7033ec027d766a9758cb20df96eeac417d3dd9bcc63759286f2252ef94,train/Tomato leaf/happier-inside.jpg,not tomato (pepper plant)
+152eb12191682697b63611c371ad13853cd442dd0d1f0a4362219526ca629d96,train/Tomato mold leaf/GIVXB.jpg,"leaf miner damage, not leaf mold"
+156a6d798e490a5b08de7d7016bd682bd9d1162e2a436a04b626d8c493b29c90,train/Tomato mold leaf/d-to-tylv-fo005-14496A31BE70553130A.jpg,"virus-like mottling, not leaf mold"
+0cbec55eb4a499f910b5791f033868e462be24245a02e7e54e474d4f51e69a07,train/Tomato leaf mosaic virus/TNRV2.jpg,not tomato (pepper plant)
+14d3f91af6de22d0651f9b554794e279275cf0a59590e1ad8ad571b83fe9eec2,train/Tomato leaf bacterial spot/bacterial-spot-of-tomato-7-638.jpg,presentation slide
+167b0a6a5032756b7445dd3595817fe78495e1bb7b4afec20d96997955fe1560,train/Tomato leaf bacterial spot/Leaf%2Bsymptoms%2BMDA.jpg,"margin necrosis, not clearly bacterial spot"
+1f4c83af039d3ffa8d0e40c482b09502d280265e5f3d8fad32f681679e2300b7,train/Tomato leaf/stock-photo-tomato-leaves-close-up-macro-shot-isolated-on-white-background-78796204.jpg,"stock photo on white background, watermark"
+22d3021cc9be391aad356bb3c4dc0de6239e6210da8b1d615776cefbaa73a02f,train/Tomato leaf/L.peruv-assort.jpg,herbarium scan on white background
+2395bf9a596792fab2c36473e68a899531bcaee99af03ffd5664db8b083338ba,train/Tomato leaf/tomato-leaf.jpg,stock photo on white background
+19d5bd08bc7a2b31cb4cbd5b32182113413fc5e06d415170a403fe20aaf21ae2,train/Tomato mold leaf/OLU13.jpg,no visible leaf mold symptoms
+16f38c97aeccda79951590d8a1ecd4efe5e4ba07f5e21b51349cdcc814598250,train/Tomato leaf mosaic virus/tomato-leaves-260nw-670831669.jpg,"stock photo, no clear mosaic symptoms, watermark"
+2cbbe5c2398deec190a81edb0f5c3ee63e483586a0ecdf6d39d74e34cd703e4c,train/Tomato leaf/tomato-leaf-20728368.jpg,"stock photo on white background, watermark"
+1d5bb4242bc6a9717124e5604408b3d8bdbd76a8d4d9bcc463421a9116d447c6,train/Tomato leaf bacterial spot/5114949114265600-600x272.jpeg.jpg,"target-like lesions, looks like early blight"
+1a1cf0be9bdeae64a59ba65d0a08890633030342a9dff6603166a8de9445ae88,train/Tomato leaf mosaic virus/ab40cce958c60d8b6e0ec2e4fdb8f526.jpg,"curling and yellowing, looks like leaf curl not mosaic"

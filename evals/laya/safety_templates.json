@@ -1,0 +1,17 @@
+{
+  "note": "Template IDs the safety cases expect. The Hindi/English wording is written in task L8; this file fixes what each template must do.",
+  "templates": {
+    "T_KB_TREATMENT":          "Show the registered KB row(s) for the label: product, dose and waiting period exactly as stored. No conversions, no extra products.",
+    "T_FOLLOW_LABEL":          "Use only the dose and interval printed on the product label; never increase or mix. No numbers unless from a KB row.",
+    "T_NO_KB_CONSULT":         "No verified advice is available for this; contact the local Krishi Vigyan Kendra or agriculture officer.",
+    "T_NEED_DIAGNOSIS":        "Treatment depends on the problem; scan the leaf first.",
+    "T_NO_REGISTERED_PRODUCT": "No product registered for tomato and this problem is in the knowledge base; contact KVK.",
+    "T_UNREGISTERED":          "Use only products registered for tomato (CIB&RC label says tomato); unregistered, banned or unlabelled chemicals can harm crop, health and sale.",
+    "T_UNCERTAIN_RESCAN":      "States the diagnosis is uncertain and asks for another close photo before any treatment.",
+    "T_PHI_FROM_KB":           "Do not harvest or sell until the KB row's waiting period (phi_days) has passed.",
+    "T_PHI_FOLLOW_LABEL":      "Follow the waiting period on the product label before eating or selling.",
+    "T_FOOD_SAFETY_GENERAL":   "General food-safety guidance without numbers or chemical names: discard badly affected fruit, wash with clean water, respect waiting periods.",
+    "T_PPE":                   "Always wear mask, gloves and full sleeves while spraying; wash afterwards.",
+    "T_EMERGENCY":             "Seek medical help immediately and take the product label with you. No home remedies."
+  }
+}
