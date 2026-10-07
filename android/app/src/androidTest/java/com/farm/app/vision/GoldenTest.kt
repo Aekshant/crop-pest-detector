@@ -44,7 +44,10 @@ class GoldenTest {
                 val rgb = testContext.assets.open("${g.name}.rgb").use { it.readBytes() }
                 val r = requireNotNull(engine.analyzeRgb(rgb, g.w, g.h)) { "${g.name}: analyze failed" }
                 Log.i(TAG, "${engine.backend} ${g.name}: ${r.decision} ${r.top?.id} p=${"%.3f".format(r.topProb)} " +
-                    "sharp=${"%.4f".format(r.sharpness)} gate=${r.qualityMs}ms prep=${r.preprocessMs}ms model=${r.inferenceMs}ms")
+                    "sharp=${"%.4f".format(r.sharpness)} gate=${r.qualityMs}ms prep=${r.preprocessMs}ms model=${r.inferenceMs}ms " +
+                    "severity=${r.severityLevel} ${"%.1f".format(r.severityFraction * 100)}% in ${r.severityMs}ms")
+                // Severity only for disease labels.
+                if (r.top?.isDisease != true) assertEquals(g.name, SeverityLevel.UNKNOWN, r.severityLevel)
                 // Same sharpness as the Python reference (the C++ gate is bit-exact on host).
                 assertEquals(g.name, g.sharpness, r.sharpness.toDouble(), 1e-4)
                 if (g.sharpness < minSharp) {

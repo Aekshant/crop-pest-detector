@@ -16,6 +16,7 @@
 #include "farm/image.h"
 #include "farm/preprocess.h"
 #include "farm/quality.h"
+#include "farm/severity.h"
 
 namespace {
 
@@ -158,9 +159,44 @@ void TestQualitySpeed() {
   CHECK(ms < 10.0);
 }
 
+void TestSeverity() {
+  // 224x224: white background, green leaf disc (r=90), brown spots inside it.
+  const int n = 224;
+  std::vector<uint8_t> rgb(n * n * 3, 255);
+  int leaf_px = 0, spot_px = 0;
+  for (int y = 0; y < n; ++y)
+    for (int x = 0; x < n; ++x) {
+      const int dx = x - 112, dy = y - 112;
+      uint8_t* p = &rgb[(static_cast<size_t>(y) * n + x) * 3];
+      if (dx * dx + dy * dy > 90 * 90) continue;
+      ++leaf_px;
+      const bool spot = ((x / 20) % 3 == 0) && ((y / 20) % 3 == 0) && dx * dx + dy * dy < 80 * 80;
+      if (spot) { p[0] = 120; p[1] = 70; p[2] = 30; ++spot_px; }   // brown
+      else { p[0] = 60; p[1] = 140; p[2] = 50; }                   // green
+    }
+  farm::SeverityEstimator est;
+  const auto r = est.Estimate(rgb.data(), n, n, n * 3);
+  const float truth = static_cast<float>(spot_px) / leaf_px;
+  std::printf("  severity synthetic: estimated %.3f vs truth %.3f, leaf %.3f\n", r.lesion_fraction, truth,
+              r.leaf_fraction);
+  CHECK(std::fabs(r.lesion_fraction - truth) < 0.02f);
+  CHECK(std::fabs(r.leaf_fraction - static_cast<float>(leaf_px) / (n * n)) < 0.02f);
+
+  // Healthy leaf: no lesions, low severity.
+  for (size_t i = 0; i < rgb.size(); i += 3)
+    if (rgb[i] == 120) { rgb[i] = 60; rgb[i + 1] = 140; rgb[i + 2] = 50; }
+  const auto healthy = est.Estimate(rgb.data(), n, n, n * 3);
+  CHECK(healthy.lesion_fraction < 0.01f && healthy.level == farm::SeverityLevel::kLow);
+
+  // No leaf (white wall): can't estimate.
+  std::vector<uint8_t> wall(n * n * 3, 250);
+  CHECK(est.Estimate(wall.data(), n, n, n * 3).level == farm::SeverityLevel::kUnknown);
+}
+
 }  // namespace
 
 void RunVisionTests() {
+  TestSeverity();
   TestGoldenParity();
   TestRotation();
   TestDecision();

@@ -8,6 +8,7 @@ LiteRT is built only for Android.
 | `image` | Pillow-exact bilinear resize, box blur, RGB→luma; YUV_420_888→RGB (full-range BT.601) | Pillow, bit for bit |
 | `quality` | Quality gate: blur effect at a 512 px short side + brightness, with reused buffers | `ml/quality_gate.py` |
 | `preprocess` | Resize short side to 256 → center-crop 224 → rotate upright → NHWC float, written straight into the input tensor | `ml/export.py` `preprocess()` |
+| `severity` | Lesion share of the leaf from HSV segmentation, for disease labels only, bucketed low < 10% ≤ medium < 30% ≤ high; "can't estimate" if under 15% of the crop is leaf | (A7) checked by eye on 10 sample leaves |
 | `decision` | temperature, softmax, then retake / not recognised / uncertain / confident | manifest thresholds |
 | `engine` (Android) | LiteRT 1.x C API: GPU delegate + FP16, else CPU (XNNPACK) + INT8; warm-up at creation; single-thread use | `ml/bundle/manifest_draft.json` |
 
@@ -42,6 +43,30 @@ below the blur threshold must come back as RETAKE.
 runs about 160× slower there than on the host. This says nothing about phones, which are
 ARM. **Phone latency must be measured on real devices** (task S4) before checking the
 budget (< 150 ms CPU INT8 on tier C).
+
+## Severity estimate (A7): how far to trust it
+
+It runs on the 224×224 crop the model saw, takes about 4 ms (emulator), and is always shown
+as "estimated". It is never derived from model confidence.
+
+What it gets right, checked by eye on 10 lab and field leaves plus the golden images:
+
+- Healthy leaves read 0–2%.
+- Spot diseases (septoria, bacterial spot) on mostly green leaves read "low".
+- Clear lesions on a close-up read medium or high, and the lesion masks sit on the lesions.
+
+Known failure modes:
+
+- **Grey-brown dead tissue on grey backgrounds** (PlantVillage lab photos) is colourless
+  like the paper, so it is missed. A nearly dead leaf then reads "can't estimate" (too
+  little leaf found) rather than falsely low.
+- **Brown or yellow out-of-focus background** next to the leaf, and **yellow-green stems**,
+  can be counted as lesion, which overestimates.
+- **Whole-plant scenes** are rough. The estimate is meant for a close-up of one leaf, which
+  is what the scan screen asks for.
+
+Real calibration needs leaves with an expert-rated severity, which can come from own field
+photos.
 
 ## Notes
 

@@ -24,7 +24,9 @@ constexpr const char* kTag = "farm_jni";
 // Layout of the float[] result (keep in sync with VisionNative.kt).
 enum Out : int {
   kDecision = 0, kTop, kTopProb, kSharpness, kBrightness, kQualityVerdict,
-  kQualityMs, kPreprocessMs, kInferenceMs, kProbs  // probs follow
+  kQualityMs, kPreprocessMs, kInferenceMs,
+  kSeverityFraction, kSeverityLevel, kSeverityMs,
+  kProbs  // probs follow
 };
 
 farm::Engine* FromHandle(jlong h) { return reinterpret_cast<farm::Engine*>(h); }
@@ -54,6 +56,9 @@ bool WriteResult(JNIEnv* env, const farm::VisionResult& r, int num_labels, jfloa
   o[kQualityMs] = r.quality_ms;
   o[kPreprocessMs] = r.preprocess_ms;
   o[kInferenceMs] = r.inference_ms;
+  o[kSeverityFraction] = r.severity.lesion_fraction;
+  o[kSeverityLevel] = static_cast<float>(r.severity.level);
+  o[kSeverityMs] = r.severity_ms;
   for (int i = 0; i < num_labels; ++i) o[kProbs + i] = r.probs[i];
   env->ReleaseFloatArrayElements(out, o, 0);
   return true;
@@ -70,7 +75,7 @@ JNIEXPORT jstring JNICALL Java_com_farm_app_NativeCore_version(JNIEnv* env, jobj
 // params: [tempGpu, rejectGpu, tempCpu, rejectCpu, confidentAt, minSharpness, minBrightness, maxBrightness]
 JNIEXPORT jlong JNICALL Java_com_farm_app_vision_VisionNative_nativeCreate(
     JNIEnv* env, jobject, jobject fp16, jobject int8, jfloatArray params, jint num_labels, jint unknown_index,
-    jint input_size, jint threads, jboolean allow_gpu) {
+    jint input_size, jint threads, jboolean allow_gpu, jbooleanArray severity_labels) {
   try {
     float p[8];
     if (env->GetArrayLength(params) < 8) { ThrowIllegalState(env, "bad params"); return 0; }
@@ -85,6 +90,12 @@ JNIEXPORT jlong JNICALL Java_com_farm_app_vision_VisionNative_nativeCreate(
     c.input_size = input_size;
     c.num_threads = threads;
     c.allow_gpu = allow_gpu;
+    if (severity_labels) {
+      const jsize n = env->GetArrayLength(severity_labels);
+      std::vector<jboolean> tmp(static_cast<size_t>(n));
+      env->GetBooleanArrayRegion(severity_labels, 0, n, tmp.data());
+      c.severity_labels.assign(tmp.begin(), tmp.end());
+    }
     std::string error;
     auto engine = farm::Engine::Create(std::move(c), &error);
     if (!engine) { ThrowIllegalState(env, "vision engine: " + error); return 0; }

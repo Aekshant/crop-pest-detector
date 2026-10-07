@@ -8,6 +8,9 @@ enum class Decision { RETAKE, NOT_RECOGNISED, UNCERTAIN, CONFIDENT }
 enum class QualityVerdict { OK, BLURRY, TOO_DARK, TOO_BRIGHT }
 enum class Backend { GPU, CPU }
 
+/** Lesion share of the leaf, from colour segmentation. Always shown as an estimate. */
+enum class SeverityLevel { UNKNOWN, LOW, MEDIUM, HIGH }
+
 data class VisionResult(
     val decision: Decision,
     val top: Label?,
@@ -19,6 +22,9 @@ data class VisionResult(
     val qualityMs: Float,
     val preprocessMs: Float,
     val inferenceMs: Float,
+    val severityLevel: SeverityLevel = SeverityLevel.UNKNOWN,
+    val severityFraction: Float = 0f,
+    val severityMs: Float = 0f,
 ) {
     /** Second-best label, shown alongside an uncertain answer. */
     fun runnerUp(labels: List<Label>): Label? =
@@ -72,6 +78,9 @@ class VisionEngine private constructor(
             qualityMs = out[VisionNative.QUALITY_MS],
             preprocessMs = out[VisionNative.PREPROCESS_MS],
             inferenceMs = out[VisionNative.INFERENCE_MS],
+            severityLevel = SeverityLevel.entries[out[VisionNative.SEVERITY_LEVEL].toInt()],
+            severityFraction = out[VisionNative.SEVERITY_FRACTION],
+            severityMs = out[VisionNative.SEVERITY_MS],
         )
     }
 
@@ -111,6 +120,7 @@ class VisionEngine private constructor(
                 if (allowGpu) VisionConfig.modelBuffer(context, "vision_fp16.tflite") else null,
                 VisionConfig.modelBuffer(context, "vision_int8.tflite"),
                 params, config.labels.size, config.unknownIndex, config.inputSize, threads, allowGpu,
+                BooleanArray(config.labels.size) { config.labels[it].isDisease },
             )
             val info = VisionNative.nativeInfo(handle)
             return VisionEngine(

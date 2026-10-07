@@ -17,6 +17,7 @@
 #include "farm/decision.h"
 #include "farm/preprocess.h"
 #include "farm/quality.h"
+#include "farm/severity.h"
 
 namespace farm {
 
@@ -38,6 +39,8 @@ struct EngineConfig {
   int num_threads = 4;
   bool allow_gpu = true;
   QualityThresholds quality;
+  // 1 for labels that get a lesion-area severity estimate (diseases only).
+  std::vector<uint8_t> severity_labels;
 };
 
 enum class Backend : int { kGpu = 0, kCpu = 1 };
@@ -48,7 +51,8 @@ struct VisionResult {
   int top = -1;
   float top_prob = 0.f;
   std::array<float, kMaxLabels> probs{};
-  float quality_ms = 0.f, preprocess_ms = 0.f, inference_ms = 0.f;
+  SeverityResult severity;  // level kUnknown unless a disease label was given
+  float quality_ms = 0.f, preprocess_ms = 0.f, inference_ms = 0.f, severity_ms = 0.f;
 };
 
 class Engine {
@@ -83,6 +87,7 @@ class Engine {
   std::string gpu_fallback_reason_;
   QualityGate gate_;
   Preprocessor pre_;
+  SeverityEstimator severity_;
 };
 
 }  // namespace farm

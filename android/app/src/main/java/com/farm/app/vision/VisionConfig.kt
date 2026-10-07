@@ -5,7 +5,10 @@ import org.json.JSONObject
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-data class Label(val id: String, val nameEn: String, val nameHi: String)
+data class Label(val id: String, val nameEn: String, val nameHi: String, val kind: String) {
+    /** Diseases get a lesion-area severity estimate; pests, healthy and unknown do not. */
+    val isDisease: Boolean get() = kind == "disease"
+}
 
 /** Per-model-file calibration from the manifest (quantization shifts probabilities). */
 data class ModelCalibration(val temperature: Float, val rejectBelow: Float)
@@ -33,7 +36,7 @@ data class VisionConfig(
             val byId = (0 until names.length()).map { names.getJSONObject(it) }.associateBy { it.getString("id") }
             val labels = ids.map { id ->
                 val n = byId.getValue(id)
-                Label(id, n.getString("name_en"), n.getString("name_hi"))
+                Label(id, n.getString("name_en"), n.getString("name_hi"), n.getString("kind"))
             }
             val files = v.getJSONObject("files")
             fun cal(key: String) = files.getJSONObject(key).let {

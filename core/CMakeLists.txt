@@ -15,7 +15,8 @@ add_library(farm_core STATIC
   src/image.cpp
   src/quality.cpp
   src/preprocess.cpp
-  src/decision.cpp)
+  src/decision.cpp
+  src/severity.cpp)
 target_include_directories(farm_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set_target_properties(farm_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
 if(NOT MSVC)
@@ -43,4 +44,7 @@ if(FARM_CORE_BUILD_TESTS)
   target_link_libraries(farm_core_tests PRIVATE farm_core)
   target_compile_definitions(farm_core_tests PRIVATE FARM_GOLDEN_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/golden")
   add_test(NAME farm_core_tests COMMAND farm_core_tests)
+  # Writes leaf/lesion masks for raw RGB crops, for eyeballing severity (A7).
+  add_executable(severity_viz tests/severity_viz.cpp)
+  target_link_libraries(severity_viz PRIVATE farm_core)
 endif()

@@ -11,7 +11,7 @@ import org.junit.Test
 
 class ScanViewModelTest {
     private fun frame(decision: Decision, sharpness: Float, label: String = "early_blight") = VisionResult(
-        decision, Label(label, label, label), 0.9f, FloatArray(12), sharpness, 120f,
+        decision, Label(label, label, label, "disease"), 0.9f, FloatArray(12), sharpness, 120f,
         if (decision == Decision.RETAKE) QualityVerdict.BLURRY else QualityVerdict.OK, 1f, 1f, 1f,
     )
 

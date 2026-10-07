@@ -18,12 +18,15 @@ internal object VisionNative {
     const val QUALITY_MS = 6
     const val PREPROCESS_MS = 7
     const val INFERENCE_MS = 8
-    const val PROBS = 9
+    const val SEVERITY_FRACTION = 9
+    const val SEVERITY_LEVEL = 10
+    const val SEVERITY_MS = 11
+    const val PROBS = 12
 
     /** params: tempGpu, rejectGpu, tempCpu, rejectCpu, confidentAt, minSharpness, minBrightness, maxBrightness. */
     external fun nativeCreate(
         fp16: ByteBuffer?, int8: ByteBuffer, params: FloatArray, numLabels: Int, unknownIndex: Int,
-        inputSize: Int, threads: Int, allowGpu: Boolean,
+        inputSize: Int, threads: Int, allowGpu: Boolean, severityLabels: BooleanArray,
     ): Long
 
     external fun nativeRelease(handle: Long)

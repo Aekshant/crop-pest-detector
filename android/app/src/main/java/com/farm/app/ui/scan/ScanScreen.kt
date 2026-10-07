@@ -33,6 +33,7 @@ import com.farm.app.ui.ScreenColumn
 import com.farm.app.vision.Decision
 import com.farm.app.vision.Label
 import com.farm.app.vision.QualityVerdict
+import com.farm.app.vision.SeverityLevel
 import com.farm.app.vision.VisionRepository
 import com.farm.app.vision.VisionResult
 
@@ -108,6 +109,16 @@ private fun ResultCard(r: VisionResult) {
             Text(headline(r), style = MaterialTheme.typography.titleMedium)
             if (r.decision == Decision.UNCERTAIN) {
                 Text(stringResource(R.string.scan_uncertain_hint))
+            }
+            if (r.severityLevel != SeverityLevel.UNKNOWN) {
+                val level = stringResource(
+                    when (r.severityLevel) {
+                        SeverityLevel.LOW -> R.string.severity_low
+                        SeverityLevel.MEDIUM -> R.string.severity_medium
+                        else -> R.string.severity_high
+                    },
+                )
+                Text(stringResource(R.string.severity_estimated, level, (r.severityFraction * 100).toInt()))
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(

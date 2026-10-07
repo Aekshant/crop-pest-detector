@@ -122,6 +122,14 @@ VisionResult Engine::Infer(VisionResult r) {
   const float* logits = static_cast<const float*>(TfLiteTensorData(TfLiteInterpreterGetOutputTensor(impl_->interpreter, 0)));
   r.decision = Decide(logits, static_cast<size_t>(config_.num_labels), decision_, r.probs.data(), &r.top);
   r.top_prob = r.probs[r.top];
+  // Severity only for an answered disease label, on the crop the model saw.
+  const bool answered = r.decision == Decision::kConfident || r.decision == Decision::kUncertain;
+  if (answered && r.top < static_cast<int>(config_.severity_labels.size()) && config_.severity_labels[r.top]) {
+    const auto s = Clock::now();
+    const int n = config_.input_size;
+    r.severity = severity_.Estimate(pre_.last_crop().data(), n, n, n * 3);
+    r.severity_ms = MsSince(s);
+  }
   return r;
 }
 
