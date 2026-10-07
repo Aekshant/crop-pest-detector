@@ -38,3 +38,47 @@ All three answer, so the L1 done-when is met. First impressions:
 
 Phone speed will be far lower than the laptop's. The design routes Laya to the cloud below
 4 tok/s on the device.
+
+## L2: Laya eval baseline (`results/l2_*`)
+
+```bash
+python3 ml/slm/run_laya_eval.py <model-id>   # 150 cases + 30 safety cases, scored by evals/score_laya.py
+```
+
+This is a baseline on purpose. It uses instructions only: one fixed system prompt (tools,
+labels, local names, language rule) and the case's app context in the user turn. There is
+no JSON grammar (L4) and no examples (L5). Temperature is 0, and llama-server reuses the
+cached system prompt. For safety cases, the model picks one of the 12 safety templates and
+writes a reply, given only the KB rows a real turn would have. The raw output is scored as-is.
+
+| | Gemma 3 1B | Qwen3 1.7B | Llama 3.2 3B |
+|---|---|---|---|
+| JSON valid | 38.7% | 72.7% | **100%** |
+| Schema valid | 28.7% | 72.7% | **96.0%** |
+| Action/tool accuracy | 10.0% | **23.3%** | **23.3%** |
+| Arg accuracy (tool cases) | 8.1% | **11.7%** | 4.5% |
+| Case pass | 4.7% | **22.0%** | 21.3% |
+| Reply language: en / hi / hinglish | 94 / 62 / 0% | 95 / 38 / 24% | 30 / **100** / **98**% |
+| Safety pass | 0% | 30% | **40%** |
+| Generation (laptop, 4 threads) | 26.6 tok/s | 20.3 tok/s | 12.2 tok/s |
+| Seconds per case (median) | 1.6 | 3.5 | 5.5 |
+| Peak RAM (ctx 4096) | 1.2 GB | 2.5 GB | **4.0 GB** |
+
+What the failures show:
+
+- **Tools are under-used.** The top failure for Qwen and Llama is replying directly where a
+  tool was expected (60–67 cases each). Their passes are almost all "respond" cases (95%),
+  while most tool families pass at 0–20%. Examples (L5) address this.
+- **Qwen3**: 27% of outputs are invalid JSON, which constrained decoding (L4) fixes. Hindi
+  and Hinglish replies often come back in English.
+- **Llama 3.2**: always valid JSON and near-perfect Hindi and Hinglish, but it answers
+  *English* questions in Hinglish. 4 GB of RAM is too much for tier B (6 GB phones).
+- **Gemma 3 1B**: can't keep the format (61% invalid JSON, every safety reply ignored the
+  template, scripts drifted to Tamil and Marathi). **Dropped.**
+- **Safety**: every model invented doses or named banned chemicals in some replies. Raw
+  SLM text must never reach the farmer on pesticide topics. Templates (L8) and the safety
+  validator (L9) are required.
+
+**Decision:** Qwen3 1.7B and Llama 3.2 3B go on to L4 and L5. Pick after L5, possibly one per
+tier: about 3B on 8 GB phones (tier A) and about 1.5B on 6 GB phones (tier B), as the design doc
+suggests.
