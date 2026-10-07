@@ -11,7 +11,7 @@ Each device runs `GoldenTest` (expected labels on device) and `DeviceBenchmark`
 | Device | How | Report |
 |---|---|---|
 | Your phone (USB) | `scripts/bench_device.sh` | pending |
-| 4 GB budget phone (Test Lab) | `MODEL=… VERSION=… scripts/bench_ftl.sh` | pending |
+| 4 GB budget phone (Test Lab) | `MODEL=… VERSION=… scripts/bench_ftl.sh` | skipped for now (needs a Google Cloud login); script ready |
 | Android emulator (reference only) | `scripts/bench_device.sh` | `sdk_gphone64_x86_64.json` |
 
 ```bash
