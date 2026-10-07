@@ -1,0 +1,80 @@
+{
+  "device": {
+    "manufacturer": "Google",
+    "model": "sdk_gphone64_x86_64",
+    "device": "emu64xa",
+    "soc": "AOSP ranchu",
+    "android": "14",
+    "sdk": 34,
+    "abi": "x86_64",
+    "ram_gb": 2.6,
+    "cores": 2,
+    "emulator": true,
+    "low_ram_device": false
+  },
+  "model_version": "vision-v3b-lite0",
+  "runs": [
+    {
+      "config": "cpu_int8_t1",
+      "threads": 1,
+      "backend": "CPU",
+      "create_ms": 1045.184381,
+      "warmup_ms": 1021.8454,
+      "gpu_fallback": "GPU disabled",
+      "golden_correct": 7,
+      "golden_gradable": 7,
+      "inference_ms_p50": 970.81976,
+      "inference_ms_p90": 1004.8473,
+      "preprocess_ms_p50": 2.171465,
+      "gate_ms_p50": 5.36294,
+      "gate_ms_p90": 5.929106
+    },
+    {
+      "config": "cpu_int8_t2",
+      "threads": 2,
+      "backend": "CPU",
+      "create_ms": 528.888251,
+      "warmup_ms": 506.61414,
+      "gpu_fallback": "GPU disabled",
+      "golden_correct": 7,
+      "golden_gradable": 7,
+      "inference_ms_p50": 513.57935,
+      "inference_ms_p90": 529.53345,
+      "preprocess_ms_p50": 2.164527,
+      "gate_ms_p50": 5.234462,
+      "gate_ms_p90": 5.900426
+    },
+    {
+      "config": "cpu_int8_t4",
+      "threads": 4,
+      "backend": "CPU",
+      "create_ms": 629.670757,
+      "warmup_ms": 606.069,
+      "gpu_fallback": "GPU disabled",
+      "golden_correct": 7,
+      "golden_gradable": 7,
+      "inference_ms_p50": 618.21533,
+      "inference_ms_p90": 629.09296,
+      "preprocess_ms_p50": 2.152306,
+      "gate_ms_p50": 5.273942,
+      "gate_ms_p90": 5.852611
+    }
+  ],
+  "budget": {
+    "cpu_int8_t1": {
+      "inference_p50_within_budget": false,
+      "limit_ms": 150,
+      "gate_p50_within_10ms": true
+    },
+    "cpu_int8_t2": {
+      "inference_p50_within_budget": false,
+      "limit_ms": 150,
+      "gate_p50_within_10ms": true
+    },
+    "cpu_int8_t4": {
+      "inference_p50_within_budget": false,
+      "limit_ms": 150,
+      "gate_p50_within_10ms": true
+    }
+  }
+}
