@@ -62,6 +62,19 @@ Every image in the vision eval sets (`evals/vision/field`, `evals/vision/ood`) i
 - Any image whose 64-bit dHash is within 6 bits of an eval image, which catches resized
   or re-encoded copies, as well as exact duplicates.
 
+## Extra field datasets (opt-in)
+
+`fetch_field_datasets.py` downloads four more field sets. `prepare.py` adds them to the
+manifest, but `train.py` leaves them out by default (see `ml/README.md`, experiments
+v3c/v3d).
+
+| Source | What | License |
+|---|---|---|
+| `pakistan` | [Mendeley 3mbnb82mxd](https://data.mendeley.com/datasets/3mbnb82mxd): in-field photos. Raw set only; the augmented copies would leak across splits. **About a third are copies of PlantDoc images**, and `prepare.py` drops them (27 were copies of eval photos). | CC BY 4.0 |
+| `bangladesh` | [Mendeley jttrv2w27r](https://data.mendeley.com/datasets/jttrv2w27r): leaves on paper, including 117 bacterial spot | CC BY 4.0 |
+| `fieldfruit` | [Mendeley swtt5wy2pr](https://data.mendeley.com/datasets/swtt5wy2pr): leaves and fruit on paper (resized set) | CC BY 4.0 |
+| `tomatovillage` | [Tomato-Village](https://github.com/mamta-joshi-gehlot/Tomato-Village): leaves from Rajasthan fields on paper. The leaf-miner class is not used (it shows Liriomyza, not Tuta). | **No license stated.** Ask the authors before any commercial use. |
+
 ## Licenses
 
 Web photos (iNaturalist, Commons) carry a per-row license and attribution in the

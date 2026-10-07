@@ -40,12 +40,21 @@ from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms as T
 
+import augment
+import quality_gate
+
 ML = Path(__file__).resolve().parent
 REPO = ML.parent
 LABELS_V1 = ML / "labels_v1.json"
 MANIFEST = ML / "data" / "manifest.csv"
 EVAL_VISION = REPO / "evals" / "vision"
-FIELD_SOURCES = {"plantdoc", "inaturalist", "commons"}
+FIELD_SOURCES = {"plantdoc", "inaturalist", "commons", "pakistan", "fieldfruit", "bangladesh", "tomatovillage"}
+# Real field leaves photographed on paper: their background is swapped during training.
+PAPER_SOURCES = {"fieldfruit", "bangladesh", "tomatovillage"}
+# Photos of leaves on the plant, like the app sees. Only these judge the model
+# (selection, calibration, thresholds): paper photos train it but would make
+# validation reward paper-specific cues (run v3c: val up, field eval down).
+IN_SITU_SOURCES = FIELD_SOURCES - PAPER_SOURCES
 
 
 # ---------- data ----------
@@ -79,15 +88,20 @@ def split_rows(rows, val_frac_field, val_max, seed):
 
 
 class ImageRows(Dataset):
-    def __init__(self, paths, targets, tf):
+    def __init__(self, paths, targets, tf, paper=None, backgrounds=None, p_paste=0.0):
         self.paths, self.targets, self.tf = paths, targets, tf
+        self.paper = paper or [False] * len(paths)
+        self.backgrounds, self.p_paste = backgrounds or [], p_paste
 
     def __len__(self):
         return len(self.paths)
 
     def __getitem__(self, i):
         with Image.open(self.paths[i]) as im:
-            return self.tf(im.convert("RGB")), self.targets[i]
+            im = im.convert("RGB")
+        if self.paper[i] and self.backgrounds and random.random() < self.p_paste:
+            im = augment.paste_on_background(im, self.backgrounds)
+        return self.tf(im), self.targets[i]
 
 
 def transforms(cfg, img):
@@ -266,6 +280,11 @@ def main():
     ap.add_argument("--weight-decay", type=float, default=1e-4)
     ap.add_argument("--label-smoothing", type=float, default=0.1)
     ap.add_argument("--field-share", type=float, default=0.3)
+    ap.add_argument("--exclude-sources", default="pakistan,fieldfruit,bangladesh,tomatovillage",
+                    help="comma-separated manifest sources to leave out. Default = the v3b recipe: the extra "
+                         "field datasets lowered field eval accuracy in CPU runs v3c/v3d (see README). "
+                         "Pass '' to use everything (meant for a full GPU fine-tune).")
+    ap.add_argument("--paste-prob", type=float, default=0.8, help="chance a paper photo gets a field background")
     ap.add_argument("--val-frac-field", type=float, default=0.15)
     ap.add_argument("--val-max", type=int, default=120, help="max lab-photo val images per class (0 = all)")
     ap.add_argument("--seed", type=int, default=0)
@@ -289,6 +308,8 @@ def main():
     with MANIFEST.open(newline="") as f:
         rows = list(csv.DictReader(f))
     manifest_sha = hashlib.sha256(MANIFEST.read_bytes()).hexdigest()[:12]
+    excluded = {s for s in args.exclude_sources.split(",") if s}
+    rows = [r for r in rows if r["source"] not in excluded]
     train_rows, val_rows = split_rows(rows, args.val_frac_field, args.val_max, args.seed)
     if args.limit_train:
         rng = random.Random(args.seed)
@@ -307,15 +328,23 @@ def main():
     cfg = timm.data.resolve_data_config({}, model=model)
     train_tf, eval_tf = transforms(cfg, args.img)
 
+    # Field backgrounds for paper photos: non-tomato field photos from the training split.
+    backgrounds = [ML / "data" / r["path"] for r in train_rows
+                   if r["label"] == "unknown" and r["source"] in ("inaturalist", "commons")]
+
     def loader(rs, tf, shuffle=False, sampler=None):
-        ds = ImageRows([ML / "data" / r["path"] for r in rs], [index[r["label"]] for r in rs], tf)
+        augmenting = tf is train_tf
+        ds = ImageRows([ML / "data" / r["path"] for r in rs], [index[r["label"]] for r in rs], tf,
+                       paper=[r["source"] in PAPER_SOURCES for r in rs],
+                       backgrounds=backgrounds if augmenting else None,
+                       p_paste=args.paste_prob if augmenting else 0.0)
         return DataLoader(ds, batch_size=args.batch, shuffle=shuffle, sampler=sampler,
                           num_workers=args.workers, pin_memory=device == "cuda", persistent_workers=False)
 
     val_loader = loader(val_rows, eval_tf)
     weights = sample_weights(train_rows, args.field_share)
     best = {"select": -1}
-    val_field = torch.tensor([r["source"] in FIELD_SOURCES for r in val_rows])
+    val_field = torch.tensor([r["source"] in IN_SITU_SOURCES for r in val_rows])
 
     def save(stage, epoch, m):
         nonlocal best
@@ -335,7 +364,12 @@ def main():
         # ----- stage 1: head on cached features -----
         set_trainable(model, -1)
         log("stage 1: caching backbone features (no augmentation)")
-        ftr, ytr = features(model, loader(train_rows, eval_tf), device)
+        # Paper photos always get a field background here, so the head never
+        # learns the paper itself (it is trained only on these cached features).
+        paste_all = ImageRows([ML / "data" / r["path"] for r in train_rows], [index[r["label"]] for r in train_rows],
+                              eval_tf, paper=[r["source"] in PAPER_SOURCES for r in train_rows],
+                              backgrounds=backgrounds, p_paste=1.0)
+        ftr, ytr = features(model, DataLoader(paste_all, batch_size=args.batch, num_workers=args.workers), device)
         fval, yval = features(model, val_loader, device)
         log(f"features cached in {time.time() - t0:.0f}s: train {tuple(ftr.shape)}, val {tuple(fval.shape)}")
         head = model.classifier
@@ -430,10 +464,14 @@ def main():
     ds = ImageRows([EVAL_VISION / p for p in eval_files], [0] * len(eval_files), eval_tf)
     el, _ = logits_of(model, DataLoader(ds, batch_size=args.batch, num_workers=args.workers), device)
     probs = F.softmax(el / temperature, dim=1)
+    # The quality gate runs before the model on the phone; apply it here too.
+    gate = quality_gate.load_thresholds()
     with (args.out / "eval_preds.jsonl").open("w") as f:
         for file, p in zip(eval_files, probs):
+            with Image.open(EVAL_VISION / file) as im:
+                quality, _ = quality_gate.check(im, gate)
             f.write(json.dumps({"file": file, "probs": {l: round(v, 5) for l, v in zip(labels, p.tolist())},
-                                "quality": "ok"}) + "\n")
+                                "quality": quality}) + "\n")
     report = subprocess.run([sys.executable, str(REPO / "evals" / "score_vision.py"),
                              str(args.out / "eval_preds.jsonl"), "--json", str(args.out / "eval_report.json"),
                              "--reject", str(reject), "--accept", str(args.accept)],

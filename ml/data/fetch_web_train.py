@@ -18,6 +18,7 @@ import csv
 import hashlib
 import json
 import re
+import threading
 import time
 import urllib.parse
 import urllib.request
@@ -59,6 +60,17 @@ COMMONS_QUERIES = [
     ("soil", "mulch garden bed filetype:bitmap", 20),
     ("hand", "open hand palm photograph filetype:bitmap", 40),
     ("hand", "hands holding filetype:bitmap", 30),
+    # More hands and soil: many pest photos have a hand or soil in frame, and the
+    # first model read bare hands and soil as pests.
+    ("hand", "human hand fingers photograph filetype:bitmap", 50),
+    ("hand", "back of hand photograph filetype:bitmap", 30),
+    ("hand", "hand holding soil filetype:bitmap", 30),
+    ("hand", "farmer hands India filetype:bitmap", 30),
+    ("soil", "red soil India filetype:bitmap", 30),
+    ("soil", "black cotton soil filetype:bitmap", 20),
+    ("soil", "cracked dry soil filetype:bitmap", 30),
+    ("soil", "compost soil close-up filetype:bitmap", 30),
+    ("soil", "farm field bare soil filetype:bitmap", 30),
 ]
 TOTAL_TARGET = {"tuta_absoluta": 210, "whitefly": 300, "fruit_borer": 300, "spider_mites": 300}
 
@@ -168,10 +180,19 @@ def main():
 
     failures = collections.Counter()
 
+    commons_lock = threading.Lock()
+    commons_last = [0.0]
+
     def fetch(job):
         label, it = job
         rel = f"{label}/{it['source']}_{it['id']}.jpg"
         for attempt in range(4):
+            if it["source"] == "commons":  # Wikimedia answers 429 to bursts: at most 1 request/s
+                with commons_lock:
+                    wait = commons_last[0] + 1.0 - time.time()
+                    if wait > 0:
+                        time.sleep(wait)
+                    commons_last[0] = time.time()
             try:
                 data = urllib.request.urlopen(urllib.request.Request(it["url"], headers=UA), timeout=60).read()
                 break

@@ -184,6 +184,44 @@
     },
     "web": {
       "note": "ml/data/fetch_web_train.py already stores photos under their v1 label (pests, and unknown for other crops, weeds, soil, hands)."
+    },
+    "pakistan": {
+      "note": "Mendeley 3mbnb82mxd 'Dataset (raw)' only; the augmented copies would leak across splits.",
+      "Tomato_Healthy_leaf": "healthy",
+      "Tomato_Early_blight_leaf": "early_blight",
+      "Tomato_leaf_late_blight": "late_blight",
+      "Tomato_Septoria_leaf_spot": "septoria_leaf_spot",
+      "Tomato_leaf_yellow_curl_virus": "yellow_leaf_curl_virus",
+      "Tomato_mold_leaf": "unknown"
+    },
+    "fieldfruit": {
+      "note": "Mendeley swtt5wy2pr 'Resize Dataset'.",
+      "Healthy Leaf": "healthy",
+      "Healthy Fruits": "healthy",
+      "Early Blight Leaf": "early_blight",
+      "Late Blight leaf": "late_blight",
+      "Leaf Curl Virus": "yellow_leaf_curl_virus",
+      "Bushy Stunt Virus": "unknown",
+      "Target Spot Fruits": "unknown"
+    },
+    "bangladesh": {
+      "note": "Mendeley jttrv2w27r; class is the file name prefix. Leaf Miner Flies (Liriomyza) not used.",
+      "Bacteiral Spot": "bacterial_spot",
+      "Healthy": "healthy",
+      "Early Blight": "early_blight",
+      "Late Blight": "late_blight",
+      "Curl": "yellow_leaf_curl_virus",
+      "Magnesium Deficiency": "unknown"
+    },
+    "tomatovillage": {
+      "note": "Variant-a multiclass. Leaf Miner is serpentine (Liriomyza), not Tuta: not used.",
+      "Healthy": "healthy",
+      "Early_blight": "early_blight",
+      "Late_blight": "late_blight",
+      "Spotted Wilt Virus": "unknown",
+      "Magnesium Deficiency": "unknown",
+      "Nitrogen Deficiency": "unknown",
+      "Pottassium Deficiency": "unknown"
     }
   }
 }

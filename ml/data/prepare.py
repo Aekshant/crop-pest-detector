@@ -51,6 +51,17 @@ LICENSES = {
     "plantvillage": "CC-BY-SA-3.0 (Hughes & Salathe 2015; Mohanty et al. 2016)",
     "plantdoc": "CC-BY-4.0 (Singh et al. 2020)",
     "ip102": "academic use only; other use needs permission (Wu et al. 2019)",
+    "pakistan": "CC-BY-4.0 (Mendeley 3mbnb82mxd)",
+    "fieldfruit": "CC-BY-4.0 (Mendeley swtt5wy2pr)",
+    "bangladesh": "CC-BY-4.0 (Mendeley jttrv2w27r)",
+    "tomatovillage": "no license stated; public with Gehlot et al. 2023 (ask authors before commercial use)",
+}
+# Field datasets from fetch_field_datasets.py: source -> (glob of class folders or files, how to read the class)
+FIELD_SETS = {
+    "pakistan": ("pakistan/Tomato Dataset/Dataset (raw)/*/*", "folder"),
+    "fieldfruit": ("fieldfruit/Resize Dataset/*/*", "folder"),
+    "bangladesh": ("bangladesh/*", "prefix"),
+    "tomatovillage": ("tomatovillage/Variant-a(Multiclass Classification)/*/*/*", "folder"),
 }
 
 # Source class -> v1 label, from the one label map. Classes not listed are skipped.
@@ -154,6 +165,8 @@ def fetch():
     sparse_clone(PLANTDOC_REPO, PLANTDOC_COMMIT, DL / "plantdoc", ["/train/Tomato*", "/test/Tomato*"])
     print("Web photos (pests, negatives)")
     subprocess.run([sys.executable, str(ROOT / "fetch_web_train.py")], check=True)
+    print("Field datasets (Pakistan, Bangladesh, field leaf/fruit, Tomato-Village)")
+    subprocess.run([sys.executable, str(ROOT / "fetch_field_datasets.py")], check=True)
     print("IP102")
     tar = DL / "ip102_v1.1.tar"
     if not (DL / "ip102" / "test.txt").exists():
@@ -219,6 +232,16 @@ def candidates():
         if d.is_dir():
             for p in sorted(d.iterdir()):
                 yield p, label, "plantdoc", folder, "train", LICENSES["plantdoc"]
+
+    for source, (pattern, how) in FIELD_SETS.items():
+        files = sorted(p for p in DL.glob(pattern) if p.suffix.lower() in (".jpg", ".jpeg", ".png"))
+        if not files:
+            print(f"WARNING: {source} not downloaded (run fetch_field_datasets.py)")
+        mapping = {k: v for k, v in _MAP[source].items() if k != "note"}
+        for p in files:
+            cls = p.parent.name if how == "folder" else p.stem.rsplit("_", 1)[0]
+            if cls in mapping:
+                yield p, mapping[cls], source, cls, "train", LICENSES[source]
 
     web = DL / "web" / "sources.csv"
     if web.exists():

@@ -166,3 +166,78 @@ is why thresholds now travel with the model.
 (17%) and healthy (25%) on field photos. Hands and soil are sometimes taken as pests,
 because many pest photos have a hand or soil in frame. Blurred photos need the quality
 gate, which isn't built yet. More own field photos for these classes would help most.
+
+## Current best: `runs/v3b_lite0_cpu` + quality gate
+
+| | Without gate | With gate (`eval_report_gated.txt`) |
+|---|---|---|
+| Field accuracy | 52.8% | 50.0% |
+| Good field photos turned away | 15.2% | 18.9% (4 sent to retake) |
+| Confident answers correct | 84.8% | 84.1% |
+| OOD rejected | 67% | **80%** (blurry 100%, soil 80%, other crops 79%, hands 60%) |
+
+Ship it with the gate. A retake prompt on a borderline photo costs the farmer one more
+photo, while a blurry photo without the gate gets a confident wrong diagnosis.
+
+## Quality gate: [`quality_gate.py`](quality_gate.py), [`quality_gate.json`](quality_gate.json)
+
+This is step 2 of the vision pipeline, and it runs before the model:
+
+- **Blur:** the no-reference *blur effect* (Crété-Roffet et al., 2007) at a 512 px short
+  side. The photo is compared with a re-blurred copy of itself.
+- **Exposure:** mean brightness.
+
+Thresholds are calibrated on 1,500 **training** field photos (never the eval sets). At most
+5% of sharp photos are sent to a retake, and 79% of blurred copies are caught. Laplacian
+variance, the textbook choice, caught only 42% at the same 5%: it depends too much on how
+busy the scene is.
+
+```bash
+ml/.venv/bin/python ml/quality_gate.py --calibrate      # refit thresholds
+ml/.venv/bin/python ml/quality_gate.py photo.jpg        # check photos
+```
+
+`train.py` applies the gate when it writes eval predictions. The C++ core must implement
+the same metric and thresholds.
+
+## Experiments that did not help (kept as logs, no checkpoints)
+
+**`runs/v3c_lite0_cpu`, `runs/v3d_lite0_cpu`.** These runs added about 9,000 field images
+(Pakistan, Bangladesh, field leaf/fruit, Tomato-Village), extra hand and soil negatives,
+and a paper-to-field background swap (`augment.py`).
+
+| | v3b | v3c | v3d |
+|---|---|---|---|
+| Field accuracy | **52.8%** | 36.1% | 39.6% |
+| PlantDoc photos | **45.8%** | 31.2% | 33.3% |
+| Confident answers correct | 84.8% | 71.1% | **89.3%** |
+| Hands rejected | **60%** | 40% | 0% |
+
+What these runs taught:
+
+1. **Validate on photos like the app's.** In v3c, selection and calibration used all field
+   validation, and most of it was leaves on paper. Validation improved while the eval got
+   worse. Now only *in-situ* photos (`IN_SITU_SOURCES`) judge a model; paper photos only
+   train it.
+2. **More sources diluted PlantDoc-style photos.** The field share per class went from
+   PlantDoc alone to mostly paper and Pakistan photos, and the eval is mostly PlantDoc-style
+   web photos. Next time, balance sampling **per source**, not just per class.
+3. **The CPU recipe** (classifier + last 2 blocks) can't absorb this much variety.
+
+The data and code stay. They are opt-in: `train.py --exclude-sources ''`, and the default
+leaves them out. Next attempt: a full fine-tune on a GPU with per-source balancing:
+
+```bash
+python ml/train.py --out ml/runs/v4_lite0_gpu --exclude-sources '' --unfreeze-blocks 0 \
+    --samples-per-epoch 0 --epochs-ft 15 --batch 128 --workers 8 --val-max 0
+```
+
+## Still open
+
+- **Tuta absoluta:** there is no public field data of real Tuta damage. Tomato-Village and
+  the Bangladesh set label *Liriomyza* (serpentine) leaf miner, not Tuta. The NM-AIST
+  (Tanzania) Tuta set isn't public, and TomatoEbola (Nigeria) needs a login. Own photos,
+  or asking NM-AIST, are the only route.
+- **Serpentine leaf miner** is common in Rajasthan (Tomato-Village) and has no v1 class.
+  Consider it for `labels_v2`.
+- **Mosaic virus:** no public field photos found.

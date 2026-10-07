@@ -1,0 +1,92 @@
+[11:10:37] device=cpu arch=tf_efficientnet_lite0 train=26364 val=2917 manifest=d1f4a592c2e5
+[11:10:37] train per class: unknown=7523, healthy=2734, early_blight=2210, late_blight=2934, septoria_leaf_spot=1619, bacterial_spot=1867, yellow_leaf_curl_virus=4972, mosaic_virus=342, tuta_absoluta=59, whitefly=246, fruit_borer=260, spider_mites=1598
+[11:10:38] stage 1: caching backbone features (no augmentation)
+[11:24:51] features cached in 853s: train (26364, 1280), val (2917, 1280)
+[11:24:51] head epoch  1: val macro recall lab 0.581 field 0.524 | loss 1.560
+[11:24:51] head epoch  2: val macro recall lab 0.716 field 0.587 | loss 1.238
+[11:24:52] head epoch  3: val macro recall lab 0.785 field 0.620 | loss 1.075
+[11:24:52] head epoch  4: val macro recall lab 0.809 field 0.651 | loss 0.956
+[11:24:52] head epoch  5: val macro recall lab 0.814 field 0.646 | loss 0.952
+[11:24:52] head epoch  6: val macro recall lab 0.844 field 0.653 | loss 0.883
+[11:24:52] head epoch  7: val macro recall lab 0.841 field 0.657 | loss 0.875
+[11:24:53] head epoch  8: val macro recall lab 0.857 field 0.668 | loss 0.829
+[11:24:53] head epoch  9: val macro recall lab 0.866 field 0.585 | loss 0.795
+[11:24:53] head epoch 10: val macro recall lab 0.866 field 0.682 | loss 0.809
+[11:24:53] head epoch 11: val macro recall lab 0.872 field 0.680 | loss 0.778
+[11:24:53] head epoch 12: val macro recall lab 0.859 field 0.673 | loss 0.785
+[11:24:53] head epoch 13: val macro recall lab 0.874 field 0.599 | loss 0.760
+[11:24:53] head epoch 14: val macro recall lab 0.872 field 0.679 | loss 0.781
+[11:24:54] head epoch 15: val macro recall lab 0.878 field 0.683 | loss 0.754
+[11:24:54] head epoch 16: val macro recall lab 0.880 field 0.689 | loss 0.748
+[11:24:54] head epoch 17: val macro recall lab 0.876 field 0.592 | loss 0.734
+[11:24:54] head epoch 18: val macro recall lab 0.873 field 0.684 | loss 0.720
+[11:24:54] head epoch 19: val macro recall lab 0.874 field 0.677 | loss 0.711
+[11:24:54] head epoch 20: val macro recall lab 0.874 field 0.611 | loss 0.713
+[11:24:54] head epoch 21: val macro recall lab 0.873 field 0.692 | loss 0.725
+[11:24:54] head epoch 22: val macro recall lab 0.867 field 0.606 | loss 0.754
+[11:24:55] head epoch 23: val macro recall lab 0.884 field 0.601 | loss 0.731
+[11:24:55] head epoch 24: val macro recall lab 0.883 field 0.588 | loss 0.700
+[11:24:55] head epoch 25: val macro recall lab 0.884 field 0.591 | loss 0.692
+[11:24:55] head epoch 26: val macro recall lab 0.882 field 0.687 | loss 0.698
+[11:24:55] head epoch 27: val macro recall lab 0.885 field 0.680 | loss 0.686
+[11:24:55] head epoch 28: val macro recall lab 0.880 field 0.671 | loss 0.699
+[11:24:55] head epoch 29: val macro recall lab 0.882 field 0.593 | loss 0.705
+[11:24:55] head epoch 30: val macro recall lab 0.882 field 0.601 | loss 0.708
+[11:24:55] stage 2: fine-tuning 2.69M params (unfreeze_blocks=2)
+[11:29:46] ft epoch  1: train loss 2.046 | val macro recall lab 0.749 field 0.653 | loss 1.027 | 291s
+[11:34:39] ft epoch  2: train loss 1.328 | val macro recall lab 0.816 field 0.621 | loss 0.893 | 292s
+[11:39:24] ft epoch  3: train loss 1.157 | val macro recall lab 0.852 field 0.611 | loss 0.812 | 285s
+[11:44:14] ft epoch  4: train loss 1.105 | val macro recall lab 0.873 field 0.623 | loss 0.765 | 290s
+[11:49:05] ft epoch  5: train loss 1.071 | val macro recall lab 0.869 field 0.623 | loss 0.729 | 291s
+[11:50:31] best: stage head epoch 16 val macro recall lab 0.880 field 0.689; temperature 0.869 (fitted on 1891 field val images)
+[11:50:31] reject threshold 0.45 (rejects <= 20% of in-scope field val photos); confident >= 0.80
+[11:50:42] eval report:
+Vision eval: runs/v3c_lite0_cpu/eval_preds.jsonl   (reject < 0.45, confident >= 0.8)
+
+Field set (144 images)
+  accuracy             36.1%   top-3  71.5%
+  false reject rate    40.2%   accuracy when answered  53.6%
+  confident answers    26.4% of images,  71.1% correct
+  macro recall         36.1%   worst class   0.0%
+  calibration (ECE)   0.207
+  per-class recall
+    bacterial_spot            16.7%  (n=12)
+    early_blight               0.0%  (n=12)
+    fruit_borer               66.7%  (n=12)
+    healthy                    8.3%  (n=12)
+    late_blight                8.3%  (n=12)
+    mosaic_virus              25.0%  (n=12)
+    septoria_leaf_spot        83.3%  (n=12)
+    spider_mites              58.3%  (n=12)
+    tuta_absoluta              0.0%  (n=12)
+    unknown                   58.3%  (n=12)
+    whitefly                  58.3%  (n=12)
+    yellow_leaf_curl_virus    50.0%  (n=12)
+  accuracy by source
+    inaturalist               45.8%
+    plantdoc                  31.2%
+  top confusions (true -> predicted)
+    bacterial_spot -> septoria_leaf_spot: 6
+    early_blight -> septoria_leaf_spot: 3
+    early_blight -> bacterial_spot: 2
+    fruit_borer -> spider_mites: 2
+    late_blight -> early_blight: 2
+
+OOD set (30 images)
+  rejected             70.0%
+    blurry                   100.0%
+    hand                      40.0%
+    other_crop                64.3%
+    soil                      80.0%
+  wrongly accepted
+    other_crop_02.jpg (potato) -> mosaic_virus 0.533
+    other_crop_04.jpg (brinjal) -> mosaic_virus 0.634
+    other_crop_08.jpg (okra) -> fruit_borer 0.455
+    other_crop_10.jpg (rice) -> whitefly 0.693
+    other_crop_12.jpg (cucumber) -> tuta_absoluta 0.611
+    soil_03.jpg (NRCSIA99343 - Iowa (3379)(NRCS Photo Gal) -> whitefly 0.761
+    hand_03.jpg (Man holding a gold coin in the palm of h) -> fruit_borer 0.898
+    hand_04.jpg (Myhand) -> early_blight 0.578
+    hand_05.jpg (Open Palm of the Left Hand, Fingers) -> tuta_absoluta 0.805
+
+[11:50:42] done in 40.1 min

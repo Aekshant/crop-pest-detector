@@ -1,0 +1,144 @@
+{
+  "preds": "runs/v3d_lite0_cpu/eval_preds.jsonl",
+  "reject": 0.35,
+  "accept": 0.8,
+  "field": {
+    "n": 144,
+    "missing": 0,
+    "accuracy": 0.3958333333333333,
+    "top3_accuracy": 0.75,
+    "false_reject_rate": 0.26515151515151514,
+    "selective_accuracy": 0.5,
+    "confident_coverage": 0.19444444444444445,
+    "confident_accuracy": 0.8928571428571429,
+    "macro_recall": 0.3958333333333333,
+    "min_recall": 0.08333333333333333,
+    "ece": 0.145225,
+    "per_class_recall": {
+      "bacterial_spot": 0.08333333333333333,
+      "early_blight": 0.25,
+      "fruit_borer": 0.75,
+      "healthy": 0.08333333333333333,
+      "late_blight": 0.3333333333333333,
+      "mosaic_virus": 0.08333333333333333,
+      "septoria_leaf_spot": 0.8333333333333334,
+      "spider_mites": 0.5833333333333334,
+      "tuta_absoluta": 0.08333333333333333,
+      "unknown": 0.4166666666666667,
+      "whitefly": 0.6666666666666666,
+      "yellow_leaf_curl_virus": 0.5833333333333334
+    },
+    "per_class_n": {
+      "bacterial_spot": 12,
+      "early_blight": 12,
+      "fruit_borer": 12,
+      "healthy": 12,
+      "late_blight": 12,
+      "mosaic_virus": 12,
+      "septoria_leaf_spot": 12,
+      "spider_mites": 12,
+      "tuta_absoluta": 12,
+      "unknown": 12,
+      "whitefly": 12,
+      "yellow_leaf_curl_virus": 12
+    },
+    "per_source_accuracy": {
+      "inaturalist": 0.5208333333333334,
+      "plantdoc": 0.3333333333333333
+    },
+    "top_confusions": [
+      [
+        "bacterial_spot",
+        "septoria_leaf_spot",
+        5
+      ],
+      [
+        "early_blight",
+        "septoria_leaf_spot",
+        4
+      ],
+      [
+        "unknown",
+        "septoria_leaf_spot",
+        4
+      ],
+      [
+        "tuta_absoluta",
+        "fruit_borer",
+        4
+      ],
+      [
+        "whitefly",
+        "spider_mites",
+        3
+      ]
+    ]
+  },
+  "ood": {
+    "n": 30,
+    "missing": 0,
+    "reject_rate": 0.7,
+    "per_category_reject_rate": {
+      "blurry": 1.0,
+      "hand": 0.0,
+      "other_crop": 0.8571428571428571,
+      "soil": 0.6
+    },
+    "false_accepts": [
+      [
+        "other_crop_04.jpg",
+        "brinjal",
+        "mosaic_virus",
+        0.431
+      ],
+      [
+        "other_crop_10.jpg",
+        "rice",
+        "whitefly",
+        0.354
+      ],
+      [
+        "soil_02.jpg",
+        "NRCSIA99096 - Iowa (2891)(NRCS Photo Gal",
+        "tuta_absoluta",
+        0.873
+      ],
+      [
+        "soil_03.jpg",
+        "NRCSIA99343 - Iowa (3379)(NRCS Photo Gal",
+        "whitefly",
+        0.655
+      ],
+      [
+        "hand_01.jpg",
+        "Soybean Field with Healthy Soil (9316804",
+        "yellow_leaf_curl_virus",
+        0.395
+      ],
+      [
+        "hand_02.jpg",
+        "Human palm",
+        "spider_mites",
+        0.518
+      ],
+      [
+        "hand_03.jpg",
+        "Man holding a gold coin in the palm of h",
+        "spider_mites",
+        0.481
+      ],
+      [
+        "hand_04.jpg",
+        "Myhand",
+        "spider_mites",
+        0.792
+      ],
+      [
+        "hand_05.jpg",
+        "Open Palm of the Left Hand, Fingers",
+        "tuta_absoluta",
+        0.894
+      ]
+    ]
+  }
+}

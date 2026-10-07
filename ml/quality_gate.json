@@ -1,0 +1,11 @@
+{
+  "min_sharpness": 0.5032,
+  "min_brightness": 42.4,
+  "max_brightness": 240.5,
+  "calibration": {
+    "photos": 1500,
+    "sharp_photos_sent_to_retake": 0.05,
+    "blurred_copies_caught": 0.788,
+    "source": "training field photos from ml/data/manifest.csv; eval sets not used"
+  }
+}
