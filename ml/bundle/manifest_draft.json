@@ -1,0 +1,87 @@
+{
+  "draft": true,
+  "note": "Vision part of the model bundle manifest (design doc 'Models, prompts, tool schema, KB pack and router thresholds ship together'). Signing, sha256 of the final .tflite files and the rest of the bundle come later.",
+  "vision": {
+    "model_version": "vision-v3b-lite0",
+    "source_checkpoint": "ml/runs/v3b_lite0_cpu/model.pt",
+    "arch": "tf_efficientnet_lite0",
+    "input": {
+      "size": 224,
+      "layout": "NHWC RGB float",
+      "resize_short_side": 256,
+      "center_crop": 224,
+      "mean": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "std": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "labels_version": 1,
+    "labels": [
+      "unknown",
+      "healthy",
+      "early_blight",
+      "late_blight",
+      "septoria_leaf_spot",
+      "bacterial_spot",
+      "yellow_leaf_curl_virus",
+      "mosaic_virus",
+      "tuta_absoluta",
+      "whitefly",
+      "fruit_borer",
+      "spider_mites"
+    ],
+    "temperature": 0.9835,
+    "thresholds": {
+      "reject_below": 0.35,
+      "confident_at_or_above": 0.8,
+      "chosen_on": "in-situ field validation photos (<= 20% good photos rejected); never the eval sets"
+    },
+    "decision": [
+      "quality gate fails -> RETAKE",
+      "top-1 is 'unknown' or p < reject_below -> NOT RECOGNISED",
+      "reject_below <= p < confident_at_or_above -> UNCERTAIN (show top-2, ask another photo, cloud second opinion if online)",
+      "p >= confident_at_or_above -> CONFIDENT"
+    ],
+    "quality_gate": {
+      "min_sharpness": 0.5032,
+      "min_brightness": 42.4,
+      "max_brightness": 240.5,
+      "metric": "blur effect (Crete-Roffet), grayscale, 512 px short side, box re-blur radius 4"
+    },
+    "files": {
+      "fp16": {
+        "path": "ml/runs/v3b_lite0_cpu/export/vision_fp16.tflite",
+        "sha256": "4135572e5d92d0e67dafcaae223cb3db8ea1e8884e6b2af81c19938b70fa7f06",
+        "temperature": 0.9462,
+        "reject_below": 0.4,
+        "confident_at_or_above": 0.8
+      },
+      "int8": {
+        "path": "ml/runs/v3b_lite0_cpu/export/vision_int8.tflite",
+        "sha256": "dddbcc1e32a99613332ee3c54b0974d124a2676f42d28813034071e83e40ac1d",
+        "temperature": 0.9518,
+        "reject_below": 0.4,
+        "confident_at_or_above": 0.8
+      },
+      "note": "Each file has its own temperature and reject threshold (quantization shifts probabilities). Delegate order: GPU uses fp16, CPU XNNPACK uses int8."
+    },
+    "eval": {
+      "field_accuracy": 0.5,
+      "field_confident_accuracy": 0.841,
+      "ood_rejected": 0.8,
+      "ece": 0.151,
+      "report": "ml/runs/v3b_lite0_cpu/eval_report_gated.txt"
+    },
+    "io": {
+      "input": "[1,224,224,3] float32 RGB 0..255 after resize-short-side-256 + center-crop-224; normalization is inside the model",
+      "output": "[1,12] float32 logits in labels order"
+    },
+    "temperature_note": "Top-level temperature/thresholds are the PyTorch checkpoint's; use the per-file values on device."
+  }
+}

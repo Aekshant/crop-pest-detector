@@ -14,3 +14,4 @@ ml/data/_downloads/
 
 # Python env and large training outputs
 ml/.venv/
+ml/.venv-export/

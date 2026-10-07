@@ -1,0 +1,17 @@
+{
+  "fp32": {
+    "temperature": 0.9456,
+    "reject_below": 0.35,
+    "confident_at_or_above": 0.8
+  },
+  "fp16": {
+    "temperature": 0.9462,
+    "reject_below": 0.4,
+    "confident_at_or_above": 0.8
+  },
+  "int8": {
+    "temperature": 0.9518,
+    "reject_below": 0.4,
+    "confident_at_or_above": 0.8
+  }
+}

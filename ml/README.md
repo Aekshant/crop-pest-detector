@@ -241,3 +241,34 @@ python ml/train.py --out ml/runs/v4_lite0_gpu --exclude-sources '' --unfreeze-bl
 - **Serpentine leaf miner** is common in Rajasthan (Tomato-Village) and has no v1 class.
   Consider it for `labels_v2`.
 - **Mosaic virus:** no public field photos found.
+
+## On-device export (V6–V9): [`export.py`](export.py), [`bundle/manifest_draft.json`](bundle/manifest_draft.json)
+
+```bash
+ml/.venv-export/bin/python ml/export.py --run ml/runs/v3b_lite0_cpu   # setup: see the export.py docstring
+```
+
+The model is exported with `litert-torch` and quantized with `ai-edge-quantizer`. Its input
+is NHWC RGB 0–255 at 224×224 (normalization is inside the model), and its output is the 12
+logits in `labels_v1` order. Each variant gets **its own temperature and reject
+threshold**, refit on in-situ field validation photos (V8), because quantization shifts
+probabilities. Scores below include the quality gate. Eval: v3b, field and OOD sets.
+| Variant | Size | Top-1 agreement with PyTorch | Field accuracy | Confident answers correct | ECE | OOD rejected | Desktop CPU p50 / p90 |
+|---|---|---|---|---|---|---|---|
+| FP32 | 13.59 MB | 100.0% | 49.3% | 84.4% | 0.162 | 80% | 4.9 / 9.5 ms |
+| FP16 | 6.93 MB | 99.4% | 50.0% | 84.4% | 0.159 | 83% | 4.6 / 7.0 ms |
+| INT8 | 4.12 MB | 92.0% | 50.7% | 85.1% | 0.117 | 80% | 3.6 / 3.8 ms |
+
+- **Ship INT8 for the CPU path (XNNPACK) and FP16 for the GPU delegate.** INT8 is 3.3×
+  smaller than FP32 and fits the 5–15 MB budget, with no loss on the field eval.
+- **INT8 quantizes only CONV_2D and DEPTHWISE_CONV_2D,** with per-channel weights and
+  min/max ranges from 192 training images. Quantizing every op dropped top-1 agreement to
+  40%: the pooling `SUM`, `GATHER_ND` and classifier don't survive INT8. 16-bit
+  activations were worse still (3%), and MSE ranges reached 78%. Conv-only reaches 92%
+  and is the same size, because the convolutions hold almost all the weights. The 8% of
+  disagreements are borderline images that fall both ways, so accuracy holds.
+- **Latency is on this desktop CPU (4 threads),** not a phone. The budget's phone numbers
+  (< 80 ms GPU on tier A/B, < 150 ms CPU INT8 on tier C) are measured on devices in the
+  Android tasks.
+- The `.tflite` files are in Git LFS. `manifest_draft.json` records their sha256 and
+  per-file calibration.

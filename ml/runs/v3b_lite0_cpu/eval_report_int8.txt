@@ -1,0 +1,44 @@
+Vision eval: ml/runs/v3b_lite0_cpu/eval_preds_int8.jsonl   (reject < 0.4, confident >= 0.8)
+
+Field set (144 images)
+  accuracy             50.7%   top-3  79.2%
+  false reject rate    25.8%   accuracy when answered  64.1%
+  confident answers    32.6% of images,  85.1% correct
+  macro recall         50.7%   worst class   8.3%
+  calibration (ECE)   0.117
+  per-class recall
+    bacterial_spot            16.7%  (n=12)
+    early_blight              41.7%  (n=12)
+    fruit_borer               75.0%  (n=12)
+    healthy                   41.7%  (n=12)
+    late_blight               50.0%  (n=12)
+    mosaic_virus              16.7%  (n=12)
+    septoria_leaf_spot        75.0%  (n=12)
+    spider_mites              58.3%  (n=12)
+    tuta_absoluta              8.3%  (n=12)
+    unknown                   58.3%  (n=12)
+    whitefly                  83.3%  (n=12)
+    yellow_leaf_curl_virus    83.3%  (n=12)
+  accuracy by source
+    inaturalist               56.2%
+    plantdoc                  47.9%
+  top confusions (true -> predicted)
+    tuta_absoluta -> fruit_borer: 4
+    bacterial_spot -> septoria_leaf_spot: 3
+    tuta_absoluta -> late_blight: 3
+    healthy -> yellow_leaf_curl_virus: 2
+    unknown -> late_blight: 2
+
+OOD set (30 images)
+  rejected             80.0%
+    blurry                   100.0%
+    hand                      60.0%
+    other_crop                78.6%
+    soil                      80.0%
+  wrongly accepted
+    other_crop_02.jpg (potato) -> yellow_leaf_curl_virus 0.55
+    other_crop_10.jpg (rice) -> bacterial_spot 0.445
+    other_crop_13.jpg (cabbage) -> whitefly 0.442
+    soil_03.jpg (NRCSIA99343 - Iowa (3379)(NRCS Photo Gal) -> whitefly 0.76
+    hand_03.jpg (Man holding a gold coin in the palm of h) -> fruit_borer 0.824
+    hand_05.jpg (Open Palm of the Left Hand, Fingers) -> tuta_absoluta 0.841
