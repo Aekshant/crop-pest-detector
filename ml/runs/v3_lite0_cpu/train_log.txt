@@ -1,0 +1,103 @@
+[00:49:21] device=cpu arch=tf_efficientnet_lite0 train=15026 val=1111 manifest=fbe27d4aa562
+[00:49:21] train per class: unknown=1958, healthy=1288, early_blight=846, late_blight=1610, septoria_leaf_spot=1546, bacterial_spot=1769, yellow_leaf_curl_virus=4311, mosaic_virus=342, tuta_absoluta=0, whitefly=0, fruit_borer=0, spider_mites=1356
+[00:49:21] WARNING: no training images for ['tuta_absoluta', 'whitefly', 'fruit_borer']; the model cannot learn these classes yet
+[00:49:22] stage 1: caching backbone features (no augmentation)
+[00:57:19] features cached in 478s: train (15026, 1280), val (1111, 1280)
+[00:57:19] head epoch  1: val acc 0.570 macro recall 0.578 loss 1.289
+[00:57:19] head epoch  2: val acc 0.700 macro recall 0.714 loss 0.935
+[00:57:20] head epoch  3: val acc 0.744 macro recall 0.756 loss 0.797
+[00:57:20] head epoch  4: val acc 0.769 macro recall 0.782 loss 0.723
+[00:57:20] head epoch  5: val acc 0.789 macro recall 0.802 loss 0.677
+[00:57:20] head epoch  6: val acc 0.816 macro recall 0.826 loss 0.643
+[00:57:20] head epoch  7: val acc 0.830 macro recall 0.838 loss 0.613
+[00:57:20] head epoch  8: val acc 0.832 macro recall 0.842 loss 0.598
+[00:57:20] head epoch  9: val acc 0.836 macro recall 0.844 loss 0.581
+[00:57:21] head epoch 10: val acc 0.833 macro recall 0.842 loss 0.576
+[00:57:21] head epoch 11: val acc 0.841 macro recall 0.849 loss 0.565
+[00:57:21] head epoch 12: val acc 0.840 macro recall 0.848 loss 0.546
+[00:57:21] head epoch 13: val acc 0.845 macro recall 0.853 loss 0.545
+[00:57:21] head epoch 14: val acc 0.842 macro recall 0.851 loss 0.534
+[00:57:21] head epoch 15: val acc 0.839 macro recall 0.848 loss 0.537
+[00:57:21] head epoch 16: val acc 0.851 macro recall 0.858 loss 0.527
+[00:57:21] head epoch 17: val acc 0.852 macro recall 0.861 loss 0.529
+[00:57:21] head epoch 18: val acc 0.858 macro recall 0.865 loss 0.521
+[00:57:21] head epoch 19: val acc 0.853 macro recall 0.861 loss 0.518
+[00:57:22] head epoch 20: val acc 0.859 macro recall 0.867 loss 0.521
+[00:57:22] head epoch 21: val acc 0.859 macro recall 0.867 loss 0.519
+[00:57:22] head epoch 22: val acc 0.861 macro recall 0.869 loss 0.507
+[00:57:22] head epoch 23: val acc 0.863 macro recall 0.870 loss 0.503
+[00:57:22] head epoch 24: val acc 0.857 macro recall 0.865 loss 0.506
+[00:57:22] head epoch 25: val acc 0.859 macro recall 0.866 loss 0.511
+[00:57:22] head epoch 26: val acc 0.867 macro recall 0.874 loss 0.503
+[00:57:22] head epoch 27: val acc 0.859 macro recall 0.866 loss 0.506
+[00:57:22] head epoch 28: val acc 0.857 macro recall 0.864 loss 0.499
+[00:57:22] head epoch 29: val acc 0.859 macro recall 0.867 loss 0.508
+[00:57:23] head epoch 30: val acc 0.867 macro recall 0.873 loss 0.496
+[00:57:23] stage 2: fine-tuning 2.69M params (unfreeze_blocks=2)
+[01:00:52] ft epoch  1: train loss 1.919 | val acc 0.791 macro recall 0.782 loss 0.666 | 209s
+[01:04:17] ft epoch  2: train loss 1.183 | val acc 0.826 macro recall 0.834 loss 0.549 | 206s
+[01:07:43] ft epoch  3: train loss 1.016 | val acc 0.874 macro recall 0.881 loss 0.468 | 206s
+[01:11:10] ft epoch  4: train loss 0.959 | val acc 0.882 macro recall 0.890 loss 0.431 | 206s
+[07:47:56] device=cpu arch=tf_efficientnet_lite0 train=15026 val=1111 manifest=fbe27d4aa562
+[07:47:56] train per class: unknown=1958, healthy=1288, early_blight=846, late_blight=1610, septoria_leaf_spot=1546, bacterial_spot=1769, yellow_leaf_curl_virus=4311, mosaic_virus=342, tuta_absoluta=0, whitefly=0, fruit_borer=0, spider_mites=1356
+[07:47:56] WARNING: no training images for ['tuta_absoluta', 'whitefly', 'fruit_borer']; the model cannot learn these classes yet
+[07:47:56] finalize only: using best_state.pt from ft epoch 4
+[07:48:25] best: stage ft epoch 4 val macro recall 0.890; temperature 0.717
+[07:48:31] eval report:
+Vision eval: runs/v3_lite0_cpu/eval_preds.jsonl   (reject < 0.5, confident >= 0.8)
+
+Field set (144 images)
+  accuracy             34.7%   top-3  57.6%
+  false reject rate    23.5%   accuracy when answered  39.4%
+  confident answers    40.3% of images,  46.6% correct
+  macro recall         34.7%   worst class   0.0%
+  calibration (ECE)   0.361
+  per-class recall
+    bacterial_spot            16.7%  (n=12)
+    early_blight              58.3%  (n=12)
+    fruit_borer                0.0%  (n=12)
+    healthy                   58.3%  (n=12)
+    late_blight               58.3%  (n=12)
+    mosaic_virus              16.7%  (n=12)
+    septoria_leaf_spot        41.7%  (n=12)
+    spider_mites               0.0%  (n=12)
+    tuta_absoluta              0.0%  (n=12)
+    unknown                   75.0%  (n=12)
+    whitefly                   0.0%  (n=12)
+    yellow_leaf_curl_virus    91.7%  (n=12)
+  accuracy by source
+    inaturalist                0.0%
+    plantdoc                  52.1%
+  top confusions (true -> predicted)
+    tuta_absoluta -> late_blight: 6
+    whitefly -> septoria_leaf_spot: 6
+    bacterial_spot -> septoria_leaf_spot: 4
+    septoria_leaf_spot -> early_blight: 4
+    bacterial_spot -> early_blight: 3
+
+OOD set (30 images)
+  rejected             43.3%
+    blurry                    16.7%
+    hand                      80.0%
+    other_crop                57.1%
+    soil                       0.0%
+  wrongly accepted
+    other_crop_01.jpg (potato) -> healthy 0.801
+    other_crop_02.jpg (potato) -> healthy 0.754
+    other_crop_05.jpg (chilli) -> early_blight 0.866
+    other_crop_07.jpg (okra) -> healthy 0.955
+    other_crop_09.jpg (cotton) -> healthy 0.937
+    other_crop_11.jpg (maize) -> healthy 0.982
+    soil_01.jpg (Plowed field drying after rain) -> healthy 0.623
+    soil_02.jpg (NRCSIA99096 - Iowa (2891)(NRCS Photo Gal) -> healthy 0.754
+    soil_03.jpg (NRCSIA99343 - Iowa (3379)(NRCS Photo Gal) -> septoria_leaf_spot 0.642
+    soil_04.jpg (NRCSIA99344 - Iowa (3381)(NRCS Photo Gal) -> septoria_leaf_spot 0.827
+    soil_05.jpg (NRCSIA99347 - Iowa (3387)(NRCS Photo Gal) -> healthy 0.793
+    hand_01.jpg (Soybean Field with Healthy Soil (9316804) -> septoria_leaf_spot 0.546
+    blurry_01.jpg (tomato_plant) -> late_blight 0.671
+    blurry_02.jpg (tomato_plant) -> mosaic_virus 0.971
+    blurry_03.jpg (tomato_plant) -> mosaic_virus 0.893
+    blurry_05.jpg (tomato_plant) -> yellow_leaf_curl_virus 0.623
+    blurry_06.jpg (tomato_plant) -> healthy 0.636
+
+[07:48:31] done in 0.6 min

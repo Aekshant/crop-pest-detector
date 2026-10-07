@@ -1,0 +1,55 @@
+Vision eval: runs/v3_lite0_cpu/eval_preds.jsonl   (reject < 0.5, confident >= 0.8)
+
+Field set (144 images)
+  accuracy             34.7%   top-3  57.6%
+  false reject rate    23.5%   accuracy when answered  39.4%
+  confident answers    40.3% of images,  46.6% correct
+  macro recall         34.7%   worst class   0.0%
+  calibration (ECE)   0.361
+  per-class recall
+    bacterial_spot            16.7%  (n=12)
+    early_blight              58.3%  (n=12)
+    fruit_borer                0.0%  (n=12)
+    healthy                   58.3%  (n=12)
+    late_blight               58.3%  (n=12)
+    mosaic_virus              16.7%  (n=12)
+    septoria_leaf_spot        41.7%  (n=12)
+    spider_mites               0.0%  (n=12)
+    tuta_absoluta              0.0%  (n=12)
+    unknown                   75.0%  (n=12)
+    whitefly                   0.0%  (n=12)
+    yellow_leaf_curl_virus    91.7%  (n=12)
+  accuracy by source
+    inaturalist                0.0%
+    plantdoc                  52.1%
+  top confusions (true -> predicted)
+    tuta_absoluta -> late_blight: 6
+    whitefly -> septoria_leaf_spot: 6
+    bacterial_spot -> septoria_leaf_spot: 4
+    septoria_leaf_spot -> early_blight: 4
+    bacterial_spot -> early_blight: 3
+
+OOD set (30 images)
+  rejected             43.3%
+    blurry                    16.7%
+    hand                      80.0%
+    other_crop                57.1%
+    soil                       0.0%
+  wrongly accepted
+    other_crop_01.jpg (potato) -> healthy 0.801
+    other_crop_02.jpg (potato) -> healthy 0.754
+    other_crop_05.jpg (chilli) -> early_blight 0.866
+    other_crop_07.jpg (okra) -> healthy 0.955
+    other_crop_09.jpg (cotton) -> healthy 0.937
+    other_crop_11.jpg (maize) -> healthy 0.982
+    soil_01.jpg (Plowed field drying after rain) -> healthy 0.623
+    soil_02.jpg (NRCSIA99096 - Iowa (2891)(NRCS Photo Gal) -> healthy 0.754
+    soil_03.jpg (NRCSIA99343 - Iowa (3379)(NRCS Photo Gal) -> septoria_leaf_spot 0.642
+    soil_04.jpg (NRCSIA99344 - Iowa (3381)(NRCS Photo Gal) -> septoria_leaf_spot 0.827
+    soil_05.jpg (NRCSIA99347 - Iowa (3387)(NRCS Photo Gal) -> healthy 0.793
+    hand_01.jpg (Soybean Field with Healthy Soil (9316804) -> septoria_leaf_spot 0.546
+    blurry_01.jpg (tomato_plant) -> late_blight 0.671
+    blurry_02.jpg (tomato_plant) -> mosaic_virus 0.971
+    blurry_03.jpg (tomato_plant) -> mosaic_virus 0.893
+    blurry_05.jpg (tomato_plant) -> yellow_leaf_curl_virus 0.623
+    blurry_06.jpg (tomato_plant) -> healthy 0.636

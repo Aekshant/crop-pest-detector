@@ -11,3 +11,6 @@ __pycache__/
 
 # Training data downloads (see ml/data/README.md)
 ml/data/_downloads/
+
+# Python env and large training outputs
+ml/.venv/
