@@ -23,3 +23,15 @@ cmake -S core -B build/core -DFARM_CORE_BUILD_TESTS=ON && cmake --build build/co
 ```
 
 Requires JDK 17+, Android SDK (platform 35), NDK 27.2.12479018, CMake 3.22.1.
+
+## Android app
+
+```bash
+cd android && ./gradlew assembleDebug testDebugUnitTest
+```
+
+Kotlin + Jetpack Compose (Material 3), one activity, `navigation-compose` with four tabs:
+Scan, Ask Laya, History, and Status (the design doc's debug screen). Each screen has a
+`ViewModel` that exposes a `StateFlow` and does its work in `viewModelScope` coroutines.
+UI strings are in English and Hindi (`values-hi`). Dependency versions are in
+`android/gradle/libs.versions.toml`.

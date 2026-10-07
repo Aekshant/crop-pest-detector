@@ -1,3 +1,20 @@
 <resources>
-    <string name="app_name">Farm</string>
+    <string name="app_name">FarmLens</string>
+    <string name="nav_scan">Scan</string>
+    <string name="nav_laya">Ask Laya</string>
+    <string name="nav_history">History</string>
+    <string name="nav_status">Status</string>
+    <string name="scan_hint">Photograph one tomato leaf up close, in daylight.</string>
+    <string name="scan_take_photo">Take photo</string>
+    <string name="scan_camera_pending">Camera is not connected yet.</string>
+    <string name="laya_hint">Ask about your tomato crop in Hindi or English.</string>
+    <string name="laya_placeholder">Type a question</string>
+    <string name="laya_send">Send</string>
+    <string name="history_empty">No scans yet.</string>
+    <string name="status_app">App version</string>
+    <string name="status_core">Native core</string>
+    <string name="status_model">Vision model</string>
+    <string name="status_tier">Device tier</string>
+    <string name="status_network">Network</string>
+    <string name="status_not_measured">Not measured yet</string>
 </resources>

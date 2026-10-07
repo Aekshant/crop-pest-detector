@@ -1,0 +1,19 @@
+<resources>
+    <string name="nav_scan">जाँच</string>
+    <string name="nav_laya">लाया से पूछें</string>
+    <string name="nav_history">इतिहास</string>
+    <string name="nav_status">स्थिति</string>
+    <string name="scan_hint">टमाटर की एक पत्ती की पास से, दिन की रोशनी में फोटो लें।</string>
+    <string name="scan_take_photo">फोटो लें</string>
+    <string name="scan_camera_pending">कैमरा अभी जुड़ा नहीं है।</string>
+    <string name="laya_hint">अपनी टमाटर की फसल के बारे में हिंदी या अंग्रेज़ी में पूछें।</string>
+    <string name="laya_placeholder">सवाल लिखें</string>
+    <string name="laya_send">भेजें</string>
+    <string name="history_empty">अभी कोई जाँच नहीं।</string>
+    <string name="status_app">ऐप संस्करण</string>
+    <string name="status_core">नेटिव कोर</string>
+    <string name="status_model">विज़न मॉडल</string>
+    <string name="status_tier">डिवाइस श्रेणी</string>
+    <string name="status_network">नेटवर्क</string>
+    <string name="status_not_measured">अभी मापा नहीं गया</string>
+</resources>

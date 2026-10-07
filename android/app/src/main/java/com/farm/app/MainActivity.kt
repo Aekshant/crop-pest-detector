@@ -1,12 +1,20 @@
 package com.farm.app
 
-import android.app.Activity
 import android.os.Bundle
-import android.widget.TextView
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import com.farm.app.ui.FarmLensApp
+import com.farm.app.ui.theme.FarmLensTheme
 
-class MainActivity : Activity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(TextView(this).apply { text = NativeCore.version() })
+        enableEdgeToEdge()
+        setContent {
+            FarmLensTheme {
+                FarmLensApp()
+            }
+        }
     }
 }
