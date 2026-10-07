@@ -15,3 +15,7 @@ ml/data/_downloads/
 # Python env and large training outputs
 ml/.venv/
 ml/.venv-export/
+
+# SLM runtime build and model files
+ml/slm/_deps/
+ml/slm/_models/

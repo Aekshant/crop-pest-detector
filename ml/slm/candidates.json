@@ -1,0 +1,14 @@
+{
+  "note": "L1 candidate small instruct models (design doc: edge SLM 1.5-3B at Q4). GGUFs are downloaded to _models/ (gitignored).",
+  "models": [
+    {"id": "qwen3-1.7b", "file": "Qwen3-1.7B-Q4_K_M.gguf", "params_b": 1.7, "license": "Apache-2.0",
+     "url": "https://huggingface.co/unsloth/Qwen3-1.7B-GGUF/resolve/main/Qwen3-1.7B-Q4_K_M.gguf",
+     "why": "strong tool calling and JSON for its size; multilingual", "extra_args": ["--reasoning-budget", "0"]},
+    {"id": "llama3.2-3b", "file": "Llama-3.2-3B-Instruct-Q4_K_M.gguf", "params_b": 3.2, "license": "Llama 3.2 Community License",
+     "url": "https://huggingface.co/unsloth/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+     "why": "Hindi is an officially supported language; native tool calling", "extra_args": []},
+    {"id": "gemma3-1b", "file": "gemma-3-1b-it-Q4_K_M.gguf", "params_b": 1.0, "license": "Gemma Terms of Use",
+     "url": "https://huggingface.co/unsloth/gemma-3-1b-it-GGUF/resolve/main/gemma-3-1b-it-Q4_K_M.gguf",
+     "why": "smallest; fits tier B/C RAM; multilingual training", "extra_args": []}
+  ]
+}

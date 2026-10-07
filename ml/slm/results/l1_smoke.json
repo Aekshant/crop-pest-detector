@@ -1,0 +1,122 @@
+{
+  "qwen3-1.7b": {
+    "id": "qwen3-1.7b",
+    "file": "Qwen3-1.7B-Q4_K_M.gguf",
+    "size_mb": 1107,
+    "load_s": 2.0,
+    "rss_mb": 2033,
+    "threads": 4,
+    "answers": [
+      {
+        "lang": "en",
+        "prompt": "My tomato leaves have brown spots with rings. What could it be?",
+        "answer": "</think>\n\nअपने टमाटो के छालों में बैरन लाल रंग के ब्लू लाल चिपचिप आ रहे हैं। ये बैरन लाल रंग के ब्लू",
+        "prompt_tokens": 75,
+        "gen_tokens": 96,
+        "prompt_tok_s": 126.8,
+        "gen_tok_s": 26.1,
+        "wall_s": 4.25
+      },
+      {
+        "lang": "hi",
+        "prompt": "मेरे टमाटर के पत्ते पीले हो रहे हैं, क्या करूँ?",
+        "answer": "चिपकू या बादल लें। टमाटर के पत्ते पीले हो रहे हैं तो उन्हें बादल या चिपकू से निकालकर बाहर ले जाए",
+        "prompt_tokens": 48,
+        "gen_tokens": 96,
+        "prompt_tok_s": 124.2,
+        "gen_tok_s": 25.3,
+        "wall_s": 4.16
+      },
+      {
+        "lang": "hinglish",
+        "prompt": "kal baarish hogi toh spray karna theek hai kya?",
+        "answer": "بالطبع! کال بااریش کرنا چاہلی ہے، لیکن اس کے لیے ایک مخصوص سریو کا استعمال کرنا چاہلی ہے۔",
+        "prompt_tokens": 22,
+        "gen_tokens": 63,
+        "prompt_tok_s": 94.6,
+        "gen_tok_s": 25.4,
+        "wall_s": 2.69
+      }
+    ]
+  },
+  "llama3.2-3b": {
+    "id": "llama3.2-3b",
+    "file": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+    "size_mb": 2019,
+    "load_s": 3.0,
+    "rss_mb": 3547,
+    "threads": 4,
+    "answers": [
+      {
+        "lang": "en",
+        "prompt": "My tomato leaves have brown spots with rings. What could it be?",
+        "answer": "Yeh toph phal ke patton ki kalaai ho sakti hai, jise neem kee kalaai ya phal ke patton ki kalaai kaha jaata hai.",
+        "prompt_tokens": 97,
+        "gen_tokens": 45,
+        "prompt_tok_s": 61.4,
+        "gen_tok_s": 13.9,
+        "wall_s": 4.76
+      },
+      {
+        "lang": "hi",
+        "prompt": "मेरे टमाटर के पत्ते पीले हो रहे हैं, क्या करूँ?",
+        "answer": "आपके टमाटर के पत्ते पीले होने का कारण हो सकता है कि वे पानी में कमी हो रही है या फिर वे कीटों से पीड़ित हो रहे हैं। मैं आपको सलाह दूंगा कि पत्तों को अच्छी तरह से पानी दें और क",
+        "prompt_tokens": 32,
+        "gen_tokens": 96,
+        "prompt_tok_s": 57.3,
+        "gen_tok_s": 13.6,
+        "wall_s": 7.54
+      },
+      {
+        "lang": "hinglish",
+        "prompt": "kal baarish hogi toh spray karna theek hai kya?",
+        "answer": "Haan, baarish ke baad spray karna zaroori hai, lekin pehle thanda hone dein tab spray karenge.",
+        "prompt_tokens": 21,
+        "gen_tokens": 32,
+        "prompt_tok_s": 35.4,
+        "gen_tok_s": 12.5,
+        "wall_s": 3.09
+      }
+    ]
+  },
+  "gemma3-1b": {
+    "id": "gemma3-1b",
+    "file": "gemma-3-1b-it-Q4_K_M.gguf",
+    "size_mb": 806,
+    "load_s": 1.5,
+    "rss_mb": 980,
+    "threads": 4,
+    "answers": [
+      {
+        "lang": "en",
+        "prompt": "My tomato leaves have brown spots with rings. What could it be?",
+        "answer": "Namaste! Brown spots and rings on your tomato leaves usually indicate a fungal infection, like early blight or Septoria leaf spot.  Let’s investigate with a bit of sunshine and good air circulation, okay?",
+        "prompt_tokens": 70,
+        "gen_tokens": 44,
+        "prompt_tok_s": 92.6,
+        "gen_tok_s": 28.8,
+        "wall_s": 2.26
+      },
+      {
+        "lang": "hi",
+        "prompt": "मेरे टमाटर के पत्ते पीले हो रहे हैं, क्या करूँ?",
+        "answer": "“अरे भाई, चिंता मत करो! थोड़ी खाद डालो और पानी दो, शायद ये रंग पड़ना बंद हो जाए। और अपने पौधों को अच्छी रोशनी दो, ये भी ज़रूरी है।”",
+        "prompt_tokens": 68,
+        "gen_tokens": 40,
+        "prompt_tok_s": 117.3,
+        "gen_tok_s": 28.3,
+        "wall_s": 1.97
+      },
+      {
+        "lang": "hinglish",
+        "prompt": "kal baarish hogi toh spray karna theek hai kya?",
+        "answer": "“Haan, kal baarish hogi toh spray karna bahut zyada hai. Agar kal baarish ho toh, then immediately spray karna sahi hai.”",
+        "prompt_tokens": 67,
+        "gen_tokens": 30,
+        "prompt_tok_s": 103.0,
+        "gen_tok_s": 25.2,
+        "wall_s": 1.81
+      }
+    ]
+  }
+}
