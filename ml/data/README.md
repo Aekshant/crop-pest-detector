@@ -30,27 +30,26 @@ rest of the archive can be deleted after extraction.
 
 ### Current counts
 
-Built without IP102 while its download finishes. Re-run `prepare.py` to add the whitefly rows.
+| Label | PlantVillage (lab) | PlantDoc (field) | iNaturalist (field) | Commons | Total |
+|---|---|---|---|---|---|
+| unknown | 4036 (leaf mold, target spot, 28 other-crop classes × 60) | 73 (leaf mold) | 879 (other crops, weeds) | 125 (soil, hands) | 5113 |
+| healthy | 1585 | 39 | — | — | 1624 |
+| early_blight | 1000 | 73 | — | — | 1073 |
+| late_blight | 1901 | 97 | — | — | 1998 |
+| septoria_leaf_spot | 1771 | 135 | — | — | 1906 |
+| bacterial_spot | 2127 | 89 | — | — | 2216 |
+| yellow_leaf_curl_virus | 5357 | 59 | — | — | 5416 |
+| mosaic_virus | 373 | 36 | — | — | 409 |
+| tuta_absoluta | — | — | 73 | — | 73 |
+| whitefly | — | — | 299 | — | 299 |
+| fruit_borer | — | — | 300 | — | 300 |
+| spider_mites | 1676 | — | 294 | — | 1970 |
+| **total** | | | | | **22397** |
 
-| Label | PlantVillage (lab) | PlantDoc (field) | IP102 | Total |
-|---|---|---|---|---|
-| bacterial_spot | 2127 | 89 | — | 2216 |
-| early_blight | 1000 | 73 | — | 1073 |
-| healthy | 1585 | 39 | — | 1624 |
-| late_blight | 1901 | 97 | — | 1998 |
-| leaf_mold | 952 | 73 | — | 1025 |
-| mosaic_virus | 373 | 36 | — | 409 |
-| septoria_leaf_spot | 1771 | 135 | — | 1906 |
-| spider_mites | 1676 | 0 | — | 1676 |
-| target_spot | 1404 | 0 | — | 1404 |
-| yellow_leaf_curl_virus | 5357 | 59 | — | 5416 |
-| whitefly | — | — | pending | — |
-| tuta_absoluta, fruit_borer | 0 | 0 | 0 | **0** |
-| **total** | 18146 | 601 | — | **18747** |
-
-Dropped while building: 41 exact copies of eval images, 5 near-duplicates of eval images
-(PlantDoc re-encodes, one of them labelled differently in train and test), 30 rejected or
-eval-used PlantDoc images, and 14 duplicates within the sources.
+Web photos come from `fetch_web_train.py`, which is run by `prepare.py` or on its own. API
+answers are cached, so it is resumable. IP102 is optional; its download stalls on Google
+Drive quota. Dropped while building: 41 exact copies of eval images, 5 near-duplicates of
+eval images, 30 rejected or eval-used PlantDoc images, and 16 duplicates within the sources.
 
 ## Kept out of training
 
@@ -64,6 +63,12 @@ Every image in the vision eval sets (`evals/vision/field`, `evals/vision/ood`) i
   or re-encoded copies, as well as exact duplicates.
 
 ## Licenses
+
+Web photos (iNaturalist, Commons) carry a per-row license and attribution in the
+manifest. **Most iNaturalist photos are CC BY-NC.** That is fine for a hackathon or
+research model, but filter `license` to CC0, CC BY and CC BY-SA before training anything
+commercial.
+
 
 | Source | License | Use |
 |---|---|---|

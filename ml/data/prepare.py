@@ -8,7 +8,10 @@
 Sources (see README.md for licenses):
   PlantVillage  tomato, lab photos, leaf-grouped train/test split
   PlantDoc      tomato, field photos, train split only
-  IP102         class 72 (Trialeurodes vaporariorum, greenhouse whitefly)
+  PlantVillage  other crops, a capped sample per class, as "unknown" negatives
+  Web           iNaturalist / Wikimedia Commons photos from fetch_web_train.py
+                (pests; other crops, weeds, soil, hands as "unknown")
+  IP102         class 72 (Trialeurodes vaporariorum, greenhouse whitefly); optional
 
 Images stay where they were downloaded (_downloads/, gitignored); the manifest
 points at them. Anything in the vision eval sets is kept out: PlantDoc's test
@@ -56,6 +59,7 @@ PLANTVILLAGE_MAP = {k: v for k, v in _MAP["plantvillage"].items() if k != "note"
 PLANTDOC_MAP = {k: v for k, v in _MAP["plantdoc"].items() if k != "note"}
 # labels_v1 uses IP102's 1-based "class N"; the split files use 0-based ids.
 IP102_MAP = {int(k.split()[1]) - 1: v for k, v in _MAP["ip102"].items() if k != "note"}
+OTHER_CROPS = _MAP["plantvillage_other_crops"]
 
 NEAR_DUP_BITS = 6  # dHash Hamming distance at or below which images count as the same photo
 
@@ -143,16 +147,21 @@ def extract_ip102(tar_path, dest):
 def fetch():
     DL.mkdir(exist_ok=True)
     print("PlantVillage (tomato)")
-    sparse_clone(PLANTVILLAGE_REPO, PLANTVILLAGE_COMMIT, DL / "plantvillage", ["/raw/color/Tomato___*"])
+    sparse_clone(PLANTVILLAGE_REPO, PLANTVILLAGE_COMMIT, DL / "plantvillage", ["/raw/color/*"])
     for split in ("train", "test"):
         download(PLANTVILLAGE_SPLITS.format(split), DL / "plantvillage" / f"color_{split}.txt")
     print("PlantDoc (tomato)")
     sparse_clone(PLANTDOC_REPO, PLANTDOC_COMMIT, DL / "plantdoc", ["/train/Tomato*", "/test/Tomato*"])
+    print("Web photos (pests, negatives)")
+    subprocess.run([sys.executable, str(ROOT / "fetch_web_train.py")], check=True)
     print("IP102")
     tar = DL / "ip102_v1.1.tar"
     if not (DL / "ip102" / "test.txt").exists():
-        download_ranged(IP102_URL, tar, IP102_SIZE)
-        extract_ip102(tar, DL / "ip102")
+        try:
+            download_ranged(IP102_URL, tar, IP102_SIZE)
+            extract_ip102(tar, DL / "ip102")
+        except SystemExit as e:
+            print(f"WARNING: {e}; continuing without IP102")
 
 
 # ---------- build ----------
@@ -185,7 +194,7 @@ def read_csv(path):
 
 
 def candidates():
-    """Yield (path, label, source, source_label, split)."""
+    """Yield (path, label, source, source_label, split, license)."""
     pv = DL / "plantvillage"
     split_of = {}
     for split in ("train", "test"):
@@ -194,14 +203,30 @@ def candidates():
     for folder, label in PLANTVILLAGE_MAP.items():
         for p in sorted((pv / "raw" / "color" / folder).iterdir()):
             rel = p.relative_to(pv).as_posix()
-            yield p, label, "plantvillage", folder, split_of.get(rel, "train")
+            yield p, label, "plantvillage", folder, split_of.get(rel, "train"), LICENSES["plantvillage"]
+    # Other crops' leaves are negatives for "unknown"; a stable sample per class.
+    for d in sorted((pv / "raw" / "color").iterdir()):
+        if d.name in PLANTVILLAGE_MAP or not d.is_dir():
+            continue
+        files = sorted(d.iterdir(), key=lambda p: hashlib.md5(p.name.encode()).hexdigest())
+        for p in files[:OTHER_CROPS["max_per_class"]]:
+            rel = p.relative_to(pv).as_posix()
+            yield p, OTHER_CROPS["label"], "plantvillage", d.name, split_of.get(rel, "train"), LICENSES["plantvillage"]
 
     pd = DL / "plantdoc"
     for folder, label in PLANTDOC_MAP.items():
         d = pd / "train" / folder
         if d.is_dir():
             for p in sorted(d.iterdir()):
-                yield p, label, "plantdoc", folder, "train"
+                yield p, label, "plantdoc", folder, "train", LICENSES["plantdoc"]
+
+    web = DL / "web" / "sources.csv"
+    if web.exists():
+        for r in read_csv(web):
+            yield (DL / "web" / r["file"], r["label"], r["source"], r["page"], "train",
+                   f"{r['license']} ({r['attribution']})")
+    else:
+        print("WARNING: no web photos yet (run fetch_web_train.py); manifest has no pest/negative web rows")
 
     ip = DL / "ip102"
     if not (ip / "test.txt").exists():
@@ -211,7 +236,8 @@ def candidates():
         for line in (ip / f"{split}.txt").read_text().splitlines():
             name, cls = line.split()
             if int(cls) in IP102_MAP:
-                yield ip / "images" / name, IP102_MAP[int(cls)], "ip102", f"class {int(cls) + 1}", split
+                yield (ip / "images" / name, IP102_MAP[int(cls)], "ip102", f"class {int(cls) + 1}", split,
+                       LICENSES["ip102"])
 
 
 def build():
@@ -225,7 +251,7 @@ def build():
 
     rows, dropped, seen = [], {"eval_exact": 0, "eval_near_dup": 0, "rejected_or_eval": 0,
                                "unreadable": 0, "duplicate": 0}, set()
-    for path, label, source, source_label, split in candidates():
+    for path, label, source, source_label, split, license in candidates():
         if not path.is_file():
             dropped["unreadable"] += 1
             continue
@@ -249,7 +275,7 @@ def build():
         seen.add(digest)
         rows.append({"path": path.relative_to(ROOT).as_posix(), "label": label, "source": source,
                      "source_label": source_label, "split": split, "sha256": digest,
-                     "license": LICENSES[source]})
+                     "license": license})
 
     with MANIFEST.open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=FIELDS)
@@ -260,7 +286,7 @@ def build():
     for r in rows:
         table.setdefault(r["label"], {}).setdefault(r["source"], 0)
         table[r["label"]][r["source"]] += 1
-    sources = ["plantvillage", "plantdoc", "ip102"]
+    sources = sorted({r["source"] for r in rows})
     print(f"{'label':24s} " + " ".join(f"{s:>12s}" for s in sources) + f" {'total':>7s}")
     for label in sorted(table):
         n = [table[label].get(s, 0) for s in sources]

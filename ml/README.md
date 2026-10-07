@@ -124,3 +124,45 @@ What this baseline shows:
    from lab photos and score 0% on field photos.
 5. **A GPU run** that fine-tunes the whole network over all the data should beat this
    baseline. Compare against it with `--baseline ml/runs/v3_lite0_cpu/eval_preds.jsonl`.
+
+### Run `runs/v3b_lite0_cpu`: data fixes (current best)
+
+Same model and CPU recipe as the baseline, with three fixes for the problems it showed:
+
+1. **Negatives for `unknown`:** 60 PlantVillage leaves from each of 28 other-crop classes,
+   880 iNaturalist field photos of 22 other crops and weeds, and 125 soil and hand photos
+   from Wikimedia Commons (`ml/data/fetch_web_train.py`).
+2. **Pest data:** iNaturalist photos of Tuta (73: only leaf mines, larvae and photos on
+   tomato, because the rest are adult moths on walls), whitefly (299), fruit borer larvae
+   (300) and spider mites (294). They are not hand-screened, and a 30-image spot check per
+   class looked acceptable.
+3. **Field-aware training:** model selection uses the mean of lab and field validation
+   macro recall. The temperature is fitted on field validation photos. The **reject
+   threshold** is chosen on field validation (at most 20% of good photos turned away) and
+   saved with the model (`thresholds.json`, `model.pt["thresholds"]`). It is never tuned
+   on the eval sets.
+
+Each model is compared at its own thresholds:
+
+```bash
+python evals/score_vision.py ml/runs/v3b_lite0_cpu/eval_preds.jsonl --reject 0.35 \
+    --baseline ml/runs/v3_lite0_cpu/eval_preds.jsonl --baseline-reject 0.5
+```
+
+| Field and OOD eval | v3 baseline (reject < 0.5) | v3b (reject < 0.35) |
+|---|---|---|
+| Field accuracy | 34.7% | **52.8%** |
+| Confident answers correct | 46.6% | **84.8%** |
+| Good photos turned away | 23.5% | **15.2%** |
+| Calibration error (ECE) | 0.36 | **0.15** |
+| OOD rejected | 43% | **67%** |
+| Fruit borer / whitefly / spider mites recall | 0 / 0 / 0% | 83 / 83 / 58% |
+
+At a fixed 0.5 threshold the scorer called v3b "worse" on false rejects. That was a
+threshold artefact: the old model's temperature (0.72) sharpened its probabilities. This
+is why thresholds now travel with the model.
+
+**Still weak:** Tuta (8%, only 59 training photos), mosaic virus (8%), bacterial spot
+(17%) and healthy (25%) on field photos. Hands and soil are sometimes taken as pests,
+because many pest photos have a hand or soil in frame. Blurred photos need the quality
+gate, which isn't built yet. More own field photos for these classes would help most.

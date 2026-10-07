@@ -156,5 +156,8 @@ With `--baseline`, each headline metric is compared, and the run **exits 1** if 
 metric is worse beyond its tolerance (`REGRESSION` in the script: 2 points for accuracy,
 5 for the worst class, 3 for OOD rejection, and so on). Missing predictions exit 2.
 `--json out.json` saves the full report.
+Thresholds belong to a model (`ml/runs/<run>/thresholds.json`). When comparing two models,
+pass each one's own: `--reject <new>` and `--baseline-reject <old>`. A shared threshold makes the
+better-calibrated model look worse.
 
 Tests: `python -m unittest discover -s evals/tests`. CI runs them in the `evals` job.

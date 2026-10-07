@@ -252,7 +252,7 @@ def get(r, dotted):
 def compare(cur, base):
     """Print metric deltas; return list of regressed metric names."""
     print()
-    print(f"Versus baseline: {base['preds']}")
+    print(f"Versus baseline: {base['preds']}  (baseline reject < {base['reject']}, this reject < {cur['reject']})")
     print(f"  {'metric':26s} {'baseline':>9s} {'this':>9s} {'delta':>8s}")
     worse = []
     for name, (direction, tol) in REGRESSION.items():
@@ -277,6 +277,8 @@ def main():
     ap.add_argument("--baseline", type=Path, help="predictions of the current model to compare against")
     ap.add_argument("--reject", type=float, default=0.5, help="reject threshold (manifest value)")
     ap.add_argument("--accept", type=float, default=0.8, help="confident threshold (manifest value)")
+    ap.add_argument("--baseline-reject", type=float, help="reject threshold of the baseline model (default: --reject)")
+    ap.add_argument("--baseline-accept", type=float, help="confident threshold of the baseline model (default: --accept)")
     ap.add_argument("--temperature", type=float, default=1.0, help="applied to 'logits' inputs")
     ap.add_argument("--json", type=Path, help="also write the full report as JSON")
     args = ap.parse_args()
@@ -285,7 +287,11 @@ def main():
     print_report(cur)
     worse = []
     if args.baseline:
-        base = score(args.baseline, args)
+        # Each model is scored at its own thresholds; they ship with the model.
+        base_args = argparse.Namespace(**{**vars(args),
+                                          "reject": args.reject if args.baseline_reject is None else args.baseline_reject,
+                                          "accept": args.accept if args.baseline_accept is None else args.baseline_accept})
+        base = score(args.baseline, base_args)
         cur["baseline"] = base
         worse = compare(cur, base)
         cur["regressions"] = worse

@@ -2,46 +2,148 @@
   "version": 1,
   "note": "The one label map for FarmLens v1. Model output index i is labels[i]. Evals, training data and Laya all read this file; never rename or reorder an id within v1.",
   "labels": [
-    {"index": 0, "id": "unknown", "kind": "unknown",
-     "name_en": "Not recognised", "name_hi": "पहचान नहीं हुई",
-     "aliases": []},
-    {"index": 1, "id": "healthy", "kind": "healthy",
-     "name_en": "Healthy", "name_hi": "स्वस्थ",
-     "aliases": ["swasth", "theek"]},
-    {"index": 2, "id": "early_blight", "kind": "disease",
-     "name_en": "Early blight", "name_hi": "अगेती झुलसा",
-     "aliases": ["agati jhulsa", "अगेती झुलसा रोग"]},
-    {"index": 3, "id": "late_blight", "kind": "disease",
-     "name_en": "Late blight", "name_hi": "पछेती झुलसा",
-     "aliases": ["pachheti jhulsa", "पछेती झुलसा रोग"]},
-    {"index": 4, "id": "septoria_leaf_spot", "kind": "disease",
-     "name_en": "Septoria leaf spot", "name_hi": "सेप्टोरिया पत्ती धब्बा",
-     "aliases": ["septoria", "सेप्टोरिया"]},
-    {"index": 5, "id": "bacterial_spot", "kind": "disease",
-     "name_en": "Bacterial spot", "name_hi": "जीवाणु धब्बा रोग",
-     "aliases": ["bacterial spot", "बैक्टीरियल धब्बा"]},
-    {"index": 6, "id": "yellow_leaf_curl_virus", "kind": "disease",
-     "name_en": "Leaf curl virus", "name_hi": "पत्ती मरोड़ रोग",
-     "aliases": ["patti marod", "leaf curl", "पत्ती मरोड़", "TYLCV", "ToLCV"]},
-    {"index": 7, "id": "mosaic_virus", "kind": "disease",
-     "name_en": "Mosaic virus", "name_hi": "मोज़ेक रोग",
-     "aliases": ["mosaic", "मोज़ेक", "chitkabra"]},
-    {"index": 8, "id": "tuta_absoluta", "kind": "pest",
-     "name_en": "Tomato leaf miner (Tuta absoluta)", "name_hi": "टूटा कीट (पिनवर्म)",
-     "aliases": ["tuta", "pinworm", "टूटा"]},
-    {"index": 9, "id": "whitefly", "kind": "pest",
-     "name_en": "Whitefly", "name_hi": "सफ़ेद मक्खी",
-     "aliases": ["safed makkhi", "सफेद मक्खी"]},
-    {"index": 10, "id": "fruit_borer", "kind": "pest",
-     "name_en": "Fruit borer (Helicoverpa)", "name_hi": "फल छेदक",
-     "aliases": ["fal chhedak", "फल छेदक कीट"]},
-    {"index": 11, "id": "spider_mites", "kind": "pest",
-     "name_en": "Spider mites", "name_hi": "लाल मकड़ी (माइट)",
-     "aliases": ["lal makdi", "लाल मकड़ी", "red spider mite"]}
+    {
+      "index": 0,
+      "id": "unknown",
+      "kind": "unknown",
+      "name_en": "Not recognised",
+      "name_hi": "पहचान नहीं हुई",
+      "aliases": []
+    },
+    {
+      "index": 1,
+      "id": "healthy",
+      "kind": "healthy",
+      "name_en": "Healthy",
+      "name_hi": "स्वस्थ",
+      "aliases": [
+        "swasth",
+        "theek"
+      ]
+    },
+    {
+      "index": 2,
+      "id": "early_blight",
+      "kind": "disease",
+      "name_en": "Early blight",
+      "name_hi": "अगेती झुलसा",
+      "aliases": [
+        "agati jhulsa",
+        "अगेती झुलसा रोग"
+      ]
+    },
+    {
+      "index": 3,
+      "id": "late_blight",
+      "kind": "disease",
+      "name_en": "Late blight",
+      "name_hi": "पछेती झुलसा",
+      "aliases": [
+        "pachheti jhulsa",
+        "पछेती झुलसा रोग"
+      ]
+    },
+    {
+      "index": 4,
+      "id": "septoria_leaf_spot",
+      "kind": "disease",
+      "name_en": "Septoria leaf spot",
+      "name_hi": "सेप्टोरिया पत्ती धब्बा",
+      "aliases": [
+        "septoria",
+        "सेप्टोरिया"
+      ]
+    },
+    {
+      "index": 5,
+      "id": "bacterial_spot",
+      "kind": "disease",
+      "name_en": "Bacterial spot",
+      "name_hi": "जीवाणु धब्बा रोग",
+      "aliases": [
+        "bacterial spot",
+        "बैक्टीरियल धब्बा"
+      ]
+    },
+    {
+      "index": 6,
+      "id": "yellow_leaf_curl_virus",
+      "kind": "disease",
+      "name_en": "Leaf curl virus",
+      "name_hi": "पत्ती मरोड़ रोग",
+      "aliases": [
+        "patti marod",
+        "leaf curl",
+        "पत्ती मरोड़",
+        "TYLCV",
+        "ToLCV"
+      ]
+    },
+    {
+      "index": 7,
+      "id": "mosaic_virus",
+      "kind": "disease",
+      "name_en": "Mosaic virus",
+      "name_hi": "मोज़ेक रोग",
+      "aliases": [
+        "mosaic",
+        "मोज़ेक",
+        "chitkabra"
+      ]
+    },
+    {
+      "index": 8,
+      "id": "tuta_absoluta",
+      "kind": "pest",
+      "name_en": "Tomato leaf miner (Tuta absoluta)",
+      "name_hi": "टूटा कीट (पिनवर्म)",
+      "aliases": [
+        "tuta",
+        "pinworm",
+        "टूटा"
+      ]
+    },
+    {
+      "index": 9,
+      "id": "whitefly",
+      "kind": "pest",
+      "name_en": "Whitefly",
+      "name_hi": "सफ़ेद मक्खी",
+      "aliases": [
+        "safed makkhi",
+        "सफेद मक्खी"
+      ]
+    },
+    {
+      "index": 10,
+      "id": "fruit_borer",
+      "kind": "pest",
+      "name_en": "Fruit borer (Helicoverpa)",
+      "name_hi": "फल छेदक",
+      "aliases": [
+        "fal chhedak",
+        "फल छेदक कीट"
+      ]
+    },
+    {
+      "index": 11,
+      "id": "spider_mites",
+      "kind": "pest",
+      "name_en": "Spider mites",
+      "name_hi": "लाल मकड़ी (माइट)",
+      "aliases": [
+        "lal makdi",
+        "लाल मकड़ी",
+        "red spider mite"
+      ]
+    }
   ],
   "out_of_scope": {
     "note": "Real tomato problems outside v1. Their images train and test the unknown class, so the app says 'not recognised' instead of guessing.",
-    "ids": ["leaf_mold", "target_spot"]
+    "ids": [
+      "leaf_mold",
+      "target_spot"
+    ]
   },
   "source_map": {
     "note": "Source class -> v1 id. Anything not listed is not used.",
@@ -74,6 +176,14 @@
     "eval": {
       "note": "Labels used in evals/vision/field/labels.csv before this map existed.",
       "leaf_mold": "unknown"
+    },
+    "plantvillage_other_crops": {
+      "note": "Every non-tomato PlantVillage class is a negative: label unknown, at most max_per_class images each (hash order).",
+      "label": "unknown",
+      "max_per_class": 60
+    },
+    "web": {
+      "note": "ml/data/fetch_web_train.py already stores photos under their v1 label (pests, and unknown for other crops, weeds, soil, hands)."
     }
   }
 }

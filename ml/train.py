@@ -45,7 +45,7 @@ REPO = ML.parent
 LABELS_V1 = ML / "labels_v1.json"
 MANIFEST = ML / "data" / "manifest.csv"
 EVAL_VISION = REPO / "evals" / "vision"
-FIELD_SOURCES = {"plantdoc"}
+FIELD_SOURCES = {"plantdoc", "inaturalist", "commons"}
 
 
 # ---------- data ----------
@@ -174,16 +174,42 @@ def logits_of(model, loader, device):
     return torch.cat(out), torch.cat(ys)
 
 
-def metrics(logits, y, labels):
-    pred = logits.argmax(1)
+def macro_recall(pred, y, labels):
     present = sorted(set(y.tolist()))
     recall = {labels[c]: ((pred == c) & (y == c)).sum().item() / (y == c).sum().item() for c in present}
+    return (sum(recall.values()) / len(recall) if recall else 0.0), recall
+
+
+def metrics(logits, y, labels, field):
+    """field: bool mask of validation rows that are field photos. Model selection
+    uses the mean of lab and field macro recall, so a model can't win on lab
+    photos alone."""
+    pred = logits.argmax(1)
+    mr, recall = macro_recall(pred, y, labels)
+    field_mr, field_recall = macro_recall(pred[field], y[field], labels)
+    lab_mr, _ = macro_recall(pred[~field], y[~field], labels)
     return {
         "acc": (pred == y).float().mean().item(),
-        "macro_recall": sum(recall.values()) / len(recall),
+        "macro_recall": mr,
+        "lab_macro_recall": lab_mr,
+        "field_macro_recall": field_mr,
+        "select": (lab_mr + field_mr) / 2,
         "loss": F.cross_entropy(logits, y).item(),
         "recall": recall,
+        "field_recall": field_recall,
     }
+
+
+def choose_reject_threshold(probs, y, unknown, max_false_reject):
+    """Highest reject threshold that turns away at most max_false_reject of
+    in-scope field validation photos. Chosen on validation, never on the eval sets."""
+    keep = y != unknown
+    probs, top = probs[keep].max(1)
+    best = 0.2
+    for t in [x / 100 for x in range(20, 81, 5)]:
+        if ((probs < t) | (top == unknown)).float().mean().item() <= max_false_reject:
+            best = t
+    return best
 
 
 def fit_temperature(logits, y):
@@ -243,6 +269,9 @@ def main():
     ap.add_argument("--val-frac-field", type=float, default=0.15)
     ap.add_argument("--val-max", type=int, default=120, help="max lab-photo val images per class (0 = all)")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--max-false-reject", type=float, default=0.2,
+                    help="reject threshold is chosen so at most this share of field val photos is turned away")
+    ap.add_argument("--accept", type=float, default=0.8, help="confident threshold")
     ap.add_argument("--finalize-only", action="store_true",
                     help="skip training; calibrate, save and evaluate from --out/best_state.pt")
     ap.add_argument("--limit-train", type=int, default=0, help="smoke test: use N random train and val images")
@@ -285,11 +314,12 @@ def main():
 
     val_loader = loader(val_rows, eval_tf)
     weights = sample_weights(train_rows, args.field_share)
-    best = {"macro_recall": -1}
+    best = {"select": -1}
+    val_field = torch.tensor([r["source"] in FIELD_SOURCES for r in val_rows])
 
     def save(stage, epoch, m):
         nonlocal best
-        if m["macro_recall"] > best["macro_recall"]:
+        if m["select"] > best["select"]:
             best = {**m, "stage": stage, "epoch": epoch}
             torch.save(model.state_dict(), args.out / "best_state.pt")
 
@@ -298,8 +328,8 @@ def main():
         # Finish an interrupted run from its saved best_state.pt.
         epochs = [json.loads(l) for l in (args.out / "train_log.jsonl").read_text().splitlines()]
         epochs = [e for e in epochs if e.get("event") == "epoch"]
-        top = max(epochs, key=lambda e: e["macro_recall"])
-        best = {k: top[k] for k in ("acc", "macro_recall", "loss", "recall", "stage", "epoch")}
+        top = max(epochs, key=lambda e: e.get("select", e["macro_recall"]))
+        best = {k: v for k, v in top.items() if k not in ("time", "event")}
         log(f"finalize only: using best_state.pt from {best['stage']} epoch {best['epoch']}", event="finalize")
     else:
         # ----- stage 1: head on cached features -----
@@ -323,8 +353,9 @@ def main():
                 loss.backward()
                 opt.step()
             with torch.no_grad():
-                m = metrics(head(fval.to(device)).cpu(), yval, labels)
-            log(f"head epoch {epoch:2d}: val acc {m['acc']:.3f} macro recall {m['macro_recall']:.3f} loss {m['loss']:.3f}",
+                m = metrics(head(fval.to(device)).cpu(), yval, labels, val_field)
+            log(f"head epoch {epoch:2d}: val macro recall lab {m['lab_macro_recall']:.3f} "
+                f"field {m['field_macro_recall']:.3f} | loss {m['loss']:.3f}",
                 event="epoch", stage="head", epoch=epoch, **m)
             save("head", epoch, m)
 
@@ -354,26 +385,43 @@ def main():
                 seen += len(y)
                 run_loss += loss.item() * len(y)
             vl, vy = logits_of(model, val_loader, device)
-            m = metrics(vl, vy, labels)
-            log(f"ft epoch {epoch:2d}: train loss {run_loss / seen:.3f} | val acc {m['acc']:.3f} "
-                f"macro recall {m['macro_recall']:.3f} loss {m['loss']:.3f} | {time.time() - t:.0f}s",
+            m = metrics(vl, vy, labels, val_field)
+            log(f"ft epoch {epoch:2d}: train loss {run_loss / seen:.3f} | val macro recall "
+                f"lab {m['lab_macro_recall']:.3f} field {m['field_macro_recall']:.3f} | loss {m['loss']:.3f} "
+                f"| {time.time() - t:.0f}s",
                 event="epoch", stage="ft", epoch=epoch, train_loss=run_loss / seen, **m)
             save("ft", epoch, m)
 
-    # ----- calibrate, save, evaluate -----
-    model.load_state_dict(torch.load(args.out / "best_state.pt"))
+    # ----- calibrate, choose thresholds, save, evaluate -----
+    state = args.out / "best_state.pt"
+    if state.exists():
+        model.load_state_dict(torch.load(state))
+    else:  # --finalize-only on a run that already produced model.pt
+        model.load_state_dict(torch.load(args.out / "model.pt")["state_dict"])
     vl, vy = logits_of(model, val_loader, device)
-    temperature = fit_temperature(vl, vy)
-    log(f"best: stage {best['stage']} epoch {best['epoch']} val macro recall {best['macro_recall']:.3f}; "
-        f"temperature {temperature:.3f}", event="best", best={k: v for k, v in best.items()}, temperature=temperature)
+    # Calibrate on field photos: lab photos make the model look more certain
+    # than it is in the field (V3 baseline: ECE 0.36 on the field eval set).
+    use_field = val_field.sum() >= 50
+    calib = val_field if use_field else torch.ones_like(val_field)
+    temperature = fit_temperature(vl[calib], vy[calib])
+    log(f"best: stage {best['stage']} epoch {best['epoch']} val macro recall lab "
+        f"{best.get('lab_macro_recall', float('nan')):.3f} field {best.get('field_macro_recall', float('nan')):.3f}; "
+        f"temperature {temperature:.3f} (fitted on {int(calib.sum())} {'field' if use_field else 'all'} val images)", event="best", best={k: v for k, v in best.items()}, temperature=temperature)
+    reject = choose_reject_threshold(F.softmax(vl[val_field] / temperature, dim=1), vy[val_field],
+                                     labels.index("unknown"), args.max_false_reject)
+    thresholds = {"reject": reject, "accept": args.accept}
+    log(f"reject threshold {reject:.2f} (rejects <= {args.max_false_reject:.0%} of in-scope field val photos); "
+        f"confident >= {args.accept:.2f}", event="thresholds", **thresholds)
+    (args.out / "thresholds.json").write_text(json.dumps({"temperature": temperature, **thresholds}, indent=2) + "\n")
     torch.save({
         "state_dict": model.state_dict(),
+        "thresholds": thresholds,
         "arch": args.arch, "img": args.img, "mean": cfg["mean"], "std": cfg["std"],
         "labels": labels, "labels_version": 1, "temperature": temperature,
         "val": best, "manifest_sha": manifest_sha, "commit": git_commit(),
         "args": {k: str(v) for k, v in vars(args).items()},
     }, args.out / "model.pt")
-    (args.out / "best_state.pt").unlink()
+    state.unlink(missing_ok=True)
 
     eval_files = []
     for sub in ("field", "ood"):
@@ -387,7 +435,8 @@ def main():
             f.write(json.dumps({"file": file, "probs": {l: round(v, 5) for l, v in zip(labels, p.tolist())},
                                 "quality": "ok"}) + "\n")
     report = subprocess.run([sys.executable, str(REPO / "evals" / "score_vision.py"),
-                             str(args.out / "eval_preds.jsonl"), "--json", str(args.out / "eval_report.json")],
+                             str(args.out / "eval_preds.jsonl"), "--json", str(args.out / "eval_report.json"),
+                             "--reject", str(reject), "--accept", str(args.accept)],
                             capture_output=True, text=True)
     (args.out / "eval_report.txt").write_text(report.stdout + report.stderr)
     log("eval report:\n" + report.stdout, event="eval", returncode=report.returncode)

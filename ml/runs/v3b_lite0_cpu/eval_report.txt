@@ -1,0 +1,48 @@
+Vision eval: runs/v3b_lite0_cpu/eval_preds.jsonl   (reject < 0.35, confident >= 0.8)
+
+Field set (144 images)
+  accuracy             52.8%   top-3  84.0%
+  false reject rate    15.2%   accuracy when answered  59.7%
+  confident answers    31.9% of images,  84.8% correct
+  macro recall         52.8%   worst class   8.3%
+  calibration (ECE)   0.151
+  per-class recall
+    bacterial_spot            25.0%  (n=12)
+    early_blight              58.3%  (n=12)
+    fruit_borer               83.3%  (n=12)
+    healthy                   33.3%  (n=12)
+    late_blight               50.0%  (n=12)
+    mosaic_virus              33.3%  (n=12)
+    septoria_leaf_spot        66.7%  (n=12)
+    spider_mites              58.3%  (n=12)
+    tuta_absoluta              8.3%  (n=12)
+    unknown                   41.7%  (n=12)
+    whitefly                  83.3%  (n=12)
+    yellow_leaf_curl_virus    91.7%  (n=12)
+  accuracy by source
+    inaturalist               58.3%
+    plantdoc                  50.0%
+  top confusions (true -> predicted)
+    bacterial_spot -> septoria_leaf_spot: 3
+    bacterial_spot -> early_blight: 3
+    tuta_absoluta -> late_blight: 3
+    tuta_absoluta -> fruit_borer: 3
+    healthy -> yellow_leaf_curl_virus: 2
+
+OOD set (30 images)
+  rejected             66.7%
+    blurry                    50.0%
+    hand                      60.0%
+    other_crop                78.6%
+    soil                      60.0%
+  wrongly accepted
+    other_crop_02.jpg (potato) -> yellow_leaf_curl_virus 0.628
+    other_crop_10.jpg (rice) -> bacterial_spot 0.362
+    other_crop_13.jpg (cabbage) -> whitefly 0.545
+    soil_03.jpg (NRCSIA99343 - Iowa (3379)(NRCS Photo Gal) -> whitefly 0.873
+    soil_05.jpg (NRCSIA99347 - Iowa (3387)(NRCS Photo Gal) -> whitefly 0.532
+    hand_03.jpg (Man holding a gold coin in the palm of h) -> fruit_borer 0.9
+    hand_05.jpg (Open Palm of the Left Hand, Fingers) -> tuta_absoluta 0.851
+    blurry_01.jpg (tomato_plant) -> whitefly 0.546
+    blurry_03.jpg (tomato_plant) -> mosaic_virus 0.468
+    blurry_05.jpg (tomato_plant) -> tuta_absoluta 0.413
