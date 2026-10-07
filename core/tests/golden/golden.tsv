@@ -1,0 +1,9 @@
+name	width	height	label_index	sharpness	brightness
+00_healthy	256	256	1	0.829762	119.7549
+01_early_blight	360	480	2	0.608905	118.8712
+02_late_blight	480	320	3	0.550653	117.0207
+03_septoria_leaf_spot	480	381	4	0.67123	135.1205
+04_yellow_leaf_curl_virus	256	256	6	0.557879	121.7788
+05_spider_mites	245	261	11	0.602402	107.9999
+06_whitefly	360	480	9	0.886745	138.5132
+07_unknown	360	480	0	0.479447	115.8689

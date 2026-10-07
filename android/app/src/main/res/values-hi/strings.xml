@@ -5,7 +5,17 @@
     <string name="nav_status">स्थिति</string>
     <string name="scan_hint">टमाटर की एक पत्ती की पास से, दिन की रोशनी में फोटो लें।</string>
     <string name="scan_take_photo">फोटो लें</string>
-    <string name="scan_camera_pending">कैमरा अभी जुड़ा नहीं है।</string>
+    <string name="scan_need_permission">पौधे देखने के लिए फार्मलेंस को कैमरा चाहिए। फोटो फोन में ही रहती हैं।</string>
+    <string name="scan_allow_camera">कैमरा चालू करें</string>
+    <string name="scan_capturing">स्थिर रखें…</string>
+    <string name="scan_again">फिर से जाँचें</string>
+    <string name="scan_retake_blurry">फोटो धुंधली है। फोन स्थिर रखकर फिर से लें।</string>
+    <string name="scan_retake_dark">बहुत अंधेरा है। रोशनी में फिर से फोटो लें।</string>
+    <string name="scan_retake_bright">बहुत तेज़ रोशनी है। पत्ती पर सीधी धूप से बचें।</string>
+    <string name="scan_not_recognised">पहचान नहीं हुई। टमाटर की एक पत्ती की पास से फोटो लें।</string>
+    <string name="scan_uncertain">शायद %1$s (%2$d%%), पक्का नहीं</string>
+    <string name="scan_uncertain_hint">पक्का करने के लिए किसी दूसरी प्रभावित पत्ती की फोटो लें।</string>
+    <string name="scan_confident">%1$s (%2$d%%)</string>
     <string name="laya_hint">अपनी टमाटर की फसल के बारे में हिंदी या अंग्रेज़ी में पूछें।</string>
     <string name="laya_placeholder">सवाल लिखें</string>
     <string name="laya_send">भेजें</string>
@@ -13,6 +23,7 @@
     <string name="status_app">ऐप संस्करण</string>
     <string name="status_core">नेटिव कोर</string>
     <string name="status_model">विज़न मॉडल</string>
+    <string name="status_model_loading">लोड हो रहा है…</string>
     <string name="status_tier">डिवाइस श्रेणी</string>
     <string name="status_network">नेटवर्क</string>
     <string name="status_not_measured">अभी मापा नहीं गया</string>

@@ -57,19 +57,20 @@
     "files": {
       "fp16": {
         "path": "ml/runs/v3b_lite0_cpu/export/vision_fp16.tflite",
-        "sha256": "4135572e5d92d0e67dafcaae223cb3db8ea1e8884e6b2af81c19938b70fa7f06",
+        "sha256": "710903e0a245c693d89fdbbac5f5645bc906f4f44f910770ca26fff82ff0ee1c",
         "temperature": 0.9462,
         "reject_below": 0.4,
         "confident_at_or_above": 0.8
       },
       "int8": {
         "path": "ml/runs/v3b_lite0_cpu/export/vision_int8.tflite",
-        "sha256": "dddbcc1e32a99613332ee3c54b0974d124a2676f42d28813034071e83e40ac1d",
+        "sha256": "3559aeb816cca6a3524b1b60d719ff6103ab89d04870c8475f4fb69d39f887d1",
         "temperature": 0.9518,
         "reject_below": 0.4,
         "confident_at_or_above": 0.8
       },
-      "note": "Each file has its own temperature and reject threshold (quantization shifts probabilities). Delegate order: GPU uses fp16, CPU XNNPACK uses int8."
+      "note": "Each file has its own temperature and reject threshold (quantization shifts probabilities). Delegate order: GPU uses fp16, CPU XNNPACK uses int8.",
+      "format_note": "All weight buffers are inline in the flatbuffer (LiteRT 1.x cannot read external buffers)."
     },
     "eval": {
       "field_accuracy": 0.5,

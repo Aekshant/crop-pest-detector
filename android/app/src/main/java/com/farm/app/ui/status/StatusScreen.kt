@@ -18,7 +18,16 @@ fun StatusScreen(viewModel: StatusViewModel = viewModel()) {
     ScreenColumn(stringResource(R.string.nav_status)) {
         Row(stringResource(R.string.status_app), state.appVersion)
         Row(stringResource(R.string.status_core), state.coreVersion ?: "…")
-        Row(stringResource(R.string.status_model), state.modelVersion)
+        val e = state.engine
+        Row(
+            stringResource(R.string.status_model),
+            when {
+                e.error != null -> "error: ${e.error}"
+                !e.ready -> stringResource(R.string.status_model_loading)
+                else -> "${e.modelVersion} · ${e.backend} · warm-up ${"%.0f".format(e.warmupMs)} ms" +
+                    if (e.gpuFallbackReason.isNotEmpty()) " · GPU: ${e.gpuFallbackReason}" else ""
+            },
+        )
         Row(stringResource(R.string.status_tier), state.deviceTier ?: notYet)
         Row(stringResource(R.string.status_network), state.network ?: notYet)
     }

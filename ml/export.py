@@ -107,6 +107,32 @@ def eval_files():
     return files
 
 
+def inline_buffers(path):
+    """Rewrite a .tflite so every weight buffer lives inside the flatbuffer.
+
+    ai-edge-quantizer stores buffers *after* the flatbuffer, referenced by
+    offset/size. Newer LiteRT runtimes read that; LiteRT 1.x (what the app
+    links) does not and fails with "Input tensor N lacks data". Models here
+    are far below the 2 GB limit that external buffers exist for.
+    """
+    import flatbuffers
+    from ai_edge_litert import schema_py_generated as S
+    raw = path.read_bytes()
+    m = S.ModelT.InitFromObj(S.Model.GetRootAsModel(raw, 0))
+    moved = 0
+    for b in m.buffers:
+        if b.offset and b.offset > 1:
+            b.data = np.frombuffer(raw[b.offset:b.offset + b.size], dtype=np.uint8)
+            b.offset, b.size = 0, 0
+            moved += 1
+    if not moved:
+        return 0
+    builder = flatbuffers.Builder(len(raw) + (1 << 20))
+    builder.Finish(m.Pack(builder), file_identifier=b"TFL3")
+    path.write_bytes(bytes(builder.Output()))
+    return moved
+
+
 def softmax(z, t):
     z = z / t
     z = z - z.max()
@@ -145,6 +171,7 @@ def main():
     fp16 = out / "vision_fp16.tflite"
     q = quantizer.Quantizer(str(fp32), rm.get_quantization_recipe())
     q.quantize().export_model(str(fp16), overwrite=True)
+    print(f"fp16: moved {inline_buffers(fp16)} external buffers inline (LiteRT 1.x)", flush=True)
     print(f"fp16: {fp16.stat().st_size / 1e6:.2f} MB", flush=True)
 
     calib_paths = representative(args.calib, args.seed)
@@ -158,6 +185,7 @@ def main():
     calib = q.calibrate({key: [{input_name: preprocess(p, size)} for p in calib_paths]})
     int8 = out / "vision_int8.tflite"
     q.quantize(calib).export_model(str(int8), overwrite=True)
+    print(f"int8: moved {inline_buffers(int8)} external buffers inline (LiteRT 1.x)", flush=True)
     print(f"int8: {int8.stat().st_size / 1e6:.2f} MB (calibrated on {len(calib_paths)} training images)", flush=True)
 
     # ----- verify, score, time -----

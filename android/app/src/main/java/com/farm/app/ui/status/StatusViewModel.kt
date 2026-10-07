@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.farm.app.BuildConfig
 import com.farm.app.NativeCore
+import com.farm.app.vision.EngineStatus
+import com.farm.app.vision.VisionRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +18,7 @@ data class StatusUiState(
     val appVersion: String = "",
     /** Null while the native library is loading. */
     val coreVersion: String? = null,
-    val modelVersion: String = "vision-v3b-lite0",
+    val engine: EngineStatus = EngineStatus(),
     /** Filled by DeviceProfiler, HealthMonitor and NetworkMonitor in later tasks. */
     val deviceTier: String? = null,
     val network: String? = null,
@@ -24,7 +26,7 @@ data class StatusUiState(
 
 /**
  * The design doc's debug/status screen: tier, health, network, breaker state and
- * recent router decisions. For now it shows versions and proves the C++ core loads.
+ * recent router decisions. For now: versions and the vision engine's backend.
  */
 class StatusViewModel(
     private val coreVersion: suspend () -> String = { NativeCore.version() },
@@ -37,6 +39,9 @@ class StatusViewModel(
             // Loading the .so and calling JNI is off the main thread.
             val version = withContext(Dispatchers.Default) { coreVersion() }
             _state.update { it.copy(coreVersion = version) }
+        }
+        viewModelScope.launch {
+            VisionRepository.status.collect { s -> _state.update { it.copy(engine = s) } }
         }
     }
 }

@@ -11,8 +11,8 @@
       "confident_accuracy": 0.844,
       "ece": 0.162,
       "ood_rejected": 0.8,
-      "cpu_ms_p50": 4.9,
-      "cpu_ms_p90": 9.5
+      "cpu_ms_p50": 6.3,
+      "cpu_ms_p90": 6.4
     },
     {
       "variant": "fp16",
@@ -24,8 +24,8 @@
       "confident_accuracy": 0.844,
       "ece": 0.159,
       "ood_rejected": 0.833,
-      "cpu_ms_p50": 4.6,
-      "cpu_ms_p90": 7.0
+      "cpu_ms_p50": 4.7,
+      "cpu_ms_p90": 5.7
     },
     {
       "variant": "int8",
@@ -37,8 +37,8 @@
       "confident_accuracy": 0.851,
       "ece": 0.117,
       "ood_rejected": 0.8,
-      "cpu_ms_p50": 3.6,
-      "cpu_ms_p90": 3.8
+      "cpu_ms_p50": 2.8,
+      "cpu_ms_p90": 4.8
     }
   ]
 }

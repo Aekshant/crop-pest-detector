@@ -1,12 +1,18 @@
+#include <cstdio>
+#include <string>
+
+#include "check.h"
 #include "farm/core.h"
 
-#include <cstdio>
+void RunVisionTests();
 
 int main() {
-  if (farm::version().rfind("farm-core", 0) != 0) {
-    std::fprintf(stderr, "unexpected version: %s\n", farm::version().c_str());
+  CHECK(farm::version().rfind("farm-core", 0) == 0);
+  RunVisionTests();
+  if (farm_test::failures()) {
+    std::fprintf(stderr, "%d check(s) failed\n", farm_test::failures());
     return 1;
   }
-  std::puts("ok");
+  std::puts("all tests passed");
   return 0;
 }

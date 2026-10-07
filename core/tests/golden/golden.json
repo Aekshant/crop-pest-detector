@@ -1,0 +1,401 @@
+{
+  "labels": [
+    "unknown",
+    "healthy",
+    "early_blight",
+    "late_blight",
+    "septoria_leaf_spot",
+    "bacterial_spot",
+    "yellow_leaf_curl_virus",
+    "mosaic_virus",
+    "tuta_absoluta",
+    "whitefly",
+    "fruit_borer",
+    "spider_mites"
+  ],
+  "input_size": 224,
+  "calibration": {
+    "fp32": {
+      "temperature": 0.9456,
+      "reject_below": 0.35,
+      "confident_at_or_above": 0.8
+    },
+    "fp16": {
+      "temperature": 0.9462,
+      "reject_below": 0.4,
+      "confident_at_or_above": 0.8
+    },
+    "int8": {
+      "temperature": 0.9518,
+      "reject_below": 0.4,
+      "confident_at_or_above": 0.8
+    }
+  },
+  "quality_thresholds": {
+    "min_sharpness": 0.5032,
+    "min_brightness": 42.4,
+    "max_brightness": 240.5
+  },
+  "images": [
+    {
+      "name": "00_healthy",
+      "width": 256,
+      "height": 256,
+      "label": "healthy",
+      "label_index": 1,
+      "source": "plantvillage",
+      "manifest_path": "_downloads/plantvillage/raw/color/Tomato___healthy/d6e75b4e-377f-4d9a-b2a5-d0fcd5ec32b8___RS_HL 0177.JPG",
+      "sharpness": 0.829762,
+      "brightness": 119.7549,
+      "logits": {
+        "fp16": [
+          -0.75349,
+          3.24784,
+          -3.48651,
+          -4.08696,
+          -0.68593,
+          -3.10311,
+          -3.58141,
+          -0.89363,
+          -1.19382,
+          -2.53085,
+          -2.82227,
+          1.11008
+        ],
+        "int8": [
+          -0.6969,
+          3.18187,
+          -3.41675,
+          -3.80857,
+          -1.28706,
+          -3.27443,
+          -3.49681,
+          -0.71368,
+          -1.67535,
+          -2.13018,
+          -2.88728,
+          1.50714
+        ]
+      },
+      "top_prob": {
+        "fp16": 0.8595,
+        "int8": 0.8129
+      }
+    },
+    {
+      "name": "01_early_blight",
+      "width": 360,
+      "height": 480,
+      "label": "early_blight",
+      "label_index": 2,
+      "source": "plantdoc",
+      "manifest_path": "_downloads/plantdoc/train/Tomato Early blight leaf/Tomato-Early-Blight-Leaves-Cornell-University.jpg",
+      "sharpness": 0.608905,
+      "brightness": 118.8712,
+      "logits": {
+        "fp16": [
+          -0.02136,
+          -3.91527,
+          5.04509,
+          -0.47874,
+          0.04451,
+          1.64337,
+          -1.30851,
+          0.01078,
+          -3.79933,
+          -2.37302,
+          -1.08242,
+          -1.88275
+        ],
+        "int8": [
+          0.03969,
+          -4.38418,
+          4.66274,
+          -0.21997,
+          -0.03738,
+          1.50462,
+          -1.11381,
+          0.23971,
+          -3.34534,
+          -2.50614,
+          -1.14337,
+          -2.03582
+        ]
+      },
+      "top_prob": {
+        "fp16": 0.9533,
+        "int8": 0.932
+      }
+    },
+    {
+      "name": "02_late_blight",
+      "width": 480,
+      "height": 320,
+      "label": "late_blight",
+      "label_index": 3,
+      "source": "plantdoc",
+      "manifest_path": "_downloads/plantdoc/train/Tomato leaf late blight/5816170621_e1cce08736_z.jpg",
+      "sharpness": 0.550653,
+      "brightness": 117.0207,
+      "logits": {
+        "fp16": [
+          -1.94958,
+          -0.00978,
+          -1.43862,
+          3.60449,
+          -3.45897,
+          -2.91256,
+          -5.28519,
+          -2.67027,
+          -0.81291,
+          -3.12994,
+          -0.70317,
+          -4.48676
+        ],
+        "int8": [
+          -1.69696,
+          0.50615,
+          -1.53648,
+          3.44318,
+          -3.13793,
+          -2.83866,
+          -5.03746,
+          -2.38286,
+          -0.75077,
+          -2.77582,
+          -0.57776,
+          -3.95333
+        ]
+      },
+      "top_prob": {
+        "fp16": 0.9492,
+        "int8": 0.9183
+      }
+    },
+    {
+      "name": "03_septoria_leaf_spot",
+      "width": 480,
+      "height": 381,
+      "label": "septoria_leaf_spot",
+      "label_index": 4,
+      "source": "plantdoc",
+      "manifest_path": "_downloads/plantdoc/train/Tomato Septoria leaf spot/SeptoriaTomato-B.jpg",
+      "sharpness": 0.67123,
+      "brightness": 135.1205,
+      "logits": {
+        "fp16": [
+          -0.63806,
+          -4.17154,
+          -0.82088,
+          -5.05227,
+          3.40809,
+          1.19229,
+          -3.33021,
+          -3.85496,
+          -3.91371,
+          -3.86494,
+          -2.20518,
+          -3.68363
+        ],
+        "int8": [
+          -1.03166,
+          -3.97166,
+          -0.51829,
+          -4.72095,
+          3.25516,
+          1.22864,
+          -3.16364,
+          -3.6664,
+          -3.76902,
+          -3.93068,
+          -1.70913,
+          -3.56682
+        ]
+      },
+      "top_prob": {
+        "fp16": 0.887,
+        "int8": 0.8629
+      }
+    },
+    {
+      "name": "04_yellow_leaf_curl_virus",
+      "width": 256,
+      "height": 256,
+      "label": "yellow_leaf_curl_virus",
+      "label_index": 6,
+      "source": "plantvillage",
+      "manifest_path": "_downloads/plantvillage/raw/color/Tomato___Tomato_Yellow_Leaf_Curl_Virus/85f426b9-d5be-433b-aef8-d1a36f91db58___UF.GRC_YLCV_Lab 09508.JPG",
+      "sharpness": 0.557879,
+      "brightness": 121.7788,
+      "logits": {
+        "fp16": [
+          -0.40353,
+          1.30152,
+          -2.94203,
+          1.00234,
+          -2.7238,
+          -0.68134,
+          4.83864,
+          -0.68749,
+          -4.39513,
+          -0.36329,
+          -1.31605,
+          -2.05614
+        ],
+        "int8": [
+          -0.78843,
+          1.36059,
+          -3.19573,
+          1.31038,
+          -2.75641,
+          -0.88604,
+          4.86598,
+          -0.49234,
+          -3.77813,
+          -0.06203,
+          -0.95193,
+          -1.84487
+        ]
+      },
+      "top_prob": {
+        "fp16": 0.9453,
+        "int8": 0.9372
+      }
+    },
+    {
+      "name": "05_spider_mites",
+      "width": 245,
+      "height": 261,
+      "label": "spider_mites",
+      "label_index": 11,
+      "source": "inaturalist",
+      "manifest_path": "_downloads/web/spider_mites/inaturalist_323443203.jpg",
+      "sharpness": 0.602402,
+      "brightness": 107.9999,
+      "logits": {
+        "fp16": [
+          1.06392,
+          0.07837,
+          -2.02527,
+          -3.97033,
+          -3.81812,
+          -1.53644,
+          -2.80373,
+          -4.06014,
+          -5.21124,
+          -0.23976,
+          -3.44508,
+          3.78303
+        ],
+        "int8": [
+          1.68728,
+          0.20238,
+          -2.5426,
+          -4.3138,
+          -3.54603,
+          -2.08988,
+          -3.40622,
+          -3.82277,
+          -4.86714,
+          -0.19578,
+          -3.72995,
+          3.8825
+        ]
+      },
+      "top_prob": {
+        "fp16": 0.9101,
+        "int8": 0.8778
+      }
+    },
+    {
+      "name": "06_whitefly",
+      "width": 360,
+      "height": 480,
+      "label": "whitefly",
+      "label_index": 9,
+      "source": "inaturalist",
+      "manifest_path": "_downloads/web/whitefly/inaturalist_172309263.jpg",
+      "sharpness": 0.886745,
+      "brightness": 138.5132,
+      "logits": {
+        "fp16": [
+          0.791,
+          0.7682,
+          -0.12058,
+          -2.93711,
+          -1.2737,
+          -0.65695,
+          -4.88042,
+          -0.61343,
+          -1.24234,
+          5.97721,
+          -2.09304,
+          -1.45898
+        ],
+        "int8": [
+          1.1934,
+          0.83959,
+          -0.86228,
+          -2.8191,
+          -1.14036,
+          -0.648,
+          -4.49284,
+          -0.51726,
+          -0.64734,
+          5.40695,
+          -2.08719,
+          -1.26962
+        ]
+      },
+      "top_prob": {
+        "fp16": 0.9869,
+        "int8": 0.9713
+      }
+    },
+    {
+      "name": "07_unknown",
+      "width": 360,
+      "height": 480,
+      "label": "unknown",
+      "label_index": 0,
+      "source": "inaturalist",
+      "manifest_path": "_downloads/web/unknown/inaturalist_744298893.jpg",
+      "sharpness": 0.479447,
+      "brightness": 115.8689,
+      "logits": {
+        "fp16": [
+          4.61343,
+          -3.51578,
+          -0.06604,
+          -4.93159,
+          1.2494,
+          -1.39145,
+          -3.08266,
+          -0.88004,
+          -3.62346,
+          -2.24802,
+          -1.66615,
+          -1.50751
+        ],
+        "int8": [
+          4.29587,
+          -3.65793,
+          0.11946,
+          -4.87449,
+          1.53901,
+          -1.56652,
+          -3.19704,
+          -0.85353,
+          -3.33593,
+          -1.9095,
+          -1.72324,
+          -1.19121
+        ]
+      },
+      "top_prob": {
+        "fp16": 0.9572,
+        "int8": 0.9245
+      }
+    }
+  ]
+}

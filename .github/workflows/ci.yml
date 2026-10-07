@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true  # golden images
       - name: Configure
         run: cmake -S core -B build/core -DFARM_CORE_BUILD_TESTS=ON
       - name: Build
@@ -36,6 +38,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true  # .tflite models packaged as assets
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -46,7 +50,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Assemble
         working-directory: android
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug assembleDebugAndroidTest testDebugUnitTest --stacktrace
       - uses: actions/upload-artifact@v4
         with:
           name: app-debug
