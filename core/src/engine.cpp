@@ -115,7 +115,8 @@ QualityResult Engine::CheckQuality(const uint8_t* gray, int w, int h, int row_st
 VisionResult Engine::Infer(VisionResult r) {
   const auto t = Clock::now();
   if (TfLiteInterpreterInvoke(impl_->interpreter) != kTfLiteOk) {
-    r.decision = Decision::kNotRecognised;  // never guess on a failed run
+    r.status = Status::kInferenceFailed;  // reported as an error, never as an answer
+    r.decision = Decision::kNotRecognised;
     return r;
   }
   r.inference_ms = MsSince(t);

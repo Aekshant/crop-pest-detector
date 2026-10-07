@@ -26,6 +26,23 @@ val copyVisionAssets by tasks.registering(Sync::class) {
     into(visionAssets.map { it.dir("vision") })
 }
 
+// AddressSanitizer build (A8): NDK ASan runtime + the NDK's official wrap.sh,
+// copied from the installed NDK at build time (nothing binary in git).
+val asanFiles = layout.buildDirectory.dir("generated/asan")
+val copyAsanRuntime by tasks.registering(Sync::class) {
+    val ndk = androidComponents.sdkComponents.ndkDirectory.get().asFile
+    val clangLib = ndk.resolve("toolchains/llvm/prebuilt/linux-x86_64/lib/clang")
+        .listFiles()?.maxByOrNull { it.name }?.resolve("lib/linux")
+    for ((abi, arch) in mapOf("arm64-v8a" to "aarch64", "x86_64" to "x86_64")) {
+        from(clangLib!!.resolve("libclang_rt.asan-$arch-android.so")) { into("jniLibs/$abi") }
+        from(ndk.resolve("wrap.sh/asan.sh")) {
+            into("resources/lib/$abi")
+            rename { "wrap.sh" }
+        }
+    }
+    into(asanFiles)
+}
+
 android {
     namespace = "com.farm.app"
     compileSdk = 35
@@ -49,6 +66,22 @@ android {
         }
     }
 
+    buildTypes {
+        // Debug build with AddressSanitizer on all our native code:
+        //   ./gradlew assembleAsan
+        //   ./gradlew assembleAsanAndroidTest -Pfarm.testBuildType=asan
+        create("asan") {
+            initWith(getByName("debug"))
+            matchingFallbacks += "debug"
+            externalNativeBuild {
+                cmake {
+                    arguments += listOf("-DANDROID_STL=c++_shared", "-DFARM_SANITIZE=address")
+                }
+            }
+        }
+    }
+    testBuildType = providers.gradleProperty("farm.testBuildType").getOrElse("debug")
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -56,6 +89,8 @@ android {
 
     sourceSets {
         getByName("main").assets.directories += visionAssets.get().asFile.absolutePath
+        getByName("asan").jniLibs.directories += asanFiles.get().dir("jniLibs").asFile.absolutePath
+        getByName("asan").resources.directories += asanFiles.get().dir("resources").asFile.absolutePath
         // Golden images + Python reference outputs for the on-device test.
         getByName("androidTest").assets.directories += repoRoot.resolve("core/tests/golden").absolutePath
     }
@@ -77,7 +112,12 @@ android {
     }
 }
 
-tasks.named("preBuild") { dependsOn(extractLiteRt, copyVisionAssets) }
+tasks.named("preBuild") { dependsOn(extractLiteRt, copyVisionAssets, copyAsanRuntime) }
+
+// wrap.sh only runs when native libs are extracted to disk.
+androidComponents {
+    onVariants(selector().withBuildType("asan")) { it.packaging.jniLibs.useLegacyPackaging.set(true) }
+}
 tasks.configureEach {
     if (name.startsWith("configureCMake") || name.startsWith("buildCMake")) dependsOn(extractLiteRt)
     if (name.contains("Assets", ignoreCase = true) && name.startsWith("merge")) dependsOn(copyVisionAssets)

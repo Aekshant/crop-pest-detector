@@ -42,7 +42,7 @@ class GoldenTest {
             Log.i(TAG, "backend=${engine.backend} warmup=${engine.warmupMs} ms gpuFallback='${engine.gpuFallbackReason}'")
             for (g in images) {
                 val rgb = testContext.assets.open("${g.name}.rgb").use { it.readBytes() }
-                val r = requireNotNull(engine.analyzeRgb(rgb, g.w, g.h)) { "${g.name}: analyze failed" }
+                val r = requireNotNull(engine.analyzeRgb(rgb, g.w, g.h).resultOrNull()) { "${g.name}: analyze failed" }
                 Log.i(TAG, "${engine.backend} ${g.name}: ${r.decision} ${r.top?.id} p=${"%.3f".format(r.topProb)} " +
                     "sharp=${"%.4f".format(r.sharpness)} gate=${r.qualityMs}ms prep=${r.preprocessMs}ms model=${r.inferenceMs}ms " +
                     "severity=${r.severityLevel} ${"%.1f".format(r.severityFraction * 100)}% in ${r.severityMs}ms")
@@ -80,7 +80,7 @@ class GoldenTest {
             val handle = handleField.getLong(engine)
             repeat(3) { VisionNative.nativeCheckQuality(handle, y, 640, 480, 640, out) }
             val times = FloatArray(20) {
-                assertTrue(VisionNative.nativeCheckQuality(handle, y, 640, 480, 640, out))
+                assertEquals(VisionNative.OK, VisionNative.nativeCheckQuality(handle, y, 640, 480, 640, out))
                 out[3]
             }.sorted()
             Log.i(TAG, "quality gate 640x480 median ${times[10]} ms, max ${times.last()} ms")
@@ -97,7 +97,7 @@ class GoldenTest {
         for (threads in listOf(1, 2, 4)) {
             VisionEngine.create(appContext, allowGpu = false, threads = threads).use { engine ->
                 repeat(2) { engine.analyzeRgb(rgb, g.w, g.h) }
-                val ms = List(5) { engine.analyzeRgb(rgb, g.w, g.h)!!.inferenceMs }.sorted()
+                val ms = List(5) { engine.analyzeRgb(rgb, g.w, g.h).resultOrNull()!!.inferenceMs }.sorted()
                 Log.i(TAG, "threads=$threads cores=${Runtime.getRuntime().availableProcessors()} inference median ${ms[2]} ms")
             }
         }

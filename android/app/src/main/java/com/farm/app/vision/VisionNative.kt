@@ -8,6 +8,15 @@ internal object VisionNative {
         System.loadLibrary("farm_jni")
     }
 
+    // Error codes returned by every native call (keep in sync with farm_jni.cpp).
+    const val OK = 0
+    const val INVALID_HANDLE = 1
+    const val INVALID_ARGUMENT = 2
+    const val BUFFER_NOT_DIRECT = 3
+    const val NATIVE_EXCEPTION = 4
+    const val OUT_OF_MEMORY = 5
+    const val INFERENCE_FAILED = 6
+
     // Float result layout (keep in sync with farm_jni.cpp).
     const val DECISION = 0
     const val TOP = 1
@@ -29,18 +38,21 @@ internal object VisionNative {
         inputSize: Int, threads: Int, allowGpu: Boolean, severityLabels: BooleanArray,
     ): Long
 
-    external fun nativeRelease(handle: Long)
-    external fun nativeInfo(handle: Long): FloatArray
+    external fun nativeRelease(handle: Long): Int
+    external fun nativeInfo(handle: Long, out: FloatArray): Int
     external fun nativeGpuFallbackReason(handle: Long): String
 
     external fun nativeAnalyzeYuv(
         handle: Long, y: ByteBuffer, u: ByteBuffer, v: ByteBuffer, width: Int, height: Int,
         yRowStride: Int, uvRowStride: Int, uvPixelStride: Int, rotation: Int, numLabels: Int, out: FloatArray,
-    ): Boolean
+    ): Int
 
     external fun nativeAnalyzeRgb(
-        handle: Long, rgb: ByteArray, width: Int, height: Int, rotation: Int, numLabels: Int, out: FloatArray,
-    ): Boolean
+        handle: Long, rgb: ByteArray?, width: Int, height: Int, rotation: Int, numLabels: Int, out: FloatArray,
+    ): Int
 
-    external fun nativeCheckQuality(handle: Long, gray: ByteBuffer, width: Int, height: Int, rowStride: Int, out: FloatArray): Boolean
+    external fun nativeCheckQuality(handle: Long, gray: ByteBuffer?, width: Int, height: Int, rowStride: Int, out: FloatArray): Int
+
+    /** Test hook: makes native code throw (1 runtime_error, 2 bad_alloc, 3 non-std) to prove it becomes a code. */
+    external fun nativeForceError(kind: Int): Int
 }

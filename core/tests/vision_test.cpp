@@ -156,7 +156,9 @@ void TestQualitySpeed() {
   for (int i = 0; i < n; ++i) gate.Check(y.data(), 640, 480, 640);
   const double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t).count() / n;
   std::printf("  quality gate 640x480: %.2f ms/frame (host)\n", ms);
-  CHECK(ms < 10.0);
+#ifndef FARM_SANITIZED
+  CHECK(ms < 10.0);  // sanitizers slow code ~4x; the budget is for release builds
+#endif
 }
 
 void TestSeverity() {

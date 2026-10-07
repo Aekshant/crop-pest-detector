@@ -8,6 +8,25 @@ enum class Decision { RETAKE, NOT_RECOGNISED, UNCERTAIN, CONFIDENT }
 enum class QualityVerdict { OK, BLURRY, TOO_DARK, TOO_BRIGHT }
 enum class Backend { GPU, CPU }
 
+/** Outcome of one analysis: a result, or a native error code (never a crash). */
+sealed interface VisionOutcome {
+    data class Ok(val result: VisionResult) : VisionOutcome
+    data class Failed(val code: Int) : VisionOutcome {
+        val reason: String
+            get() = when (code) {
+                VisionNative.INVALID_HANDLE -> "engine closed"
+                VisionNative.INVALID_ARGUMENT -> "invalid input"
+                VisionNative.BUFFER_NOT_DIRECT -> "camera buffer not direct"
+                VisionNative.NATIVE_EXCEPTION -> "native error"
+                VisionNative.OUT_OF_MEMORY -> "out of memory"
+                VisionNative.INFERENCE_FAILED -> "model run failed"
+                else -> "error $code"
+            }
+    }
+}
+
+fun VisionOutcome.resultOrNull(): VisionResult? = (this as? VisionOutcome.Ok)?.result
+
 /** Lesion share of the leaf, from colour segmentation. Always shown as an estimate. */
 enum class SeverityLevel { UNKNOWN, LOW, MEDIUM, HIGH }
 
@@ -48,22 +67,20 @@ class VisionEngine private constructor(
     private val out = FloatArray(VisionNative.PROBS + config.labels.size)
 
     /** Analyzes a CameraX YUV_420_888 frame without copying its planes. */
-    fun analyze(image: ImageProxy): VisionResult? {
-        check(handle != 0L) { "engine closed" }
+    fun analyze(image: ImageProxy): VisionOutcome {
         val (y, u, v) = image.planes
-        val ok = VisionNative.nativeAnalyzeYuv(
+        val code = VisionNative.nativeAnalyzeYuv(
             handle, y.buffer, u.buffer, v.buffer, image.width, image.height,
             y.rowStride, u.rowStride, u.pixelStride, image.imageInfo.rotationDegrees, config.labels.size, out,
         )
-        return if (ok) result() else null
+        return outcome(code)
     }
 
     /** Analyzes an RGB8 image (golden tests, gallery photos). */
-    fun analyzeRgb(rgb: ByteArray, width: Int, height: Int, rotationDegrees: Int = 0): VisionResult? {
-        check(handle != 0L) { "engine closed" }
-        val ok = VisionNative.nativeAnalyzeRgb(handle, rgb, width, height, rotationDegrees, config.labels.size, out)
-        return if (ok) result() else null
-    }
+    fun analyzeRgb(rgb: ByteArray, width: Int, height: Int, rotationDegrees: Int = 0): VisionOutcome =
+        outcome(VisionNative.nativeAnalyzeRgb(handle, rgb, width, height, rotationDegrees, config.labels.size, out))
+
+    private fun outcome(code: Int) = if (code == VisionNative.OK) VisionOutcome.Ok(result()) else VisionOutcome.Failed(code)
 
     private fun result(): VisionResult {
         val top = out[VisionNative.TOP].toInt()
@@ -84,6 +101,7 @@ class VisionEngine private constructor(
         )
     }
 
+    /** Idempotent; afterwards every call returns INVALID_HANDLE instead of crashing. */
     override fun close() {
         if (handle != 0L) VisionNative.nativeRelease(handle)
         handle = 0L
@@ -122,7 +140,8 @@ class VisionEngine private constructor(
                 params, config.labels.size, config.unknownIndex, config.inputSize, threads, allowGpu,
                 BooleanArray(config.labels.size) { config.labels[it].isDisease },
             )
-            val info = VisionNative.nativeInfo(handle)
+            val info = FloatArray(2)
+            check(VisionNative.nativeInfo(handle, info) == VisionNative.OK) { "engine info failed" }
             return VisionEngine(
                 handle, config,
                 backend = if (info[0] == 0f) Backend.GPU else Backend.CPU,

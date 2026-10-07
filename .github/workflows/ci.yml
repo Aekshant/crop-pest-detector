@@ -19,6 +19,11 @@ jobs:
         run: cmake --build build/core -j
       - name: Test
         run: ctest --test-dir build/core --output-on-failure
+      - name: Test under AddressSanitizer + UBSan
+        run: |
+          cmake -S core -B build/core-asan -DFARM_CORE_BUILD_TESTS=ON -DFARM_CORE_SANITIZE=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build/core-asan -j
+          ctest --test-dir build/core-asan --output-on-failure
 
   evals:
     name: evals (scorer tests + case checks)
@@ -50,7 +55,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Assemble
         working-directory: android
-        run: ./gradlew assembleDebug assembleDebugAndroidTest testDebugUnitTest --stacktrace
+        run: ./gradlew assembleDebug assembleDebugAndroidTest testDebugUnitTest assembleAsan --stacktrace
       - uses: actions/upload-artifact@v4
         with:
           name: app-debug

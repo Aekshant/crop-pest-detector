@@ -57,7 +57,7 @@ class DeviceBenchmark {
                 repeat(3) { e.analyzeRgb(goldens[1].rgb, goldens[1].w, goldens[1].h) }  // settle clocks/caches
                 for (round in 0 until 5) {
                     for (g in goldens) {
-                        val r = e.analyzeRgb(g.rgb, g.w, g.h) ?: continue
+                        val r = e.analyzeRgb(g.rgb, g.w, g.h).resultOrNull() ?: continue
                         gate += r.qualityMs
                         if (r.decision == Decision.RETAKE) continue
                         inf += r.inferenceMs

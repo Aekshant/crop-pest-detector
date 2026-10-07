@@ -45,7 +45,11 @@ struct EngineConfig {
 
 enum class Backend : int { kGpu = 0, kCpu = 1 };
 
+// Why an analysis produced no answer (kOk otherwise).
+enum class Status : int { kOk = 0, kInferenceFailed = 1 };
+
 struct VisionResult {
+  Status status = Status::kOk;
   QualityResult quality;
   Decision decision = Decision::kRetake;
   int top = -1;

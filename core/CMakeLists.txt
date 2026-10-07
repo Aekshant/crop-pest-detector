@@ -5,6 +5,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(FARM_CORE_BUILD_TESTS "Build host unit tests" OFF)
+# Host memory/UB checking for the tests (A8): -DFARM_CORE_SANITIZE=ON
+option(FARM_CORE_SANITIZE "Build with AddressSanitizer + UndefinedBehaviorSanitizer" OFF)
+if(FARM_CORE_SANITIZE)
+  add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined -g)
+  add_link_options(-fsanitize=address,undefined)
+  add_compile_definitions(FARM_SANITIZED=1)  # timing budgets don't apply
+endif()
 # Path to an extracted LiteRT 1.x AAR (headers/ and jni/<abi>/). Set by the
 # Android build; when empty, the engine (inference) is not built.
 set(FARM_CORE_LITERT_DIR "" CACHE PATH "Extracted LiteRT AAR directory")

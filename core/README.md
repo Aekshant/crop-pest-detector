@@ -68,6 +68,27 @@ Known failure modes:
 Real calibration needs leaves with an expert-rated severity, which can come from own field
 photos.
 
+## Native safety (A8)
+
+- **JNI never crashes the app.** Every entry point runs in `Guarded()`. It checks the
+  handle against the set of live engines (a stale, zero or made-up handle is rejected, not
+  dereferenced), validates sizes, strides and buffers, and catches every C++ exception.
+  Each call returns an error code: `INVALID_HANDLE`, `INVALID_ARGUMENT`,
+  `BUFFER_NOT_DIRECT`, `NATIVE_EXCEPTION`, `OUT_OF_MEMORY` or `INFERENCE_FAILED`. Kotlin
+  gets `VisionOutcome.Failed(code)`: the camera skips the frame, and an inference failure
+  on the GPU switches the engine to CPU for the session. Engine creation is the exception:
+  it throws `IllegalStateException`, which is caught where the engine is created.
+- `nativeForceError(kind)` throws on purpose. `ErrorHandlingTest` (on device) checks that
+  forced exceptions, bad handles, bad arguments, non-direct buffers and corrupt models all
+  come back as codes or exceptions, and that the engine still works afterwards.
+- **AddressSanitizer:**
+  - Host: `cmake -DFARM_CORE_SANITIZE=ON` (ASan + UBSan) runs all core tests. It is clean,
+    and CI runs it.
+  - Android: the `asan` build type sanitizes the core and JNI with `c++_shared`, and packages
+    the NDK ASan runtime and the NDK's `wrap.sh`:
+    `./gradlew assembleAsan assembleAsanAndroidTest -Pfarm.testBuildType=asan`. The error and
+    golden tests pass under it on the emulator. Prebuilt LiteRT is not instrumented.
+
 ## Notes
 
 - **External weight buffers:** `ai-edge-quantizer` writes weights after the flatbuffer,

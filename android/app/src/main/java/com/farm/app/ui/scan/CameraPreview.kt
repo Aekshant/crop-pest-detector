@@ -17,6 +17,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.farm.app.vision.VisionNative
+import com.farm.app.vision.VisionOutcome
 import com.farm.app.vision.VisionRepository
 import com.farm.app.vision.VisionResult
 import com.farm.app.vision.VisionThread
@@ -58,7 +60,13 @@ fun CameraPreview(onResult: (VisionResult) -> Unit, modifier: Modifier = Modifie
                     if (now - last < MIN_FRAME_INTERVAL_MS) return@use
                     last = now
                     val engine = VisionRepository.obtain(context) ?: return@use
-                    engine.analyze(image)?.let(onResult)
+                    when (val outcome = engine.analyze(image)) {
+                        is VisionOutcome.Ok -> onResult(outcome.result)
+                        is VisionOutcome.Failed -> {
+                            Log.w("CameraPreview", "frame skipped: ${outcome.reason}")
+                            if (outcome.code == VisionNative.INFERENCE_FAILED) VisionRepository.onInferenceFailed(context)
+                        }
+                    }
                 }
             }
             try {
