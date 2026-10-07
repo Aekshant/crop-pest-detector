@@ -84,5 +84,10 @@
       "output": "[1,12] float32 logits in labels order"
     },
     "temperature_note": "Top-level temperature/thresholds are the PyTorch checkpoint's; use the per-file values on device."
+  },
+  "laya": {
+    "tool_schema_version": 1,
+    "tool_schema": "ml/bundle/tools_schema_v1.json",
+    "note": "The app refuses a bundle whose tool_schema_version it does not support (design doc, update flow step 3)."
   }
 }

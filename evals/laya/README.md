@@ -48,9 +48,9 @@ Arg values are either a literal (exact match) or a matcher:
 | `{"range": [a, b]}` | the number is between a and b, inclusive |
 | `{"absent": true}` | the arg is not given |
 
-Tools follow [`tools_v1.json`](tools_v1.json), the eval copy of tool schema v1 from the design
-doc. Its labels are the ids in [`ml/labels_v1.json`](../../ml/labels_v1.json) minus `unknown`, and
-`check_cases.py` fails if they drift. Out-of-scope diseases such as leaf mold expect a
+Tools follow the bundle's tool schema, [`ml/bundle/tools_schema_v1.json`](../../ml/bundle/tools_schema_v1.json)
+(L3; the single source of truth). Its labels are the ids in [`ml/labels_v1.json`](../../ml/labels_v1.json)
+minus `unknown`, and `check_cases.py` fails if they drift. Out-of-scope diseases such as leaf mold expect a
 `respond`/`unsupported` reply.
 
 ### Coverage
@@ -157,7 +157,7 @@ python evals/score_laya.py outputs.jsonl --baseline current.jsonl # + better/wor
 | Metric | Meaning |
 |---|---|
 | JSON valid | `raw` parses as a JSON object |
-| schema valid | Tool, arg names and types, labels and required args match `tools_v1.json` |
+| schema valid | Tool, arg names and types, labels and required args match `ml/bundle/tools_schema_v1.json` |
 | action/tool accuracy | Right choice between tool, clarify and respond, and the right tool. `alt` answers count. |
 | arg accuracy | All expected args match, on tool cases (`unordered_args` may be swapped) |
 | case pass | Valid, right action and tool, right args |

@@ -26,6 +26,7 @@ import sys
 from pathlib import Path
 
 LAYA = Path(__file__).resolve().parent / "laya"
+TOOL_SCHEMA = Path(__file__).resolve().parents[1] / "ml" / "bundle" / "tools_schema_v1.json"
 IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
 LANGS = ("en", "hi", "hinglish")
 
@@ -241,7 +242,7 @@ def rate(xs):
 
 
 def score(path):
-    schema = json.loads((LAYA / "tools_v1.json").read_text())
+    schema = json.loads(TOOL_SCHEMA.read_text())
     tools, labels = schema["tools"], set(schema["labels"])
     default_ctx = json.loads((LAYA / "context_default.json").read_text())
     kb_rows = json.loads((LAYA / "safety_kb_fixture.json").read_text())["rows"]

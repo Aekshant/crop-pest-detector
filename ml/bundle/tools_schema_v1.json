@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "labels_version": 1,
+  "note": "Laya tool schema v1 (design doc, 'Tools (schema v1)'). Ships in the model bundle; the manifest's tool_schema_version must match schema_version. Single source of truth for the app, the evals and constrained decoding (ml/bundle/tool_schema.py builds the UNDERSTAND output JSON Schema from it).",
+  "labels": [
+    "healthy", "early_blight", "late_blight", "septoria_leaf_spot", "bacterial_spot",
+    "yellow_leaf_curl_virus", "mosaic_virus", "tuta_absoluta", "whitefly", "fruit_borer", "spider_mites"
+  ],
+  "respond_kinds": ["greeting", "thanks", "out_of_scope", "offline", "explain", "unsupported"],
+  "tools": {
+    "scan_image": {
+      "description": "Open the camera to photograph and diagnose a leaf.",
+      "needsNetwork": false,
+      "sideEffect": false,
+      "args": {
+        "field_id": {"type": "string", "required": false, "description": "Field to attach the scan to (an id from the context)."}
+      }
+    },
+    "get_scan_history": {
+      "description": "List past scans and their diagnoses.",
+      "needsNetwork": false,
+      "sideEffect": false,
+      "args": {
+        "field_id": {"type": "string", "required": false, "description": "Only this field (an id from the context)."},
+        "days": {"type": "integer", "required": false, "minimum": 1, "maximum": 365, "description": "Only the last N days."}
+      }
+    },
+    "compare_scans": {
+      "description": "Compare two scans to see if a problem is getting better or worse.",
+      "needsNetwork": false,
+      "sideEffect": false,
+      "args": {
+        "scan_a": {"type": "string", "required": true, "description": "Older scan id from the context."},
+        "scan_b": {"type": "string", "required": true, "description": "Newer scan id from the context."}
+      }
+    },
+    "get_treatment_info": {
+      "description": "Verified treatment and prevention for a diagnosed problem, from the knowledge base.",
+      "needsNetwork": false,
+      "sideEffect": false,
+      "args": {
+        "label": {"type": "label", "required": true, "description": "One of the labels."}
+      }
+    },
+    "get_weather": {
+      "description": "Weather forecast, e.g. to decide when to spray.",
+      "needsNetwork": true,
+      "sideEffect": false,
+      "args": {
+        "location": {"type": "string", "required": true, "description": "Place name, usually the farm's location from the context."}
+      }
+    },
+    "record_observation": {
+      "description": "Save a note about the crop (needs a confirmation tap).",
+      "needsNetwork": false,
+      "sideEffect": true,
+      "args": {
+        "text": {"type": "string", "required": true, "description": "The note, in the farmer's words."}
+      }
+    },
+    "create_reminder": {
+      "description": "Set a reminder (needs a confirmation tap).",
+      "needsNetwork": false,
+      "sideEffect": true,
+      "args": {
+        "when": {"type": "datetime", "required": true, "description": "ISO 8601 with +05:30, e.g. 2026-10-21T08:00:00+05:30."},
+        "text": {"type": "string", "required": true, "description": "What to remind about."}
+      }
+    }
+  }
+}

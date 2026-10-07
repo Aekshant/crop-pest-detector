@@ -158,7 +158,7 @@ def main():
     args = ap.parse_args()
     model = next(m for m in json.loads((SLM / "candidates.json").read_text())["models"] if m["id"] == args.model)
 
-    schema = json.loads((LAYA / "tools_v1.json").read_text())
+    schema = json.loads((REPO / "ml" / "bundle" / "tools_schema_v1.json").read_text())
     default_ctx = json.loads((LAYA / "context_default.json").read_text())
     templates = json.loads((LAYA / "safety_templates.json").read_text())["templates"]
     kb_rows = json.loads((LAYA / "safety_kb_fixture.json").read_text())["rows"]

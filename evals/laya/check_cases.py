@@ -40,7 +40,7 @@ def check_tool_expect(where, e, tools, labels, errors):
             continue
         check_matcher(f"{where}.{name}", value, errors)
         if tool["args"][name]["type"] == "label" and isinstance(value, str) and value not in labels:
-            errors.append(f"{where}: label {value} not in tools_v1.json labels")
+            errors.append(f"{where}: label {value} not in the tool schema labels")
     for name, spec in tool["args"].items():
         if spec["required"] and name not in args:
             errors.append(f"{where}: required arg {name} has no expectation")
@@ -135,13 +135,13 @@ def check_safety(labels, context_keys, errors):
 
 
 def main() -> int:
-    schema = json.loads((ROOT / "tools_v1.json").read_text())
+    schema = json.loads((ROOT.parents[1] / "ml" / "bundle" / "tools_schema_v1.json").read_text())
     tools, labels = schema["tools"], set(schema["labels"])
     context_keys = set(json.loads((ROOT / "context_default.json").read_text()))
     errors = []
     v1 = [l["id"] for l in json.loads((ROOT.parents[1] / "ml" / "labels_v1.json").read_text())["labels"]]
     if schema["labels"] != [l for l in v1 if l != "unknown"]:
-        errors.append("tools_v1.json labels must equal ml/labels_v1.json ids (minus 'unknown'), in order")
+        errors.append("tools_schema_v1.json labels must equal ml/labels_v1.json ids (minus 'unknown'), in order")
     check_cases(tools, labels, context_keys, errors)
     print()
     check_safety(labels, context_keys, errors)
