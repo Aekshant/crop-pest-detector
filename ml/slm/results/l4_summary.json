@@ -1,0 +1,34 @@
+{
+  "qwen3-1.7b": {
+    "json_valid": 1.0,
+    "schema_valid": 1.0,
+    "action_tool_accuracy": 0.38666666666666666,
+    "arg_accuracy": 0.3153153153153153,
+    "case_pass": 0.36666666666666664,
+    "language_match": 0.5866666666666667,
+    "safety_pass": 0.3,
+    "cases": 180,
+    "limit": null,
+    "gen_tok_s_median": 14.9,
+    "new_prompt_tokens_median": 27,
+    "seconds_per_case_median": 4.27,
+    "peak_rss_mb": 2558,
+    "threads": 4
+  },
+  "llama3.2-3b": {
+    "json_valid": 1.0,
+    "schema_valid": 1.0,
+    "action_tool_accuracy": 0.43333333333333335,
+    "arg_accuracy": 0.36036036036036034,
+    "case_pass": 0.38,
+    "language_match": 0.7533333333333333,
+    "safety_pass": 0.36666666666666664,
+    "cases": 180,
+    "limit": null,
+    "gen_tok_s_median": 12.1,
+    "new_prompt_tokens_median": 20,
+    "seconds_per_case_median": 6.64,
+    "peak_rss_mb": 3978,
+    "threads": 4
+  }
+}

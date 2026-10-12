@@ -23,6 +23,25 @@ LABELS_FILE = BUNDLE.parent / "labels_v1.json"
 ARG_TYPES = {"string", "integer", "label", "datetime"}
 # ISO 8601 date-time with seconds and an explicit offset (the app works in +05:30).
 DATETIME_PATTERN = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?([+-]\d{2}:\d{2}|Z)$"
+# Length caps on free text. Under constrained decoding they force a looping
+# model ("बर्फ के बर्फ के ...", seen in L4) to close the string and the JSON
+# instead of running into max_tokens with broken output. The decoding token
+# budget must cover the worst case: Devanagari can take ~3 tokens per
+# character, so 120 chars is <= ~360 tokens; see MAX_OUTPUT_TOKENS.
+MAX_REPLY_CHARS = 120
+MAX_TEXT_ARG_CHARS = 120
+# Free text may only use Devanagari, Latin letters, digits and common
+# punctuation, and no JSON escapes. This blocks two failures seen in L1-L4:
+# replies drifting into other scripts (Urdu, Tamil, Marathi, Gujarati...) and
+# loops of "\uXXXX" escapes, which count as one character each but cost many
+# tokens. Two capped strings of Devanagari (worst ~3 tokens/char) + the JSON
+# skeleton stay under MAX_OUTPUT_TOKENS.
+TEXT_CHARS = "\u0900-\u097F\u200C\u200D a-zA-Z0-9.,!?'()%:;/+&\u20B9\u2019\u2018-"
+MAX_OUTPUT_TOKENS = 1024
+
+
+def text_pattern(max_chars, min_chars=1):
+    return f"^[{TEXT_CHARS}]{{{min_chars},{max_chars}}}$"
 
 
 def load(path=SCHEMA_FILE):
@@ -63,7 +82,7 @@ def _arg_schema(spec, labels):
             if k in spec:
                 s[k] = spec[k]
         return s
-    return {"type": "string", "minLength": 1}
+    return {"type": "string", "pattern": text_pattern(MAX_TEXT_ARG_CHARS)}
 
 
 def understand_schema(schema, tools=None):
@@ -86,20 +105,21 @@ def understand_schema(schema, tools=None):
                     "required": [a for a, s in args.items() if s["required"]],
                     "additionalProperties": False,
                 },
-                "reply": {"type": "string"},
+                "reply": {"type": "string", "pattern": text_pattern(MAX_REPLY_CHARS)},
             },
             "required": ["intent", "tool", "args", "reply"],
             "additionalProperties": False,
         })
     variants.append({
         "type": "object",
-        "properties": {"clarify": {"type": "string", "minLength": 1}},
+        "properties": {"clarify": {"type": "string", "pattern": text_pattern(MAX_REPLY_CHARS)}},
         "required": ["clarify"],
         "additionalProperties": False,
     })
     variants.append({
         "type": "object",
-        "properties": {"intent": {"enum": schema["respond_kinds"]}, "reply": {"type": "string", "minLength": 1}},
+        "properties": {"intent": {"enum": schema["respond_kinds"]},
+                       "reply": {"type": "string", "pattern": text_pattern(MAX_REPLY_CHARS)}},
         "required": ["intent", "reply"],
         "additionalProperties": False,
     })

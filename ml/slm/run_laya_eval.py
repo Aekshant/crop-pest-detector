@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
-"""L2: run the Laya eval (evals/laya) through a candidate SLM via llama-server.
+"""Run the Laya eval (evals/laya) through a candidate SLM via llama-server.
 
-  python ml/slm/run_laya_eval.py gemma3-1b [--limit 20]
+  python ml/slm/run_laya_eval.py gemma3-1b [--limit 20]            # L2 baseline
+  python ml/slm/run_laya_eval.py qwen3-1.7b --grammar               # L4
 
-Writes ml/slm/results/l2_<model>_outputs.jsonl (the format evals/score_laya.py
-reads), scores it, and appends speed/RAM to ml/slm/results/l2_summary.json.
+Writes ml/slm/results/<stage>_<model>_outputs.jsonl (the format
+evals/score_laya.py reads), scores it, and records speed/RAM in
+ml/slm/results/<stage>_summary.json.
 
-Baseline on purpose: instructions only. No JSON grammar (that's L4) and no
-few-shot examples (L5). The system prompt is identical for every case so
-llama-server reuses its KV cache; only the case context and message are new.
+L2 = instructions only. L4 (--grammar) = the same prompts with constrained
+decoding: llama.cpp turns the tool schema's UNDERSTAND JSON Schema
+(ml/bundle/tool_schema.py) into a grammar, so only valid outputs can be
+generated; network tools are left out of the schema when the case is
+OFFLINE (the router disables them). The system prompt is identical for every
+case so llama-server reuses its KV cache.
 """
 
 import argparse
@@ -24,6 +29,8 @@ from pathlib import Path
 SLM = Path(__file__).resolve().parent
 REPO = SLM.parents[1]
 LAYA = REPO / "evals" / "laya"
+sys.path.insert(0, str(REPO / "ml" / "bundle"))
+import tool_schema  # noqa: E402
 SERVER = SLM / "_deps" / "llama.cpp" / "build" / "bin" / "llama-server"
 PORT = 8092
 THREADS = int(os.environ.get("SLM_THREADS", "4"))
@@ -127,9 +134,11 @@ class Server:
             time.sleep(0.5)
         self.model = model
 
-    def chat(self, system, messages, max_tokens):
+    def chat(self, system, messages, max_tokens, json_schema=None):
         body = {"messages": [{"role": "system", "content": system}, *messages], "max_tokens": max_tokens,
                 "temperature": 0.0, "cache_prompt": True}
+        if json_schema is not None:
+            body["response_format"] = {"type": "json_schema", "json_schema": {"name": "output", "schema": json_schema}}
         if self.model["id"].startswith("qwen3"):
             body["chat_template_kwargs"] = {"enable_thinking": False}
         req = urllib.request.Request(f"http://127.0.0.1:{PORT}/v1/chat/completions", data=json.dumps(body).encode(),
@@ -155,6 +164,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("model")
     ap.add_argument("--limit", type=int, default=0, help="first N cases of each file (smoke test)")
+    ap.add_argument("--grammar", action="store_true", help="L4: constrained decoding with the tool schema")
     args = ap.parse_args()
     model = next(m for m in json.loads((SLM / "candidates.json").read_text())["models"] if m["id"] == args.model)
 
@@ -166,7 +176,18 @@ def main():
     if args.limit:
         cases, safety = cases[:args.limit], safety[:args.limit]
 
-    out = SLM / "results" / f"l2_{model['id']}_outputs.jsonl"
+    stage = "l4" if args.grammar else "l2"
+    out = SLM / "results" / f"{stage}_{model['id']}_outputs.jsonl"
+    online_schema = offline_schema = safety_schema = None
+    if args.grammar:
+        online_schema = tool_schema.understand_schema(schema)
+        offline_schema = tool_schema.understand_schema(
+            schema, tools=[n for n, t in schema["tools"].items() if not t["needsNetwork"]])
+        safety_schema = {"type": "object", "properties": {
+            "template": {"enum": list(templates)},
+            "reply": {"type": "string", "pattern": tool_schema.text_pattern(tool_schema.MAX_REPLY_CHARS)},
+            "certainty": {"enum": ["confident", "uncertain", "none"]}},
+            "required": ["template", "reply", "certainty"], "additionalProperties": False}
     out.parent.mkdir(exist_ok=True)
     sys_u, sys_s = understand_system(schema), safety_system(templates)
     server = Server(model)
@@ -176,14 +197,18 @@ def main():
             for i, c in enumerate(cases + safety, 1):
                 t = time.time()
                 if c["id"].startswith("safety"):
-                    text, tm = server.chat(sys_s, safety_messages(c, default_ctx, kb_rows), 160)
+                    text, tm = server.chat(sys_s, safety_messages(c, default_ctx, kb_rows),
+                                           tool_schema.MAX_OUTPUT_TOKENS if args.grammar else 160, safety_schema)
                     parsed = lenient_json(text)
                     row = {"id": c["id"], "raw": text, "reply": str(parsed.get("reply", text)),
                            "templates": [parsed["template"]] if parsed.get("template") else []}
                     if parsed.get("certainty") in ("confident", "uncertain"):
                         row["certainty"] = parsed["certainty"]
                 else:
-                    text, tm = server.chat(sys_u, understand_messages(c, default_ctx), 200)
+                    offline = {**default_ctx, **c.get("context", {})}.get("network") == "OFFLINE"
+                    text, tm = server.chat(sys_u, understand_messages(c, default_ctx),
+                                           tool_schema.MAX_OUTPUT_TOKENS if args.grammar else 200,
+                                           offline_schema if offline else online_schema)
                     parsed = lenient_json(text)
                     row = {"id": c["id"], "raw": text.strip(), "reply": str(parsed.get("reply") or parsed.get("clarify") or "")}
                     if not row["reply"]:
@@ -200,11 +225,11 @@ def main():
     finally:
         server.stop()
 
-    report = REPO / "ml" / "slm" / "results" / f"l2_{model['id']}_report.json"
+    report = REPO / "ml" / "slm" / "results" / f"{stage}_{model['id']}_report.json"
     sc = subprocess.run([sys.executable, str(REPO / "evals" / "score_laya.py"), str(out), "--json", str(report),
                          "--max-failures", "0"], capture_output=True, text=True)
     print(sc.stdout)
-    summary_path = SLM / "results" / "l2_summary.json"
+    summary_path = SLM / "results" / f"{stage}_summary.json"
     summary = json.loads(summary_path.read_text()) if summary_path.exists() else {}
     m = json.loads(report.read_text())["metrics"]
     gen_speeds.sort()

@@ -81,9 +81,19 @@ class ToolSchemaTest(unittest.TestCase):
             "days out of range": {"intent": "h", "tool": "get_scan_history", "args": {"days": 0}, "reply": "x"},
             "empty clarify": {"clarify": ""},
             "unknown respond kind": {"intent": "chitchat", "reply": "hi"},
+            "runaway reply (looping)": {"intent": "greeting", "reply": "बर्फ के " * 60},
+            "reply in Urdu script (seen in L1)": {"intent": "greeting", "reply": "بالطبع! کال بااریش"},
+            "reply in Tamil script (seen in L2)": {"intent": "greeting", "reply": "இதைப் பச்சைப்"},
+            "escaped characters in a note (seen in L4)": {"intent": "n", "tool": "record_observation",
+                                                           "args": {"text": "क्य\\u0628"}, "reply": "ok"},
         }
         for why, obj in bad.items():
             self.assertFalse(valid(obj), why)
+
+    def test_normal_replies_in_all_three_languages_pass(self):
+        for reply in ("Opening the camera now.", "कैमरा खोल रही हूँ, पत्ती दिखाइए।", "Theek hai, kal subah 8 baje yaad dilaungi!",
+                      "आज शाम 5 बजे पानी देने की याद दिलाऊँगी।", "Price: ₹120 (approx.)"):
+            self.assertTrue(valid({"intent": "greeting", "reply": reply}), reply)
 
     def test_tool_and_clarify_cannot_mix(self):
         # L2 outputs like this ("ask_clarification" + a tool) must not validate.

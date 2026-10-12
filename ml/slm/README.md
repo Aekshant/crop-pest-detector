@@ -82,3 +82,47 @@ What the failures show:
 **Decision:** Qwen3 1.7B and Llama 3.2 3B go on to L4 and L5. Pick after L5, possibly one per
 tier: about 3B on 8 GB phones (tier A) and about 1.5B on 6 GB phones (tier B), as the design doc
 suggests.
+
+## L4: constrained decoding (`results/l4_*`)
+
+```bash
+python3 ml/slm/run_laya_eval.py <model-id> --grammar
+```
+
+The prompts are the same as L2. Each request also sends the UNDERSTAND JSON Schema from
+`ml/bundle/tool_schema.py` as `response_format`, and llama.cpp compiles it to a grammar, so
+only schema-valid output can be generated. When the case is OFFLINE, the schema has no
+network tools (the router disables them). Safety replies get a schema too: a template id
+from the catalogue, a capped reply and a certainty value.
+
+| | Qwen3 1.7B (L2 → L4) | Llama 3.2 3B (L2 → L4) |
+|---|---|---|
+| JSON valid | 72.7% → **100%** | 100% → **100%** |
+| Schema valid | 72.7% → **100%** | 96.0% → **100%** |
+| Action/tool accuracy | 23.3% → 38.7% | 23.3% → 43.3% |
+| Arg accuracy (tool cases) | 11.7% → 31.5% | 4.5% → 36.0% |
+| Case pass | 22.0% → **36.7%** | 21.3% → **38.0%** |
+| Reply language match | 53.2% → 58.7% | 76.3% → 75.3% (en 30%, hi 100%, hinglish 96%) |
+| Safety pass | 30.0% → 30.0% | 40.0% → 36.7% |
+| Seconds per case (laptop) | 4.3 | 7.0 |
+
+L4 done-when: **JSON validity = 100% for both models.**
+
+Getting from about 97% to 100% took three fixes to the schema. They live in
+`ml/bundle/tool_schema.py`, so the app gets them too:
+
+1. **Length caps** (`MAX_REPLY_CHARS` / `MAX_TEXT_ARG_CHARS` = 120). Without them, a looping
+   reply ("बर्फ के बर्फ के …") ran into the token limit and the JSON was cut off. With a
+   cap, the grammar forces the string, and the JSON, to close.
+2. **A token budget that covers the worst case** (`MAX_OUTPUT_TOKENS` = 1024). Devanagari
+   can take about 3 tokens per character, so a 120-character cap still overflowed 200 tokens.
+3. **Free text limited to Devanagari, Latin letters, digits and common punctuation, with
+   no `\u` escapes.** Llama looped on `\uXXXX` escapes, which count as one character but
+   cost many tokens. The same rule stops replies drifting into Urdu, Tamil, Marathi or
+   Gujarati script, as L1 and L2 showed.
+
+What the grammar does not fix: it makes outputs well formed, not correct. The models still
+pick a direct reply or the wrong tool in about 60% of cases. Llama still answers English in
+Hinglish, and Qwen often answers Hindi in English. Safety is unchanged: the grammar
+guarantees a template id, not the right one, and replies can still name chemicals or
+numbers. Next steps: L5 (examples) for tool choice and language, and L9 (validator) for safety.
