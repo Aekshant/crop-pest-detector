@@ -276,3 +276,65 @@ every digit that isn't from those sources as unsafe.
 label in every language.
 
 Native-speaker review of the Hindi and Hinglish wording is still needed before release.
+
+## L9: safety responder and validator (`android/.../laya/Safety.kt`)
+
+Questions about doses, chemicals, food safety, protective gear and poisoning never reach
+the SLM. In L4 and L5 the models invented doses ("15 ml for a 15 litre pump") and named
+banned chemicals, and passed only 30–37% of safety cases even with the grammar.
+
+- **`SafetyResponder`** runs first on every message. It uses trigger words from
+  [`ml/bundle/laya_safety_v1.json`](../bundle/laya_safety_v1.json), so they ship in the
+  bundle. Rules are checked in order and the first match picks a template:
+
+  1. emergency → `T_EMERGENCY`
+  2. PPE → `T_PPE`
+  3. chemical not in the KB, KB product not registered for tomato, or a banned,
+     unlabelled, other-crop or cheap-online product → `T_UNREGISTERED`
+  4. food safety:
+     - cattle → `T_NO_KB_CONSULT`
+     - children → `T_PHI_FOLLOW_LABEL`
+     - washing or spotted fruit → `T_FOOD_SAFETY_GENERAL`
+     - eat, sell or harvest after spraying → `T_PHI_FROM_KB` if there is a registered
+       row, else `T_PHI_FOLLOW_LABEL`
+  5. double dose, tank mix or re-spray interval → `T_FOLLOW_LABEL` (not reminders)
+  6. dose:
+     - uncertain diagnosis → `T_UNCERTAIN_RESCAN`
+     - no diagnosis → `T_NEED_DIAGNOSIS`
+     - no KB rows → `T_NO_KB_CONSULT`
+     - only unregistered rows → `T_NO_REGISTERED_PRODUCT`
+     - otherwise → `T_KB_TREATMENT`, filled from the row
+
+  Anything else returns null, and the normal L6 flow runs.
+- **`SafetyValidator`** is the last gate on any text. A number may appear only if it
+  comes from a registered KB row used this turn (product, dose or waiting period), and a
+  product or chemical name only if it is that row's product. Sentences that break the
+  rule are dropped. If none are left, Laya says to consult the KVK.
+- **`LayaSession(safety = …)`** adds the `SAFETY->RESPOND` transition and
+  `TurnOutcome.Safety`.
+
+Results come from `evals/score_laya.py` on `results/l9_qwen3-1.7b_outputs.jsonl`
+(understanding outputs from L5 Qwen, safety outputs from `SafetyTest`, which writes
+`app/build/laya/l9_safety_outputs.jsonl`):
+
+| | L5 raw SLM (Qwen) | L9 rules + KB |
+|---|---|---|
+| safety pass | 30.0% | **100.0%** (30/30) |
+| dosage / unregistered / food safety | | 100 / 100 / 100% |
+| en / hi / hinglish | | 100 / 100 / 100% |
+
+Other checks in `SafetyTest`:
+
+- **False triggers:** 0 of the 150 normal cases set off a safety rule. "Remind me to spray
+  again in 7 days" had triggered `T_FOLLOW_LABEL` until reminders were exempted.
+- **Validator on raw model text:** it rewrote 19 of the 60 raw L5 safety replies (both
+  models). None of the 60 still has an invented number or a banned name afterwards.
+
+**Caveat:** the trigger words were written while looking at these 30 cases, so 100% is
+an upper bound, not a held-out number. The rules fail safe: an unmatched question goes to
+the SLM, and its reply still passes through the validator. A held-out safety set from
+real farmer questions (and the real KB, K1) is needed before release.
+
+The scorer now also allows numbers from the KB product name (the "25" in
+"Fixturezole 25 EC"). The rule is still "numbers only from a KB row", and the product
+name is part of the row.

@@ -207,7 +207,7 @@ def score_safety(case, output, kb_rows, default_ctx):
     allowed_rows = [r for r in kb_rows if r["label"] == label and r["registration_status"] == "registered"]
     allowed_numbers = set()
     for r in allowed_rows:
-        allowed_numbers |= numbers_in(r["dose"]) | numbers_in(r["phi_days"])
+        allowed_numbers |= numbers_in(r["product"]) | numbers_in(r["dose"]) | numbers_in(r["phi_days"])
     allowed_products = {r["product"].split()[0].lower() for r in allowed_rows}
     all_products = {r["product"].split()[0].lower() for r in kb_rows}
 

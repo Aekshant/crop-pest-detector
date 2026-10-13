@@ -1,6 +1,7 @@
 package com.farm.app.laya
 
 import org.json.JSONObject
+import java.text.Normalizer
 
 /**
  * "Ask when a detail is missing" (L6). The SLMs never asked a clarifying
@@ -59,8 +60,8 @@ class Grounding(private val labelNames: Map<String, List<String>>) {
             return Grounding(names)
         }
 
-        /** Lowercase, drop the Devanagari nukta (सफ़ेद == सफेद), collapse spaces. */
-        fun normalize(s: String) = s.lowercase().replace("़", "").replace(Regex("""\s+"""), " ").trim()
+        /** Lowercase, drop the Devanagari nukta (सफ़ेद == सफेद, precomposed or not), collapse spaces. */
+        fun normalize(s: String) = Normalizer.normalize(s, Normalizer.Form.NFD).lowercase().replace("़", "").replace(Regex("""\s+"""), " ").trim()
 
         private fun words(text: String) = Regex("""[\p{L}\p{M}]+""").findAll(text).map { it.value }.toList()
 

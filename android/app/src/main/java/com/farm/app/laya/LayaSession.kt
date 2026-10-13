@@ -73,6 +73,9 @@ sealed interface TurnOutcome {
 
     /** A hard limit or a failure: answer from a template, never an error screen. */
     data class Fallback(override val lang: Lang, val reason: FallbackReason) : TurnOutcome
+
+    /** L9: a dose, chemical, food-safety, PPE or poisoning question, answered by rules and the KB only. */
+    data class Safety(override val lang: Lang, val reply: SafetyReply) : TurnOutcome
 }
 
 data class Limits(val maxToolCalls: Int = 3, val maxClarifications: Int = 2, val generationBudgetMs: Long = 8_000)
@@ -99,6 +102,8 @@ class LayaSession(
     private val limits: Limits = Limits(),
     /** L7: answer short exact commands without the SLM (null disables). */
     private val fastIntents: ((String, LayaContext) -> Understanding?)? = FastIntentMatcher::match,
+    /** L9: safety-sensitive messages never reach the SLM (e.g. SafetyResponder::respond with the last diagnosis). */
+    private val safety: ((String, LayaContext, Lang) -> SafetyReply?)? = null,
 ) {
     enum class State { IDLE, AWAITING_CLARIFICATION, AWAITING_CONFIRMATION }
 
@@ -120,6 +125,8 @@ class LayaSession(
         val newTurn = state != State.AWAITING_CLARIFICATION  // a reply to a confirmation prompt starts over
         if (newTurn) startTurn(text) else messages += Message(true, text)
         state = State.IDLE
+        // Safety first, on every message (a clarification reply can still ask for a dose).
+        safety?.invoke(text, context, lang)?.let { go("SAFETY", "RESPOND"); return done(TurnOutcome.Safety(lang, it)) }
         if (newTurn) fastIntents?.invoke(text, context)?.let { return handle("FAST", it, context) }
         return understand(context)
     }
