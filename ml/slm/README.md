@@ -126,3 +126,51 @@ pick a direct reply or the wrong tool in about 60% of cases. Llama still answers
 Hinglish, and Qwen often answers Hindi in English. Safety is unchanged: the grammar
 guarantees a template id, not the right one, and replies can still name chemicals or
 numbers. Next steps: L5 (examples) for tool choice and language, and L9 (validator) for safety.
+
+## L5: few-shot examples (`results/l5_*`)
+
+```bash
+python3 ml/slm/run_laya_eval.py <model-id> --fewshot     # grammar + examples
+```
+
+The prompt gains 8 examples from [`ml/bundle/laya_fewshot_v1.json`](../bundle/laya_fewshot_v1.json):
+6 in Hinglish, as the plan asks, plus 1 Hindi and 1 English. They cover scan, treatment
+by local name, a reminder with a relative date, history, a clarifying question, an
+offline reply, a scan comparison and a note. They use their **own example context**
+(different date, place, field and scan ids), and `test_laya_fewshot.py` checks that they
+are schema-valid and not near-copies of any eval input (max character-trigram similarity
+0.39). One example was rephrased after the check caught it.
+
+| | Qwen3 1.7B (L4 → L5) | Llama 3.2 3B (L4 → L5) |
+|---|---|---|
+| Action/tool accuracy | 38.7% → **74.7%** | 43.3% → **76.0%** |
+| Arg accuracy (tool cases) | 31.5% → **72.1%** | 36.0% → **73.9%** |
+| Case pass | 36.7% → **62.7%** | 38.0% → **66.7%** |
+| JSON valid | 100% → 100% | 100% → 100% |
+| Reply language: en / hi / hinglish | 98/50/28 → 30/54/82% | 30/100/96 → **14/68/94%** |
+| Safety pass | 30.0% → 30.0% | 36.7% → 36.7% |
+| Seconds per case (laptop) | 4.7 | 6.7 |
+
+L5 done-when: **tool accuracy improves vs L4.** It nearly doubled for both models. Every
+tool family improved. For example, scan_image went from 27% to 100% (Qwen) and
+compare_scans from 17% to 83% (Llama).
+
+What the examples made worse, or didn't fix:
+
+- **Reply language.** With 6 of 8 examples in Hinglish, both models now reply in Hinglish
+  much more often: English replies match only 14–30% of the time, and Llama's Hindi
+  dropped from 100% to 68%. **Recommendation: don't let the SLM choose the reply
+  language.** Detect it deterministically from the farmer's input script (Devanagari →
+  Hindi, Roman with Hindi words → Hinglish, otherwise English, as `score_laya.py` does).
+  Say every user-facing sentence from templates (L8) in that language, and keep the
+  model's `reply` field internal.
+- **Clarify is still 0%** for both. The models never ask a question. They guess a time,
+  field or label instead (for example, a reminder with no time). This needs a rule
+  outside the model: when a tool's required argument wasn't in the farmer's words or the
+  context, ask instead (L6 state machine).
+- **Safety is unchanged.** As expected: that is L9's job.
+
+**Model choice so far:** the two are within 4 points (66.7% vs 62.7% case pass). Qwen3
+1.7B is 1.4× faster and needs 2.5 GB instead of 4.0 GB, which fits tier B. **Default edge
+model: Qwen3 1.7B.** Llama 3.2 3B stays an option for tier A if later stages widen the
+gap. This needs re-checking with phone tokens/sec (S4).

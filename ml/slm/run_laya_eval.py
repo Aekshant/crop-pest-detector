@@ -3,6 +3,7 @@
 
   python ml/slm/run_laya_eval.py gemma3-1b [--limit 20]            # L2 baseline
   python ml/slm/run_laya_eval.py qwen3-1.7b --grammar               # L4
+  python ml/slm/run_laya_eval.py qwen3-1.7b --fewshot               # L5 (grammar + examples)
 
 Writes ml/slm/results/<stage>_<model>_outputs.jsonl (the format
 evals/score_laya.py reads), scores it, and records speed/RAM in
@@ -48,7 +49,21 @@ def tools_text(schema):
     return "\n".join(lines)
 
 
-def understand_system(schema):
+def fewshot_text(fewshot):
+    lines = ["", "Examples. They use their own example context below; for the real request, always use the real app context.",
+             f"Example context: {json.dumps(fewshot['context'], ensure_ascii=False)}"]
+    for e in fewshot["examples"]:
+        note = f" (network {e['context_override']['network']})" if e.get("context_override") else ""
+        lines.append(f"Farmer{note}: {e['farmer']}")
+        lines.append(f"Output: {json.dumps(e['output'], ensure_ascii=False)}")
+    return "\n".join(lines)
+
+
+def understand_system(schema, fewshot=None):
+    return _understand_system(schema) + (fewshot_text(fewshot) if fewshot else "")
+
+
+def _understand_system(schema):
     return f"""You are the understanding step of Laya, the farming assistant in the FarmLens app for tomato farmers in India.
 Read the farmer's message and the app context, then choose exactly ONE action. Output ONLY one JSON object and nothing else.
 
@@ -165,6 +180,7 @@ def main():
     ap.add_argument("model")
     ap.add_argument("--limit", type=int, default=0, help="first N cases of each file (smoke test)")
     ap.add_argument("--grammar", action="store_true", help="L4: constrained decoding with the tool schema")
+    ap.add_argument("--fewshot", action="store_true", help="L5: add ml/bundle/laya_fewshot_v1.json examples (implies --grammar)")
     args = ap.parse_args()
     model = next(m for m in json.loads((SLM / "candidates.json").read_text())["models"] if m["id"] == args.model)
 
@@ -176,7 +192,10 @@ def main():
     if args.limit:
         cases, safety = cases[:args.limit], safety[:args.limit]
 
-    stage = "l4" if args.grammar else "l2"
+    if args.fewshot:
+        args.grammar = True
+    stage = "l5" if args.fewshot else ("l4" if args.grammar else "l2")
+    fewshot = json.loads((REPO / "ml" / "bundle" / "laya_fewshot_v1.json").read_text()) if args.fewshot else None
     out = SLM / "results" / f"{stage}_{model['id']}_outputs.jsonl"
     online_schema = offline_schema = safety_schema = None
     if args.grammar:
@@ -189,7 +208,7 @@ def main():
             "certainty": {"enum": ["confident", "uncertain", "none"]}},
             "required": ["template", "reply", "certainty"], "additionalProperties": False}
     out.parent.mkdir(exist_ok=True)
-    sys_u, sys_s = understand_system(schema), safety_system(templates)
+    sys_u, sys_s = understand_system(schema, fewshot), safety_system(templates)
     server = Server(model)
     peak_rss, gen_speeds, prompt_new, wall = 0.0, [], [], []
     try:

@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "note": "Few-shot examples for Laya's UNDERSTAND prompt (L5). Written fresh, with their own example context (different date, place, fields and scan ids from the eval), so the model learns how to use context rather than memorising answers; test_laya_fewshot.py checks they are schema-valid and not near-copies of eval cases. 6 Hinglish (as the plan asks) + 1 Hindi + 1 English, because L4 showed English questions answered in Hinglish.",
+  "context": {
+    "now": "2026-11-03T18:30:00+05:30",
+    "location": "Pune, Maharashtra",
+    "network": "ONLINE",
+    "current_field": "g1",
+    "fields": [{"id": "g1", "name": "Kuan wala khet"}, {"id": "g2", "name": "Sadak wala khet"}],
+    "recent_scans": [
+      {"id": "t201", "field_id": "g1", "label": "late_blight", "taken_at": "2026-11-01T09:15:00+05:30"},
+      {"id": "t202", "field_id": "g1", "label": "late_blight", "taken_at": "2026-10-25T08:40:00+05:30"}
+    ],
+    "last_diagnosis": null
+  },
+  "examples": [
+    {"lang": "hinglish", "farmer": "kuan wale khet ki patti par kaale dhabbe hain, ek baar dekh lo",
+     "output": {"intent": "check_leaf", "tool": "scan_image", "args": {"field_id": "g1"}, "reply": "Camera khol rahi hoon, patti paas se dikhaiye."}},
+    {"lang": "hinglish", "farmer": "pachheti jhulsa se paudhe kaise bachaun",
+     "output": {"intent": "treatment", "tool": "get_treatment_info", "args": {"label": "late_blight"}, "reply": "Pachheti jhulsa ka upay dekh rahi hoon."}},
+    {"lang": "hinglish", "farmer": "parso subah yaad dilana ki khet mein paani chhodna hai",
+     "output": {"intent": "reminder", "tool": "create_reminder", "args": {"when": "2026-11-05T08:00:00+05:30", "text": "khet mein paani chhodna"}, "reply": "Theek hai, parso subah 8 baje yaad dilaungi."}},
+    {"lang": "hinglish", "farmer": "pichle do hafte mein kuan wale khet ki jaanch mein kya aaya",
+     "output": {"intent": "history", "tool": "get_scan_history", "args": {"field_id": "g1", "days": 14}, "reply": "Pichle 14 din ki jaanch dikha rahi hoon."}},
+    {"lang": "hinglish", "farmer": "fungicide wali yaad bhi set kar dena",
+     "output": {"clarify": "Kab yaad dilaun? Din aur samay bataiye."}},
+    {"lang": "hinglish", "farmer": "kal dhoop niklegi kya", "context_override": {"network": "OFFLINE"},
+     "output": {"intent": "offline", "reply": "Abhi internet nahi hai, mausam ki jaankari baad mein dungi."}},
+    {"lang": "hi", "farmer": "कुएँ वाले खेत में झुलसा पहले से ज़्यादा फैला है क्या?",
+     "output": {"intent": "compare", "tool": "compare_scans", "args": {"scan_a": "t202", "scan_b": "t201"}, "reply": "दोनों जाँच की तुलना कर रही हूँ।"}},
+    {"lang": "en", "farmer": "Note that the lower leaves near the gate are curling",
+     "output": {"intent": "note", "tool": "record_observation", "args": {"text": "lower leaves near the gate are curling"}, "reply": "Noted. I will save this after you confirm."}}
+  ]
+}
