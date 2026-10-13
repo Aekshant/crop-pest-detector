@@ -174,3 +174,54 @@ What the examples made worse, or didn't fix:
 1.7B is 1.4× faster and needs 2.5 GB instead of 4.0 GB, which fits tier B. **Default edge
 model: Qwen3 1.7B.** Llama 3.2 3B stays an option for tier A if later stages widen the
 gap. This needs re-checking with phone tokens/sec (S4).
+
+## L6: Laya's bounded state machine (`android/.../laya/`)
+
+The state machine runs in the app, because the design keeps conversation state on the
+phone so a turn can fail over to the cloud. `LayaSession` takes the SLM, the tools and a
+clock as injected interfaces:
+
+```
+UNDERSTAND -> CALL_TOOL | CLARIFY | RESPOND
+CALL_TOOL  -> VALIDATE           (args validated against tools_schema_v1 first; side-effect tools wait for a confirm tap)
+VALIDATE   -> RESPOND | CLARIFY (photo) | CALL_TOOL (follow-up)
+RESPOND    -> DONE
+CLARIFY    -> UNDERSTAND         (on the farmer's reply)
+```
+
+**Hard limits per turn** (any limit, model error, invalid tool call or tool failure ends in
+`TurnOutcome.Fallback` and a template reply, never an error):
+
+- 3 tool calls
+- 2 clarifications
+- 8 s of total generation (`withTimeout` on the remaining budget, accumulated across
+  clarifications)
+
+**Rules outside the model**, added because of what L5 showed:
+
+- **Ask when a detail is missing** (`Grounding.kt`). Before a tool runs, the details that
+  must come from the farmer are checked against what they actually said:
+  - a reminder's time and text
+  - a note's content
+  - the disease, when there is no last diagnosis
+  - the field, for a comparison
+  - the location, for weather
+
+  If one is missing, Laya asks about that slot instead of acting on the model's guess. The
+  models never asked in L5 (0%).
+- **Reply language is detected from the farmer's words** (`Language.kt`), not chosen by the
+  model.
+- **Offline**, network tools are removed from what the model may call, and a network call
+  becomes the offline reply.
+
+**Tests** (L6 done-when: every transition covered). 19 JVM tests:
+
+- `LayaSessionTest`: every transition in the table, every limit, model errors, invalid
+  calls, offline, photo request, tool failure, follow-up chaining, confirm and decline, and
+  counter reset between turns.
+- `LayaRulesEvalTest` runs the rules against the real eval:
+  - Grounding raises **no false clarification** for any of the expected tool calls in the
+    150 cases.
+  - It asks about the **right slot for all 18 clarify cases**.
+  - Language detection matches the case labels for 149 of 150 (only "hello laya" is
+    ambiguous).
