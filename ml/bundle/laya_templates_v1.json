@@ -1,0 +1,458 @@
+{
+ "version": 1,
+ "note": "Everything Laya says to the farmer (L8). Laya never speaks raw SLM text: the reply language comes from the farmer's words (L6) and the sentence from here. Placeholders in {braces} are filled by the app; numbers only ever enter through placeholders ({prob} from the vision model, {dose}/{phi_days}/{product} from KB rows). test_laya_templates.py checks coverage, scripts and that no template contains digits.",
+ "languages": [
+  "en",
+  "hi",
+  "hinglish"
+ ],
+ "placeholders": [
+  "name",
+  "about",
+  "prob",
+  "second",
+  "level",
+  "percent",
+  "product",
+  "dose",
+  "phi_days",
+  "count"
+ ],
+ "labels": {
+  "unknown": {
+   "en": {
+    "name": "Not recognised",
+    "about": "This does not look like a tomato leaf I know."
+   },
+   "hi": {
+    "name": "पहचान नहीं हुई",
+    "about": "यह किसी जानी-पहचानी टमाटर की पत्ती जैसा नहीं दिखता।"
+   },
+   "hinglish": {
+    "name": "Pehchaan nahi hui",
+    "about": "Ye kisi jaani-pehchaani tamatar ki patti jaisa nahi dikhta."
+   }
+  },
+  "healthy": {
+   "en": {
+    "name": "Healthy",
+    "about": "No disease or pest found on this leaf."
+   },
+   "hi": {
+    "name": "स्वस्थ",
+    "about": "इस पत्ती पर कोई रोग या कीट नहीं दिखा।"
+   },
+   "hinglish": {
+    "name": "Swasth",
+    "about": "Is patti par koi rog ya keet nahi dikha."
+   }
+  },
+  "early_blight": {
+   "en": {
+    "name": "Early blight",
+    "about": "A fungal disease: brown spots with rings, usually starting on older, lower leaves."
+   },
+   "hi": {
+    "name": "अगेती झुलसा",
+    "about": "फफूंद से होने वाला रोग: छल्लेदार भूरे धब्बे, जो अक्सर नीचे की पुरानी पत्तियों से शुरू होते हैं।"
+   },
+   "hinglish": {
+    "name": "Agati jhulsa",
+    "about": "Fafoond se hone wala rog: chhalledar bhure dhabbe, jo aksar neeche ki purani pattiyon se shuru hote hain."
+   }
+  },
+  "late_blight": {
+   "en": {
+    "name": "Late blight",
+    "about": "A fast-spreading disease in cool, wet weather: large dark, water-soaked patches on leaves and stems."
+   },
+   "hi": {
+    "name": "पछेती झुलसा",
+    "about": "ठंडे, नम मौसम में तेज़ी से फैलने वाला रोग: पत्तियों और तनों पर बड़े, गहरे, पानी भरे से धब्बे।"
+   },
+   "hinglish": {
+    "name": "Pachheti jhulsa",
+    "about": "Thande, nam mausam mein tezi se failne wala rog: pattiyon aur tanon par bade, gehre, paani bhare se dhabbe."
+   }
+  },
+  "septoria_leaf_spot": {
+   "en": {
+    "name": "Septoria leaf spot",
+    "about": "A fungal disease: many small round spots with grey centres and dark edges on lower leaves."
+   },
+   "hi": {
+    "name": "सेप्टोरिया पत्ती धब्बा",
+    "about": "फफूंद रोग: नीचे की पत्तियों पर बहुत से छोटे गोल धब्बे, बीच में सलेटी और किनारे गहरे।"
+   },
+   "hinglish": {
+    "name": "Septoria patti dhabba",
+    "about": "Fafoond rog: neeche ki pattiyon par bahut se chhote gol dhabbe, beech mein saleti aur kinare gehre."
+   }
+  },
+  "bacterial_spot": {
+   "en": {
+    "name": "Bacterial spot",
+    "about": "A bacterial disease: small dark, greasy-looking spots on leaves and fruit."
+   },
+   "hi": {
+    "name": "जीवाणु धब्बा रोग",
+    "about": "जीवाणु से होने वाला रोग: पत्तियों और फलों पर छोटे, गहरे, चिकने से दिखने वाले धब्बे।"
+   },
+   "hinglish": {
+    "name": "Jeevanu dhabba rog",
+    "about": "Jeevanu se hone wala rog: pattiyon aur phalon par chhote, gehre, chikne se dikhne wale dhabbe."
+   }
+  },
+  "yellow_leaf_curl_virus": {
+   "en": {
+    "name": "Leaf curl virus",
+    "about": "A virus spread by whitefly: leaves curl upwards, turn yellow at the edges, and the plant stays small."
+   },
+   "hi": {
+    "name": "पत्ती मरोड़ रोग",
+    "about": "सफ़ेद मक्खी से फैलने वाला वायरस: पत्तियाँ ऊपर की ओर मुड़ती हैं, किनारे पीले पड़ते हैं और पौधा छोटा रह जाता है।"
+   },
+   "hinglish": {
+    "name": "Patti marod rog",
+    "about": "Safed makkhi se failne wala virus: pattiyan upar ki or mudti hain, kinare peele padte hain aur paudha chhota reh jaata hai."
+   }
+  },
+  "mosaic_virus": {
+   "en": {
+    "name": "Mosaic virus",
+    "about": "A virus: light and dark green mottled patches on leaves, which may look twisted."
+   },
+   "hi": {
+    "name": "मोज़ेक रोग",
+    "about": "वायरस रोग: पत्तियों पर हल्के और गहरे हरे चितकबरे धब्बे, पत्तियाँ टेढ़ी-मेढ़ी हो सकती हैं।"
+   },
+   "hinglish": {
+    "name": "Mosaic rog",
+    "about": "Virus rog: pattiyon par halke aur gehre hare chitkabre dhabbe, pattiyan tedhi-medhi ho sakti hain."
+   }
+  },
+  "tuta_absoluta": {
+   "en": {
+    "name": "Tomato leaf miner (Tuta)",
+    "about": "A small moth whose caterpillars tunnel inside leaves and bore into fruit."
+   },
+   "hi": {
+    "name": "टूटा कीट",
+    "about": "एक छोटा पतंगा, जिसकी इल्लियाँ पत्तियों के अंदर सुरंग बनाती हैं और फलों में छेद करती हैं।"
+   },
+   "hinglish": {
+    "name": "Tuta keet",
+    "about": "Ek chhota patanga, jiski illiyan pattiyon ke andar surang banati hain aur phalon mein chhed karti hain."
+   }
+  },
+  "whitefly": {
+   "en": {
+    "name": "Whitefly",
+    "about": "Tiny white insects under the leaves that suck sap and spread leaf curl virus."
+   },
+   "hi": {
+    "name": "सफ़ेद मक्खी",
+    "about": "पत्तियों के नीचे छोटे सफ़ेद कीट, जो रस चूसते हैं और पत्ती मरोड़ वायरस फैलाते हैं।"
+   },
+   "hinglish": {
+    "name": "Safed makkhi",
+    "about": "Pattiyon ke neeche chhote safed keet, jo ras chooste hain aur patti marod virus failate hain."
+   }
+  },
+  "fruit_borer": {
+   "en": {
+    "name": "Fruit borer",
+    "about": "Caterpillars that bore holes into green and ripe fruit."
+   },
+   "hi": {
+    "name": "फल छेदक",
+    "about": "इल्लियाँ जो कच्चे और पके फलों में छेद करती हैं।"
+   },
+   "hinglish": {
+    "name": "Fal chhedak",
+    "about": "Illiyan jo kachche aur pake phalon mein chhed karti hain."
+   }
+  },
+  "spider_mites": {
+   "en": {
+    "name": "Spider mites",
+    "about": "Tiny mites under the leaves: yellow speckles, fine webbing, and leaves that dry out."
+   },
+   "hi": {
+    "name": "लाल मकड़ी",
+    "about": "पत्तियों के नीचे बहुत छोटी माइट: पीले बारीक धब्बे, महीन जाला, और पत्तियाँ सूखने लगती हैं।"
+   },
+   "hinglish": {
+    "name": "Lal makdi",
+    "about": "Pattiyon ke neeche bahut chhoti mite: peele bareek dhabbe, maheen jaala, aur pattiyan sookhne lagti hain."
+   }
+  }
+ },
+ "diagnosis": {
+  "confident": {
+   "en": "This looks like {name} (confident, {prob}%). {about}",
+   "hi": "यह {name} लगता है (भरोसा: पक्का, {prob}%)। {about}",
+   "hinglish": "Ye {name} lagta hai (bharosa: pakka, {prob}%). {about}"
+  },
+  "healthy": {
+   "en": "This leaf looks healthy (confident, {prob}%). Keep checking your plants every few days.",
+   "hi": "यह पत्ती स्वस्थ दिखती है (भरोसा: पक्का, {prob}%)। हर कुछ दिन में पौधों की जाँच करते रहिए।",
+   "hinglish": "Ye patti swasth dikhti hai (bharosa: pakka, {prob}%). Har kuch din mein paudhon ki jaanch karte rahiye."
+  },
+  "uncertain": {
+   "en": "This may be {name} or {second}, but I am not sure ({prob}%). Please take another photo of a different affected leaf.",
+   "hi": "यह {name} या {second} हो सकता है, पर पक्का नहीं ({prob}%)। कृपया किसी दूसरी प्रभावित पत्ती की फोटो लीजिए।",
+   "hinglish": "Ye {name} ya {second} ho sakta hai, par pakka nahi ({prob}%). Kripya kisi doosri prabhavit patti ki photo lijiye."
+  },
+  "not_recognised": {
+   "en": "Not recognised. Please photograph one tomato leaf up close.",
+   "hi": "पहचान नहीं हुई। टमाटर की एक पत्ती की पास से फोटो लीजिए।",
+   "hinglish": "Pehchaan nahi hui. Tamatar ki ek patti ki paas se photo lijiye."
+  },
+  "retake_blurry": {
+   "en": "The photo is blurry. Hold the phone steady and take it again.",
+   "hi": "फोटो धुंधली है। फोन स्थिर रखकर फिर से लीजिए।",
+   "hinglish": "Photo dhundhli hai. Phone sthir rakhkar phir se lijiye."
+  },
+  "retake_dark": {
+   "en": "It is too dark. Move into daylight and take the photo again.",
+   "hi": "बहुत अंधेरा है। रोशनी में जाकर फिर से फोटो लीजिए।",
+   "hinglish": "Bahut andhera hai. Roshni mein jaakar phir se photo lijiye."
+  },
+  "retake_bright": {
+   "en": "It is too bright. Avoid direct sun on the leaf and take the photo again.",
+   "hi": "बहुत तेज़ रोशनी है। पत्ती पर सीधी धूप से बचाकर फिर से फोटो लीजिए।",
+   "hinglish": "Bahut tez roshni hai. Patti par seedhi dhoop se bachakar phir se photo lijiye."
+  },
+  "severity": {
+   "en": "Severity (estimated): {level}, about {percent}% of the leaf.",
+   "hi": "गंभीरता (अनुमान): {level}, पत्ती का लगभग {percent}%।",
+   "hinglish": "Gambhirta (anumaan): {level}, patti ka lagbhag {percent}%."
+  },
+  "next_step_disease": {
+   "en": "Tap 'Treatment' to see what to do, from verified sources.",
+   "hi": "क्या करें, यह जानने के लिए 'उपचार' दबाइए। जानकारी प्रमाणित स्रोतों से है।",
+   "hinglish": "Kya karein, ye jaanne ke liye 'Upchaar' dabaiye. Jaankari pramanit sroton se hai."
+  }
+ },
+ "severity_levels": {
+  "low": {
+   "en": "low",
+   "hi": "कम",
+   "hinglish": "kam"
+  },
+  "medium": {
+   "en": "medium",
+   "hi": "मध्यम",
+   "hinglish": "madhyam"
+  },
+  "high": {
+   "en": "high",
+   "hi": "ज़्यादा",
+   "hinglish": "zyada"
+  }
+ },
+ "clarify": {
+  "when": {
+   "en": "When should I remind you? Please tell me the day and time.",
+   "hi": "कब याद दिलाऊँ? दिन और समय बताइए।",
+   "hinglish": "Kab yaad dilaun? Din aur samay bataiye."
+  },
+  "text": {
+   "en": "What should I write down?",
+   "hi": "क्या लिखूँ?",
+   "hinglish": "Kya likhun?"
+  },
+  "label": {
+   "en": "Which problem is it? Tell me the disease or pest, or take a photo of the leaf.",
+   "hi": "कौन सी समस्या है? रोग या कीट का नाम बताइए, या पत्ती की फोटो लीजिए।",
+   "hinglish": "Kaunsi samasya hai? Rog ya keet ka naam bataiye, ya patti ki photo lijiye."
+  },
+  "field": {
+   "en": "Which field should I check?",
+   "hi": "किस खेत की जाँच देखूँ?",
+   "hinglish": "Kis khet ki jaanch dekhun?"
+  },
+  "location": {
+   "en": "Which village or town is your farm near?",
+   "hi": "आपका खेत किस गाँव या शहर के पास है?",
+   "hinglish": "Aapka khet kis gaon ya shahar ke paas hai?"
+  },
+  "photo": {
+   "en": "I need a fresh photo. Please photograph an affected leaf up close.",
+   "hi": "मुझे नई फोटो चाहिए। किसी प्रभावित पत्ती की पास से फोटो लीजिए।",
+   "hinglish": "Mujhe nayi photo chahiye. Kisi prabhavit patti ki paas se photo lijiye."
+  }
+ },
+ "respond": {
+  "greeting": {
+   "en": "Namaste! Ask me about your tomato crop, or take a photo of a leaf.",
+   "hi": "नमस्ते! अपनी टमाटर की फसल के बारे में पूछिए, या पत्ती की फोटो लीजिए।",
+   "hinglish": "Namaste! Apni tamatar ki fasal ke baare mein poochiye, ya patti ki photo lijiye."
+  },
+  "thanks": {
+   "en": "Happy to help. Take care of your crop!",
+   "hi": "मदद करके खुशी हुई। अपनी फसल का ध्यान रखिए!",
+   "hinglish": "Madad karke khushi hui. Apni fasal ka dhyan rakhiye!"
+  },
+  "out_of_scope": {
+   "en": "I can only help with tomato crops: diseases, pests, scans and reminders.",
+   "hi": "मैं सिर्फ़ टमाटर की फसल में मदद कर सकती हूँ: रोग, कीट, जाँच और रिमाइंडर।",
+   "hinglish": "Main sirf tamatar ki fasal mein madad kar sakti hoon: rog, keet, jaanch aur reminder."
+  },
+  "offline": {
+   "en": "There is no internet right now. I will answer this when you are back online.",
+   "hi": "अभी इंटरनेट नहीं है। इंटरनेट आने पर इसका जवाब दूँगी।",
+   "hinglish": "Abhi internet nahi hai. Internet aane par iska jawab dungi."
+  },
+  "unsupported": {
+   "en": "I can't identify that problem yet. Please show the leaf at your local Krishi Vigyan Kendra.",
+   "hi": "यह समस्या मैं अभी नहीं पहचान सकती। कृपया पत्ती अपने कृषि विज्ञान केंद्र पर दिखाइए।",
+   "hinglish": "Ye samasya main abhi nahi pehchaan sakti. Kripya patti apne Krishi Vigyan Kendra par dikhaiye."
+  },
+  "explain": {
+   "en": "{name}: {about}",
+   "hi": "{name}: {about}",
+   "hinglish": "{name}: {about}"
+  },
+  "cancelled": {
+   "en": "Okay, I did not save it.",
+   "hi": "ठीक है, मैंने इसे नहीं सहेजा।",
+   "hinglish": "Theek hai, maine ise save nahi kiya."
+  }
+ },
+ "tools": {
+  "scan_image": {
+   "en": "Opening the camera. Show me one leaf up close.",
+   "hi": "कैमरा खोल रही हूँ। एक पत्ती पास से दिखाइए।",
+   "hinglish": "Camera khol rahi hoon. Ek patti paas se dikhaiye."
+  },
+  "record_observation_confirm": {
+   "en": "Save this note?",
+   "hi": "यह नोट सहेजूँ?",
+   "hinglish": "Ye note save karun?"
+  },
+  "record_observation_done": {
+   "en": "Note saved.",
+   "hi": "नोट सहेज लिया।",
+   "hinglish": "Note save ho gaya."
+  },
+  "create_reminder_confirm": {
+   "en": "Set this reminder?",
+   "hi": "यह रिमाइंडर लगाऊँ?",
+   "hinglish": "Ye reminder lagaun?"
+  },
+  "create_reminder_done": {
+   "en": "Reminder set.",
+   "hi": "रिमाइंडर लग गया।",
+   "hinglish": "Reminder lag gaya."
+  },
+  "history_empty": {
+   "en": "No scans yet. Take a photo of a leaf to start.",
+   "hi": "अभी कोई जाँच नहीं है। शुरू करने के लिए पत्ती की फोटो लीजिए।",
+   "hinglish": "Abhi koi jaanch nahi hai. Shuru karne ke liye patti ki photo lijiye."
+  },
+  "history_heading": {
+   "en": "Your scans:",
+   "hi": "आपकी जाँच:",
+   "hinglish": "Aapki jaanch:"
+  },
+  "compare_worse": {
+   "en": "The problem has spread since the earlier scan.",
+   "hi": "पिछली जाँच से समस्या बढ़ी है।",
+   "hinglish": "Pichhli jaanch se samasya badhi hai."
+  },
+  "compare_better": {
+   "en": "The problem has reduced since the earlier scan.",
+   "hi": "पिछली जाँच से समस्या कम हुई है।",
+   "hinglish": "Pichhli jaanch se samasya kam hui hai."
+  },
+  "compare_same": {
+   "en": "No clear change since the earlier scan.",
+   "hi": "पिछली जाँच से कोई साफ़ बदलाव नहीं है।",
+   "hinglish": "Pichhli jaanch se koi saaf badlav nahi hai."
+  }
+ },
+ "fallback": {
+  "generic": {
+   "en": "Sorry, I could not finish that. Please try again, or use the buttons below.",
+   "hi": "माफ़ कीजिए, यह पूरा नहीं हो पाया। फिर से कोशिश कीजिए, या नीचे के बटन इस्तेमाल कीजिए।",
+   "hinglish": "Maaf kijiye, ye poora nahi ho paya. Phir se koshish kijiye, ya neeche ke button istemal kijiye."
+  },
+  "slow": {
+   "en": "This is taking too long. Please try a shorter question, or use the buttons below.",
+   "hi": "इसमें बहुत समय लग रहा है। छोटा सवाल पूछिए, या नीचे के बटन इस्तेमाल कीजिए।",
+   "hinglish": "Ismein bahut samay lag raha hai. Chhota sawal poochiye, ya neeche ke button istemal kijiye."
+  }
+ },
+ "fallback_reasons": {
+  "TOOL_LIMIT": "generic",
+  "CLARIFY_LIMIT": "generic",
+  "TIME_BUDGET": "slow",
+  "MODEL_ERROR": "generic",
+  "INVALID_TOOL_CALL": "generic",
+  "TOOL_FAILED": "generic"
+ },
+ "safety": {
+  "T_KB_TREATMENT": {
+   "en": "For {name}, the verified option is {product}: {dose}. Do not harvest for {phi_days} days after spraying. Follow the product label exactly.",
+   "hi": "{name} के लिए प्रमाणित विकल्प {product} है: {dose}। छिड़काव के बाद {phi_days} दिन तक तुड़ाई न करें। उत्पाद के लेबल पर लिखे निर्देश ठीक से मानिए।",
+   "hinglish": "{name} ke liye pramanit vikalp {product} hai: {dose}. Chhidkaav ke baad {phi_days} din tak tudai na karein. Product ke label par likhe nirdesh theek se maniye."
+  },
+  "T_FOLLOW_LABEL": {
+   "en": "Use only the dose and spray interval printed on the product label. Never increase the dose or mix products.",
+   "hi": "सिर्फ़ उत्पाद के लेबल पर लिखी मात्रा और छिड़काव का अंतर ही अपनाइए। मात्रा कभी न बढ़ाइए और दवाएँ न मिलाइए।",
+   "hinglish": "Sirf product ke label par likhi matra aur chhidkaav ka antar hi apnaiye. Matra kabhi na badhaiye aur dawaiyan na milaiye."
+  },
+  "T_NO_KB_CONSULT": {
+   "en": "I don't have verified advice for this. Please ask your local Krishi Vigyan Kendra or agriculture officer.",
+   "hi": "इसके लिए मेरे पास प्रमाणित जानकारी नहीं है। कृपया अपने कृषि विज्ञान केंद्र या कृषि अधिकारी से पूछिए।",
+   "hinglish": "Iske liye mere paas pramanit jaankari nahi hai. Kripya apne Krishi Vigyan Kendra ya krishi adhikari se poochiye."
+  },
+  "T_NEED_DIAGNOSIS": {
+   "en": "Treatment depends on the problem. Please take a photo of the leaf first.",
+   "hi": "उपचार समस्या पर निर्भर करता है। पहले पत्ती की फोटो लीजिए।",
+   "hinglish": "Upchaar samasya par nirbhar karta hai. Pehle patti ki photo lijiye."
+  },
+  "T_NO_REGISTERED_PRODUCT": {
+   "en": "No product registered for tomato and this problem is in my verified list. Please ask your local Krishi Vigyan Kendra.",
+   "hi": "टमाटर और इस समस्या के लिए पंजीकृत कोई दवा मेरी प्रमाणित सूची में नहीं है। कृपया अपने कृषि विज्ञान केंद्र से पूछिए।",
+   "hinglish": "Tamatar aur is samasya ke liye panjikrit koi dawa meri pramanit soochi mein nahi hai. Kripya apne Krishi Vigyan Kendra se poochiye."
+  },
+  "T_UNREGISTERED": {
+   "en": "Use only products registered for tomato, with tomato written on the label. Banned, unlabelled or unregistered chemicals can harm your crop, your health and your sale.",
+   "hi": "सिर्फ़ टमाटर के लिए पंजीकृत दवा इस्तेमाल कीजिए, जिसके लेबल पर टमाटर लिखा हो। प्रतिबंधित, बिना लेबल या अपंजीकृत रसायन फसल, सेहत और बिक्री को नुकसान पहुँचा सकते हैं।",
+   "hinglish": "Sirf tamatar ke liye panjikrit dawa istemal kijiye, jiske label par tamatar likha ho. Pratibandhit, bina label ya apanjikrit rasayan fasal, sehat aur bikri ko nuksaan pahuncha sakte hain."
+  },
+  "T_UNCERTAIN_RESCAN": {
+   "en": "I am not sure about this diagnosis yet. Please take another close photo before any treatment.",
+   "hi": "मुझे इस पहचान पर अभी पक्का भरोसा नहीं है। कोई भी उपचार करने से पहले पास से एक और फोटो लीजिए।",
+   "hinglish": "Mujhe is pehchaan par abhi pakka bharosa nahi hai. Koi bhi upchaar karne se pehle paas se ek aur photo lijiye."
+  },
+  "T_PHI_FROM_KB": {
+   "en": "After spraying {product}, wait {phi_days} days before you harvest or sell.",
+   "hi": "{product} के छिड़काव के बाद तुड़ाई या बिक्री से पहले {phi_days} दिन रुकिए।",
+   "hinglish": "{product} ke chhidkaav ke baad tudai ya bikri se pehle {phi_days} din rukiye."
+  },
+  "T_PHI_FOLLOW_LABEL": {
+   "en": "Wait for the waiting period printed on the product label before you eat or sell the fruit.",
+   "hi": "फल खाने या बेचने से पहले उत्पाद के लेबल पर लिखी प्रतीक्षा अवधि पूरी होने दीजिए।",
+   "hinglish": "Phal khane ya bechne se pehle product ke label par likhi prateeksha avadhi poori hone dijiye."
+  },
+  "T_FOOD_SAFETY_GENERAL": {
+   "en": "Throw away badly affected fruit, wash fruit well in clean water, and always respect the waiting period after spraying.",
+   "hi": "बहुत ख़राब फल फेंक दीजिए, फलों को साफ़ पानी से अच्छी तरह धोइए, और छिड़काव के बाद की प्रतीक्षा अवधि हमेशा मानिए।",
+   "hinglish": "Bahut kharab phal phenk dijiye, phalon ko saaf paani se achhi tarah dhoiye, aur chhidkaav ke baad ki prateeksha avadhi hamesha maniye."
+  },
+  "T_PPE": {
+   "en": "Always wear a mask, gloves and full sleeves while spraying, and wash well afterwards.",
+   "hi": "छिड़काव करते समय हमेशा मास्क, दस्ताने और पूरी बाँह के कपड़े पहनिए, और बाद में अच्छी तरह नहाइए-धोइए।",
+   "hinglish": "Chhidkaav karte samay hamesha mask, dastane aur poori baanh ke kapde pehniye, aur baad mein achhi tarah nahaiye-dhoiye."
+  },
+  "T_EMERGENCY": {
+   "en": "Get medical help immediately and take the product label with you. Do not try home remedies.",
+   "hi": "तुरंत डॉक्टर के पास जाइए और दवा का लेबल साथ ले जाइए। घरेलू उपाय मत आज़माइए।",
+   "hinglish": "Turant doctor ke paas jaiye aur dawa ka label saath le jaiye. Gharelu upay mat aazmaiye."
+  }
+ }
+}

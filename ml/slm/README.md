@@ -243,3 +243,36 @@ Tests:
 - On the eval, every case the matcher fires on agrees with the expected answer. It never
   takes "mausam kaisa hai?" when the location is unknown, which is a clarify case.
 - The session makes no model call for a fast intent.
+
+## L8: response templates (`ml/bundle/laya_templates_v1.json`)
+
+Laya never shows raw SLM text to the farmer. The reply language comes from the farmer's
+own words (L6), and the sentence comes from a template in that language: English, Hindi
+(Devanagari) or Hinglish (Roman script).
+
+| Section | Entries |
+|---|---|
+| `labels` | a name and a one-line description for all 12 labels (no treatments) |
+| `diagnosis` | confident, healthy, uncertain (with the runner-up), not recognised, retake (blurry, dark, bright), severity, next step |
+| `clarify` | one question per missing slot: when, text, label, field, location, photo |
+| `respond` | greeting, thanks, out_of_scope, offline, unsupported, explain, cancelled |
+| `tools` | confirmations and results for the tools |
+| `fallback` | one message per `FallbackReason` |
+| `safety` | the 12 `T_*` safety templates from `evals/laya/safety_templates.json` |
+
+Numbers only enter through placeholders: `{prob}` comes from the vision model, and
+`{product}`, `{dose}` and `{phi_days}` come from KB rows. The L9 validator therefore treats
+every digit that isn't from those sources as unsafe.
+
+[`test_laya_templates.py`](../bundle/test_laya_templates.py) checks that:
+
+- every label and every entry exists in all three languages;
+- every state-machine slot, fallback reason, respond kind and safety id is covered;
+- Hindi is written in Devanagari and the others in Latin script;
+- no template contains a digit of its own;
+- placeholders are known and are the same in every language.
+
+`Templates.kt` renders them on the device. `TemplatesTest` renders a diagnosis for every
+label in every language.
+
+Native-speaker review of the Hindi and Hinglish wording is still needed before release.
