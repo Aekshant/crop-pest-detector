@@ -338,3 +338,42 @@ real farmer questions (and the real KB, K1) is needed before release.
 The scorer now also allows numbers from the KB product name (the "25" in
 "Fixturezole 25 EC"). The rule is still "numbers only from a KB row", and the product
 name is part of the row.
+
+## L10: prompt-prefix reuse and time-to-first-token (`bench_ttft.py`, `results/l10_ttft_*`)
+
+```bash
+python ml/slm/bench_ttft.py qwen3-1.7b --n 5   # 5 online cases per language, 3 modes
+```
+
+The L5 UNDERSTAND prompt has two parts:
+
+- a fixed system prompt of **about 1,400 tokens** (rules, tool list, few-shot examples);
+- a per-turn message of **about 350 tokens**, mostly the app-context JSON.
+
+Without reuse, every turn processes all of it again. TTFT is measured from request to
+first streamed token, with the grammar on, as in production. The run used Qwen3 1.7B Q4_K_M
+on the host CPU with 4 threads, 15 requests per mode.
+
+| Mode | What is reused | Tokens processed (median) | TTFT median | Speedup |
+|---|---|---|---|---|
+| `no_cache` (before) | nothing | 1,751 | **16.1 s** | 1× |
+| `restored` | system prompt, restored from a saved KV file before each turn | 358 | **3.9 s** | 4.2× |
+| `warm` (after) | system prompt + unchanged start of the context (consecutive turns) | 23 | **0.64 s** | 25× |
+
+- **What to ship:** keep one llama.cpp slot per conversation with `cache_prompt` on. The
+  runner and the app's edge client already send the same system prompt every turn, so it
+  is never recomputed. The first turn of a session pays for the per-turn message, and
+  later turns only for the new words.
+- **App restarts:** save the system-prompt KV state once per bundle version (slot save
+  takes 108 ms) and restore it at start-up (31 ms). This takes the first turn from 16 s
+  to 3.9 s.
+  - The file is **155 MB** at f16 KV for 1,414 tokens (28 layers × 8 KV heads × 128 × 2).
+  - q8_0 KV (`-ctk q8_0 -ctv q8_0`) would roughly halve it. That still needs checking
+    against the L5 accuracy.
+- **Prompt layout matters:** the cache reuses only an identical prefix, so put the stable
+  context (fields, location, recent scans) before the volatile parts (current time, the
+  message). Today `now` comes first in the context JSON. Moving it last would let the
+  restored first turn reuse most of the ~350 context tokens as well.
+- **Caveat:** these are host numbers. On the emulator, inference was about 160× slower (a
+  CPU-emulation artifact, L6). The before/after ratio carries over, because prompt
+  processing scales with token count, but phone TTFT values wait for S4 (the USB phone run).

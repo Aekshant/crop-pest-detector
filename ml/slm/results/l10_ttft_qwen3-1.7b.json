@@ -1,0 +1,362 @@
+{
+ "model": "qwen3-1.7b",
+ "threads": 4,
+ "host": "CPU (x86_64), llama.cpp llama-server",
+ "prompt": "L5 UNDERSTAND system prompt (instructions, tools, few-shot) + per-turn context and message; grammar on",
+ "cached_prefix_tokens": 1414,
+ "slot_file_mb": 154.7,
+ "slot_save_ms": 108,
+ "slot_restore_ms": 31,
+ "speedup_median": {
+  "warm": 25.0,
+  "restored": 4.2
+ },
+ "no_cache": {
+  "summary": {
+   "n": 15,
+   "median_ms": 16091,
+   "mean_ms": 15912,
+   "max_ms": 16277,
+   "median_prompt_tokens_processed": 1751
+  },
+  "requests": [
+   {
+    "id": "laya-001",
+    "ttft_ms": 14774,
+    "prompt_n": 1743,
+    "cached_n": 0,
+    "prompt_ms": 14739
+   },
+   {
+    "id": "laya-002",
+    "ttft_ms": 15314,
+    "prompt_n": 1747,
+    "cached_n": 0,
+    "prompt_ms": 15293
+   },
+   {
+    "id": "laya-003",
+    "ttft_ms": 15583,
+    "prompt_n": 1749,
+    "cached_n": 0,
+    "prompt_ms": 15565
+   },
+   {
+    "id": "laya-004",
+    "ttft_ms": 15781,
+    "prompt_n": 1747,
+    "cached_n": 0,
+    "prompt_ms": 15758
+   },
+   {
+    "id": "laya-005",
+    "ttft_ms": 15872,
+    "prompt_n": 1744,
+    "cached_n": 0,
+    "prompt_ms": 15848
+   },
+   {
+    "id": "laya-006",
+    "ttft_ms": 16072,
+    "prompt_n": 1768,
+    "cached_n": 0,
+    "prompt_ms": 16050
+   },
+   {
+    "id": "laya-007",
+    "ttft_ms": 16158,
+    "prompt_n": 1766,
+    "cached_n": 0,
+    "prompt_ms": 16136
+   },
+   {
+    "id": "laya-008",
+    "ttft_ms": 16277,
+    "prompt_n": 1780,
+    "cached_n": 0,
+    "prompt_ms": 16255
+   },
+   {
+    "id": "laya-009",
+    "ttft_ms": 16145,
+    "prompt_n": 1763,
+    "cached_n": 0,
+    "prompt_ms": 16123
+   },
+   {
+    "id": "laya-010",
+    "ttft_ms": 16214,
+    "prompt_n": 1770,
+    "cached_n": 0,
+    "prompt_ms": 16192
+   },
+   {
+    "id": "laya-011",
+    "ttft_ms": 16104,
+    "prompt_n": 1750,
+    "cached_n": 0,
+    "prompt_ms": 16085
+   },
+   {
+    "id": "laya-012",
+    "ttft_ms": 16115,
+    "prompt_n": 1751,
+    "cached_n": 0,
+    "prompt_ms": 16096
+   },
+   {
+    "id": "laya-013",
+    "ttft_ms": 16114,
+    "prompt_n": 1749,
+    "cached_n": 0,
+    "prompt_ms": 16093
+   },
+   {
+    "id": "laya-014",
+    "ttft_ms": 16091,
+    "prompt_n": 1752,
+    "cached_n": 0,
+    "prompt_ms": 16069
+   },
+   {
+    "id": "laya-015",
+    "ttft_ms": 16065,
+    "prompt_n": 1751,
+    "cached_n": 0,
+    "prompt_ms": 16043
+   }
+  ]
+ },
+ "warm": {
+  "summary": {
+   "n": 15,
+   "median_ms": 644,
+   "mean_ms": 951,
+   "max_ms": 3773,
+   "median_prompt_tokens_processed": 23
+  },
+  "requests": [
+   {
+    "id": "laya-001",
+    "ttft_ms": 3773,
+    "prompt_n": 350,
+    "cached_n": 1393,
+    "prompt_ms": 3757
+   },
+   {
+    "id": "laya-002",
+    "ttft_ms": 546,
+    "prompt_n": 19,
+    "cached_n": 1728,
+    "prompt_ms": 521
+   },
+   {
+    "id": "laya-003",
+    "ttft_ms": 574,
+    "prompt_n": 21,
+    "cached_n": 1728,
+    "prompt_ms": 556
+   },
+   {
+    "id": "laya-004",
+    "ttft_ms": 557,
+    "prompt_n": 19,
+    "cached_n": 1728,
+    "prompt_ms": 538
+   },
+   {
+    "id": "laya-005",
+    "ttft_ms": 437,
+    "prompt_n": 16,
+    "cached_n": 1728,
+    "prompt_ms": 415
+   },
+   {
+    "id": "laya-006",
+    "ttft_ms": 1014,
+    "prompt_n": 40,
+    "cached_n": 1728,
+    "prompt_ms": 992
+   },
+   {
+    "id": "laya-007",
+    "ttft_ms": 974,
+    "prompt_n": 38,
+    "cached_n": 1728,
+    "prompt_ms": 952
+   },
+   {
+    "id": "laya-008",
+    "ttft_ms": 1278,
+    "prompt_n": 52,
+    "cached_n": 1728,
+    "prompt_ms": 1256
+   },
+   {
+    "id": "laya-009",
+    "ttft_ms": 903,
+    "prompt_n": 35,
+    "cached_n": 1728,
+    "prompt_ms": 884
+   },
+   {
+    "id": "laya-010",
+    "ttft_ms": 1054,
+    "prompt_n": 41,
+    "cached_n": 1729,
+    "prompt_ms": 1035
+   },
+   {
+    "id": "laya-011",
+    "ttft_ms": 613,
+    "prompt_n": 22,
+    "cached_n": 1728,
+    "prompt_ms": 594
+   },
+   {
+    "id": "laya-012",
+    "ttft_ms": 671,
+    "prompt_n": 23,
+    "cached_n": 1728,
+    "prompt_ms": 648
+   },
+   {
+    "id": "laya-013",
+    "ttft_ms": 584,
+    "prompt_n": 21,
+    "cached_n": 1728,
+    "prompt_ms": 561
+   },
+   {
+    "id": "laya-014",
+    "ttft_ms": 644,
+    "prompt_n": 24,
+    "cached_n": 1728,
+    "prompt_ms": 625
+   },
+   {
+    "id": "laya-015",
+    "ttft_ms": 638,
+    "prompt_n": 23,
+    "cached_n": 1728,
+    "prompt_ms": 618
+   }
+  ]
+ },
+ "restored": {
+  "summary": {
+   "n": 15,
+   "median_ms": 3858,
+   "mean_ms": 3859,
+   "max_ms": 4228,
+   "median_prompt_tokens_processed": 358
+  },
+  "requests": [
+   {
+    "id": "laya-001",
+    "ttft_ms": 3644,
+    "prompt_n": 350,
+    "cached_n": 1393,
+    "prompt_ms": 3621
+   },
+   {
+    "id": "laya-002",
+    "ttft_ms": 3767,
+    "prompt_n": 354,
+    "cached_n": 1393,
+    "prompt_ms": 3751
+   },
+   {
+    "id": "laya-003",
+    "ttft_ms": 3913,
+    "prompt_n": 356,
+    "cached_n": 1393,
+    "prompt_ms": 3897
+   },
+   {
+    "id": "laya-004",
+    "ttft_ms": 3766,
+    "prompt_n": 354,
+    "cached_n": 1393,
+    "prompt_ms": 3751
+   },
+   {
+    "id": "laya-005",
+    "ttft_ms": 3751,
+    "prompt_n": 351,
+    "cached_n": 1393,
+    "prompt_ms": 3735
+   },
+   {
+    "id": "laya-006",
+    "ttft_ms": 3924,
+    "prompt_n": 375,
+    "cached_n": 1393,
+    "prompt_ms": 3908
+   },
+   {
+    "id": "laya-007",
+    "ttft_ms": 3904,
+    "prompt_n": 373,
+    "cached_n": 1393,
+    "prompt_ms": 3888
+   },
+   {
+    "id": "laya-008",
+    "ttft_ms": 4228,
+    "prompt_n": 387,
+    "cached_n": 1393,
+    "prompt_ms": 4212
+   },
+   {
+    "id": "laya-009",
+    "ttft_ms": 3893,
+    "prompt_n": 370,
+    "cached_n": 1393,
+    "prompt_ms": 3878
+   },
+   {
+    "id": "laya-010",
+    "ttft_ms": 3943,
+    "prompt_n": 377,
+    "cached_n": 1393,
+    "prompt_ms": 3927
+   },
+   {
+    "id": "laya-011",
+    "ttft_ms": 3810,
+    "prompt_n": 357,
+    "cached_n": 1393,
+    "prompt_ms": 3795
+   },
+   {
+    "id": "laya-012",
+    "ttft_ms": 3832,
+    "prompt_n": 358,
+    "cached_n": 1393,
+    "prompt_ms": 3817
+   },
+   {
+    "id": "laya-013",
+    "ttft_ms": 3792,
+    "prompt_n": 356,
+    "cached_n": 1393,
+    "prompt_ms": 3777
+   },
+   {
+    "id": "laya-014",
+    "ttft_ms": 3858,
+    "prompt_n": 359,
+    "cached_n": 1393,
+    "prompt_ms": 3842
+   },
+   {
+    "id": "laya-015",
+    "ttft_ms": 3867,
+    "prompt_n": 358,
+    "cached_n": 1393,
+    "prompt_ms": 3849
+   }
+  ]
+ }
+}
