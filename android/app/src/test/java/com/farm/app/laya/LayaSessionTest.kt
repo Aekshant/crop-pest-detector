@@ -55,7 +55,7 @@ class LayaSessionTest {
     // UNDERSTAND -> RESPOND -> DONE
     @Test fun directReply() = runTest {
         val s = session(FakeModel(100L then Understanding.Respond("greeting")))
-        val out = s.onUserMessage("namaste laya", ctx)
+        val out = s.onUserMessage("namaste laya, kaise ho aap", ctx)  // not an exact fast intent -> model
         assertEquals(TurnOutcome.Answer(Lang.HINGLISH, "greeting", emptyList()), out)
         assertEquals(listOf("UNDERSTAND->RESPOND", "RESPOND->DONE"), s.transitions)
         assertEquals(LayaSession.State.IDLE, s.state)
@@ -116,7 +116,7 @@ class LayaSessionTest {
     // 8 s generation budget: one slow call
     @Test fun slowModelHitsTimeBudget() = runTest {
         val s = session(FakeModel(9_000L then Understanding.Respond("greeting")))
-        assertEquals(TurnOutcome.Fallback(Lang.EN, FallbackReason.TIME_BUDGET), s.onUserMessage("Hi Laya", ctx))
+        assertEquals(TurnOutcome.Fallback(Lang.EN, FallbackReason.TIME_BUDGET), s.onUserMessage("tell me about my farm", ctx))
         assertEquals(8_000L, testScheduler.currentTime)  // cut off at the budget, not after 9 s
     }
 
@@ -129,9 +129,9 @@ class LayaSessionTest {
 
     @Test fun modelErrorAndBadOutput() = runTest {
         val failing = session(Understander { throw IllegalStateException("model crashed") })
-        assertEquals(FallbackReason.MODEL_ERROR, (failing.onUserMessage("hi", ctx) as TurnOutcome.Fallback).reason)
+        assertEquals(FallbackReason.MODEL_ERROR, (failing.onUserMessage("tell me about my farm", ctx) as TurnOutcome.Fallback).reason)
         val weird = session(FakeModel(1L then Understanding.Respond("chitchat")))
-        assertEquals(FallbackReason.MODEL_ERROR, (weird.onUserMessage("hi", ctx) as TurnOutcome.Fallback).reason)
+        assertEquals(FallbackReason.MODEL_ERROR, (weird.onUserMessage("tell me about my farm", ctx) as TurnOutcome.Fallback).reason)
     }
 
     // CALL_TOOL validates args against the tool schema before running anything

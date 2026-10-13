@@ -225,3 +225,21 @@ CLARIFY    -> UNDERSTAND         (on the farmer's reply)
   - It asks about the **right slot for all 18 clarify cases**.
   - Language detection matches the case labels for 149 of 150 (only "hello laya" is
     ambiguous).
+
+## L7: fast intents (`android/.../laya/FastIntentMatcher.kt`)
+
+Short, exact commands in Hindi, Hinglish or English skip the SLM: scan ("scan karo", "जाँच
+करो", "take a photo"), history ("history dikhao", "इतिहास दिखाओ"), weather (only when the
+location is known), greetings and thanks. The whole message must be the command, after
+dropping filler like "please", "ji" or "laya". "scan karo aur batao kya bimari hai" goes to
+the model. A fast intent enters the state machine as `FAST -> CALL_TOOL / RESPOND`, so tool
+validation, grounding and confirmation still apply.
+
+Tests:
+
+- 19 common commands across 3 languages are matched.
+- **0.01 ms or less per match on the JVM** (done-when: < 100 ms).
+- Free-form questions are never matched.
+- On the eval, every case the matcher fires on agrees with the expected answer. It never
+  takes "mausam kaisa hai?" when the location is unknown, which is a clarify case.
+- The session makes no model call for a fast intent.

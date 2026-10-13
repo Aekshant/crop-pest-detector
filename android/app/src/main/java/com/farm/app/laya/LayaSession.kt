@@ -97,6 +97,8 @@ class LayaSession(
     private val tools: ToolRunner,
     private val clock: Clock,
     private val limits: Limits = Limits(),
+    /** L7: answer short exact commands without the SLM (null disables). */
+    private val fastIntents: ((String, LayaContext) -> Understanding?)? = FastIntentMatcher::match,
 ) {
     enum class State { IDLE, AWAITING_CLARIFICATION, AWAITING_CONFIRMATION }
 
@@ -115,9 +117,10 @@ class LayaSession(
     private var pending: Understanding.Call? = null
 
     suspend fun onUserMessage(text: String, context: LayaContext): TurnOutcome {
-        if (state != State.AWAITING_CLARIFICATION) startTurn(text)  // a reply to a confirmation prompt starts over
-        else messages += Message(true, text)
+        val newTurn = state != State.AWAITING_CLARIFICATION  // a reply to a confirmation prompt starts over
+        if (newTurn) startTurn(text) else messages += Message(true, text)
         state = State.IDLE
+        if (newTurn) fastIntents?.invoke(text, context)?.let { return handle("FAST", it, context) }
         return understand(context)
     }
 
@@ -164,13 +167,15 @@ class LayaSession(
             return fallback("UNDERSTAND", FallbackReason.MODEL_ERROR)
         }
         generationMs += clock.nowMs() - start
-        return when (u) {
-            is Understanding.Respond ->
-                if (u.kind in schema.respondKinds) { go("UNDERSTAND", "RESPOND"); done(TurnOutcome.Answer(lang, u.kind, results.toList())) }
-                else fallback("UNDERSTAND", FallbackReason.MODEL_ERROR)
-            is Understanding.Clarify -> clarify("UNDERSTAND", u.question, null)
-            is Understanding.Call -> callTool("UNDERSTAND", u, context)
-        }
+        return handle("UNDERSTAND", u, context)
+    }
+
+    private suspend fun handle(from: String, u: Understanding, context: LayaContext): TurnOutcome = when (u) {
+        is Understanding.Respond ->
+            if (u.kind in schema.respondKinds) { go(from, "RESPOND"); done(TurnOutcome.Answer(lang, u.kind, results.toList())) }
+            else fallback(from, FallbackReason.MODEL_ERROR)
+        is Understanding.Clarify -> clarify(from, u.question, null)
+        is Understanding.Call -> callTool(from, u, context)
     }
 
     private suspend fun callTool(from: String, call: Understanding.Call, context: LayaContext): TurnOutcome {
