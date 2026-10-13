@@ -361,8 +361,8 @@ on the host CPU with 4 threads, 15 requests per mode.
 | `warm` (after) | system prompt + unchanged start of the context (consecutive turns) | 23 | **0.64 s** | 25× |
 
 - **What to ship:** keep one llama.cpp slot per conversation with `cache_prompt` on. The
-  runner and the app's edge client already send the same system prompt every turn, so it
-  is never recomputed. The first turn of a session pays for the per-turn message, and
+  edge client must send the identical system prompt every turn (as `run_laya_eval.py`
+  does), so it is never recomputed. The first turn of a session pays for the per-turn message, and
   later turns only for the new words.
 - **App restarts:** save the system-prompt KV state once per bundle version (slot save
   takes 108 ms) and restore it at start-up (31 ms). This takes the first turn from 16 s
