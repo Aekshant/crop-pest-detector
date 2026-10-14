@@ -102,3 +102,44 @@ uvx --with pdfplumber python kb/build_kb.py
 **Before release:** an agronomist should review these rows. Choosing which of the 40
 early-blight products to show (for example, by FRAC group rotation, availability or
 price) is a product decision. The responder currently shows the first row.
+
+## KB pack (K3): `kb/dist/kb_tomato_v1.sqlite`
+
+```bash
+python kb/fetch_sources.py
+uvx --with pdfplumber python kb/build_kb.py                    # K2 rows (only when the lists change)
+uvx --with fastembed --with sqlite-vec python kb/build_pack.py # the pack: 1.7 MB, about 15 s once the model is cached
+```
+
+A single sqlite file is what the bundle ships (design doc: read-only, replaced by KB pack
+updates). It contains:
+
+| Table | Contents |
+|---|---|
+| `meta` | `kb_version`, `embedding_model`, `embedding_dim`, `built_at` |
+| `kb_source` | `sources.csv` |
+| `kb_treatment` | the 129 K2 rows, indexed by label: the only place a product, dose or waiting period lives |
+| `kb_chunk` | 296 advisory text chunks (`label`, `text`, `source_id`, `source_url`) |
+| `vec_chunk` | sqlite-vec `vec0` table with cosine distance; `rowid = kb_chunk.id` |
+
+- **Chunks:**
+  - TNAU pages give one chunk per section (symptoms, identification, management,
+    favourable conditions), prefixed with the pest name.
+  - The NIPHM/NCIPM tomato IPM package gives paragraphs of up to 600 characters, labelled
+    from their own text or the last pest heading.
+  - The ICAR-NBAIR Tuta note is chunked the same way as the NIPHM package.
+- **No doses in chunks:** every sentence with a dose ("@", "200 ml", "0.2%", "per acre")
+  is dropped (107 sentences). Retrieval therefore can't put an old or unregistered dose in
+  front of Laya, and doses come from `kb_treatment` only.
+- **Embeddings:** `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`, 384
+  dimensions, quantized ONNX through fastembed. It is multilingual (Hindi included), so
+  Hindi and Hinglish questions can match the English chunks. On the phone the same ONNX
+  model embeds the question (onnxruntime-android, about 220 MB); that runtime is not
+  wired up yet.
+- `test_pack.py` checks that:
+  - every table is filled;
+  - every label has chunks;
+  - no chunk contains a dose;
+  - a vector query returns the nearest chunk first.
+
+  It is skipped when the pack hasn't been built. CI runs only the CSV tests.

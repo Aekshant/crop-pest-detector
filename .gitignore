@@ -20,3 +20,4 @@ ml/.venv-export/
 ml/slm/_deps/
 ml/slm/_models/
 kb/_cache/
+kb/dist/
