@@ -1,0 +1,199 @@
+list,page,product,pest,values,labels,special_basis
+fungicide,2,Azoxystrobin 23% SC,Early & Late blight,125gm | 500ml | 500 | 3,early_blight;late_blight,False
+fungicide,4,Captan 50% WP,Early blight,1250gm | 2.5kg | 750-1000 | -,early_blight,False
+fungicide,4,Captan 50% WP,Late blight,1250gm | 2.5kg | 750-1000 | -,late_blight,False
+fungicide,4,Captan 75% WP,Damping off (Nursery),0.25% | 2500gm | 1000 Soil drench in the nursery | NA,,True
+fungicide,4,Captan 75% WP,Early blight,1250gm | 1667gm | 1000 | 6,early_blight,True
+fungicide,4,Captan 75% WP,Late blight,1250gm | 1667gm | 1000 | 6,late_blight,True
+fungicide,5,Captan 75% WS,,Damping off (soil drench) | 15-25 Gm per kg seed | 20-30gm Per kg seed | 1,,True
+fungicide,8,Copper oxychloride 50% WP,Early blight,1.25 | 2.5 | 750-1000 | -,early_blight,False
+fungicide,8,Copper oxychloride 50% WP,Late blight,1.25 | 2.5 | 750-1000 | -,late_blight,False
+fungicide,8,Copper oxychloride 50% WP,Leaf spot,1.25 | 2.5 | 750-1000 | -,,False
+fungicide,9,Copper Hydroxide 61.41% WG,Late Blight and Early blight,767.63 | 1250 | 500 | 3,early_blight;late_blight,False
+fungicide,9,Copper Sulphate 2.62% SC,Early blight and Late blight,- | 1 litre | 500 | 3 days,early_blight;late_blight,False
+fungicide,10,Cyazofamid 34.5% SC,Late blight,80g | 200ml | 500 | 3-5,late_blight,False
+fungicide,12,Fluoxapiprolin 1.9 %w/w SC,Late blight,20-25 | 1000-1250 | 375-500 | 5,late_blight,False
+fungicide,13,PYRACLOSTROBIN AL 80% WP,Damping-off,2.0-2.4 | 2.5-3.0 | 1 Lit/sq. meter | -,,True
+fungicide,15,Iprodione 50% WP,Early blight,0.75kg | 1.5kg | 500 | 15,early_blight,False
+fungicide,15,Kasugamycin 3% SL,Early blight,30-37.5 0.03- 0.0375% | 1000-1250 ml | 500-600 | 03,early_blight,False
+fungicide,18,Mancozeb 35% SC,Early blight& Late blight,0.175% or175 gm/100 Lt. water | 0.5%or500 gm/100lt. water | 500Lt.Water or as required depending upon crop stage and equipment used | 10,early_blight;late_blight,False
+fungicide,18,Mancozeb 75% WG,Early blight,750gm | 1000gm | 500Ltr. | 5-6,early_blight,False
+fungicide,18,Mancozeb 75% WP,"Late blight, Buckeye rot, Leafspot",1.125-1.5 kg | 1.5-2kg | 750Ltr. | -,late_blight,False
+fungicide,19,Mandipropamid 23.4% SC,Late blight,0.02% or 0.2 ml/Ltr. | 0.08% or 0.8ml/Ltr. | 500 | 5,late_blight,False
+fungicide,20,Metalaxyl-M 31.8% ES,Damping Off,0.64 | 2.0 | used as seed dresser,,False
+fungicide,21,Metiram 70%WG,Alternaria blight,1750gm | 2500gm | 500-750 Lt. | 6,early_blight,False
+fungicide,23,Picarbutrazox 9.53% w/w SC,Early blight & Late blight,100-125 | 1000-1250 | 500 | 7,early_blight;late_blight,False
+fungicide,26,Propineb 70%WP,Buckeye rot,0.21%or 210 g/100Ltr. water | 0.30%or300 gram/100Ltr. water | As required depending Upon crop stage and plant protection equipment used | 10,,False
+fungicide,26,Pyraclostrobin 20% WG,Early blight,75-100 gm | 375-500gm | 500 | 3,early_blight,False
+fungicide,29,(Streptomycin Sulphate 90% + Tetracycline Hydrochloride 10%) SP,Bacterial Leafspot,"- | Spray seedlings with streptocycline4 0to100 ppm solution in seed beds and fields after the appearance of first true leaves two sprays of streptocycline, one before transplanting and another after Are effective for controlling The disease. | - | -",bacterial_spot,True
+fungicide,34,(Streptomycin Sulphate 9% + Tetracycline Hydrochloride 1%) SP,Bacterial Leaf spot,"- | Spray seedlings with Streptocyclin 40- 100 ppm solution in seed beds and fields after the appearance of first true leaves two sprays of streptocycline, one before transplanting and another after effective for controlling The disease. | - | -",bacterial_spot,True
+fungicide,39,Tebuconazole 38.39% w/w SC,Early blight and Anthracnose,268.75 | 625 | 500 | 5,early_blight,False
+fungicide,39,Thifluzamide24%SC,Early blight,120 | 500 | 500 | 7,early_blight,False
+fungicide,40,Thiophanate Methyl 70%WP,Ring rot,500gm | 715gm | 750-1000 | 7,,False
+fungicide,43,Zineb 75%WP,Early blight,1.125- 1.5KG | 1.5-2KG | 750-1000 Lt,early_blight,False
+fungicide,43,Zineb 75%WP,Late blight,1.125- 1.5KG | 1.5-2KG | 750-1000 Lt,late_blight,False
+fungicide,43,Zineb 75%WP,Grey leaf mould,1.125- 1.5KG | 1.5-2KG | 750-1000 Lt,,False
+fungicide,44,Ziram 80%WP,Early blight,1.2- 1.6 kg | 1.5-2.0kg | 750-1000 | 3,early_blight,False
+fungicide,45,Azoxystrobin 25% + Boscalid 35% WG,Early blight and Septoria leaf spot,300 | 500 | 500 L/ha | 10,early_blight;septoria_leaf_spot,False
+fungicide,46,Azoxystrobin 4.8% w/w + Chlorothalonil 40% w/w SC,"Early Blight, Late Blight, Powdery Mildew, Septoria Leaf blight",1.344 (0.144 + 1.2) g | 3 ml | 500 | 3,early_blight;late_blight;septoria_leaf_spot,False
+fungicide,46,Ametoctradin 27%+ Dimethomorph 20.27% w/w SC,Late Blight,420-525 | 800-1000ml | 500 | 03,late_blight,False
+fungicide,46,Ametoctradin 25%(w/w) + Metalaxyl 20%(w/w) WDG,"""Damping off (Pythium",Ametoctradin 25% (w/w) + | 1000 | 500 | -,,False
+fungicide,47,Ametoctradin 25%(w/w) + Metalaxyl 20%(w/w) WDG,"aphanidermatum) Late blight (Phytophthora infestans)""",Metalaxyl 20% (w/w) WDG,late_blight,False
+fungicide,47,Azoxystrobin 18.2% + Difenoconazole 11.4% w/w SC,,Early blight & Late blight | 0.03% or 0.3 g/l | 0.1% or 1 ml / Litre water | 500 | 5,,False
+fungicide,49,Azoxystrobin 8.3% + Mancozeb 66.7% WG,Early and late blight,124.5+1000 | 1500 | 500 | 5,early_blight;late_blight,False
+fungicide,49,Azoxystrobin 11.5% + Mancozeb 30% WP,Early blight and late blight,(86.5+225) to (100.62+ 262.50) | 750-875 | 500 | 3,early_blight;late_blight,False
+fungicide,51,Azoxystrobin 11% + Tebuconazole 18.3% w/w SC,Early blight,82.5+137.25 | 750 | 500 | 7,early_blight,False
+fungicide,52,Azoxystrobin 13.04% + Thifluzamide 15.66% w/w SC,Early blight,75 + 90 | 500 | 500 | 5,early_blight,False
+fungicide,54,Boscalid 25.2%+Pyraclostrobin12.8%WG,Early blight,190 | 500 | 500 | 10,early_blight,False
+fungicide,54,Captan 70%+ Hexaconazole 5%WP,"Early blight, Powdery Mildew, Leaf Spot and fruit rot",562.5 | 750 | 500 | 7,early_blight,False
+fungicide,58,Chlorothalonil 40.0% w/w + Difenoconazole 4.0 w/w SC,"Early blight, Late blight",440^ (400+40) | 1000 | 500 (via Knap sack ) 20 (via drone application) | 7,early_blight;late_blight,False
+fungicide,59,Chlorothalonil 35 % + Cymoxanil 15% + Metalaxyl 2 % SC,Early blight (Alternaria solani); Late blight (Phytophthora infestans),291.36 +124.88 +16.65 | 832.50 | 500 | 15,early_blight;late_blight,False
+fungicide,60,Cymoxanil 8%+ Mancozeb 64% WP,Late blight,1080gm | 1500gm | 500-750 | 10days,late_blight,False
+fungicide,60,Cyazofamid 25% + Pyraclostrobin 18% w/v SC,Tomato Late Blight (Phytophthora infestan Early Blight (Alternari solani),75+54 - 87.5+63 s) and a | 300-350 | 500 | 26,early_blight;late_blight,False
+fungicide,61,Dimethomorph 12% + Pyraclostrobin 6.7% WG,Early Blight,183.75 g | 1250 g | 500 l | 10,early_blight,False
+fungicide,61,Famoxadone16.6%+ Cymoxanil22.1%SC,Early and Late blight,210 | 500 | 500 | 3,early_blight;late_blight,False
+fungicide,62,Flubendiamide 7.5% + Kresoxim-Methyl 37.5% SC,Early and Late blight,50 + 250 | 667 | 500 | 7,early_blight;late_blight,False
+fungicide,62,Fluopicolide 6.25% + Propamocarb hydrochloride 62.5% SC,Late Blight,93.8 + 937.5 | 1.5 L | 500 | 5,late_blight,False
+fungicide,64,Fluoxapiprolin 2.65% w/w + Fluopicolide 17.70% w/w SC,Late blight,15 + 100 - 18.75 + 125 | 500 - 625 | 500 - 625 | 500 | 5,late_blight,False
+fungicide,65,Fluxapyroxad 75 g/l + Difenoconazole 50 g/l SC,"Early blight, Septoria Leaf spot",100-125 | 800-1000 | 500 | 10,early_blight;septoria_leaf_spot,False
+fungicide,65,Fluxapyroxad 250g/l + Pyraclostrobin 250g/l SC,"Early blight, Septoria leaf spot",100-125 | 200-250 | 500 | 10,early_blight;septoria_leaf_spot,False
+fungicide,68,Iprovalicarb 5.5% + Propineb 61.25% WP,Early and late blight,123.75 g +1378.13 g To 137.5 g +1531.25 g | 2.25 to 2.5 Kg | 500 | 5,early_blight;late_blight,False
+fungicide,69,Iprovalicarb 8.4 % w/w + Copper oxychloride 68.2 % w/w (40.6 % w/w as Cu) WG,Early blight and Late blight,84+406- 105+507.5 | 1000-1250 | 500 | 5,early_blight;late_blight,False
+fungicide,71,Kresoxim-methyl 18% + Mancozeb 54% WP,"Early blight, Late blight, Fruit rot",250+750 | 1388 | 500 | 7,early_blight;late_blight,False
+fungicide,71,Mancozeb 40% + Azoxystrobin 7% OS,Early Blight & light blight,600g+105g | 1500 g | 500 L | 5,early_blight,False
+fungicide,71,Mancozeb 69.7% + Cyazofamid 5.3 % WG,Late Blight and Alternaria leaf spot,1045.50+79.50 | 1500 | 500 L/ha | 7,early_blight;late_blight,False
+fungicide,72,Mancozeb 64% + Thiophanate Methyl 12% WP,"Late blight, Leaf Spot, Buck eye rot and Ring Rot",1140 1500 | 1500 750 | 750 7 | 07,late_blight,False
+fungicide,73,Mefentrifluconazole 200g/l + Pyraclostrobin 200g/l SC,,"Early blight, and | 160-200 | 400-500 ml | 500 | 07",,False
+fungicide,73,Mefentrifluconazole 200g/l + Pyraclostrobin 200g/l SC,,Septoria leaf spot,,False
+fungicide,74,Metalaxyl M 3.3%+ Chlorothalonil 33.1% SC,"Early blight, Late blight",0.073% or 364 g | 0.2% or 1000 ml | 500 | 5,early_blight;late_blight,False
+fungicide,75,Metiram 44% + Dimethomorph 9% WG,Late blight,1325 | 2500 | 500 | 10,late_blight,False
+fungicide,75,Metiram 55% + Pyraclostrobin 5% WG,Early blight,900-1050 | 1500-1750 | 500 | 5,early_blight,False
+fungicide,76,Oxathiapiprolin 1.4% w/w + Azoxystrobin 14.46% w/w SC,,"Late Blight, Early | 136 (12 + 124) – | 800-900 | 500 | 05",,False
+fungicide,76,Oxathiapiprolin 1.4% w/w + Azoxystrobin 14.46% w/w SC,,"Blight, Powdery | 153 (13.5 + 139.5)",,False
+fungicide,76,Oxathiapiprolin 1.4% w/w + Azoxystrobin 14.46% w/w SC,,Mildew,,False
+fungicide,76,Oxathiapiprolin 0.6% + Mancozeb 60% w/w WG,Late Blight (Phytophthora infestans),1515 | 2500 | 500 | 5,late_blight,False
+fungicide,78,Picoxystrobin 2.5% + Dimethomorph 16.5% + Mancozeb 50% WP,Early Blight (Alternaria solani) and Late Blight (Phytophthora infestans),2070 | 3000 | 500 | 15,early_blight;late_blight,False
+fungicide,81,PROPINEB 54.2%+TRICYCLAZOLE 15% w/w WP,Early blight and Late blight,677.5+187.5 | 1250 | 500 | 10,early_blight;late_blight,False
+fungicide,82,Pydiflumetofen 6.89% + Difenoconazole 11.49% w/w SC,"Early blight, Powdery mildew",100 (37.50+62.50) | 500 | 500 | 3,early_blight,False
+fungicide,83,Pyraclostrobin 3.5% + Thiram 15% + Clothianidin 22.5% FS,,Early Blight & Late blight | 56.25+168.75+56.2 5 | 562.5 | 500 | 10,,True
+fungicide,86,Sulphur 75% + Chlorantraniliprole 0.85% WDG,,Powdery mildew disease & Fruit borer pest | 2625 + 29.75 | 3500 | 500 | 3,,False
+fungicide,87,Tebuconazole 50% + Trifloxystrobin 25% WG,Early blight,175+87.5 | 350 | 500 | 5,early_blight,False
+fungicide,88,Thiophanate methyl 15% (w/w) + Copper Oxychloride 40%(w/w) WP,"Early & Late Blight, Leaf Spot, Ring Rot",300 + 800 (1100 gm) | 2000 | 750 | 7,early_blight;late_blight,False
+fungicide,88,Thiophanate methyl 38% + Kasugamycin 2.21% SC,Powdery mildew & Bacterial leaf spot,402.1-502.6 | 1000- 1250 | 375-500 | 07,bacterial_spot,False
+fungicide,89,Trifloxystrobin 10% +Difenoconazole 12.5%+Sulfur 3% SC,,Early and Late | 45 + 56.25 + 13.5 | 450 | 500 | 14,,False
+fungicide,89,Trifloxystrobin 10% +Difenoconazole 12.5%+Sulfur 3% SC,,Blight,,False
+fungicide,90,Trifloxystrobin 25% + Hexaconazole 25% w/w WG,,"Early blight, Late | 50+50 | 200 | 500 | 7",,False
+fungicide,90,Trifloxystrobin 25% + Hexaconazole 25% w/w WG,,"blight, Powdery",,False
+fungicide,90,Trifloxystrobin 25% + Hexaconazole 25% w/w WG,,mildew and Fruit,,False
+fungicide,90,Trifloxystrobin 25% + Hexaconazole 25% w/w WG,,spot,,False
+fungicide,91,Validamycin5%+Tebuconazole15%SC,Early blight & Late blight,120 + 1200 to 150 + 1500 | 2000 to 2500 | 500 | 5 days,early_blight;late_blight,False
+insecticide,2,Abamectin 01.90 % EC,Red spider mites and Leaf Miner,8.6 – 11.4 | 450 - 600 | 500 | 3,spider_mites,False
+insecticide,7,Broflanilide 300 g/l SC,Fruit borer (Helicoverpa armigera) & leaf miner (Liriomyza trifolii),18.6-25.2 | 62-84 | 500 | 1,fruit_borer,False
+insecticide,8,Broflanilide 20% SC,"Thrips, Leaf miner & Fruit borer",25 | 125 | 500 | 1,fruit_borer,False
+insecticide,10,Carbofuran 03 % CG,Whitefly fly,1200 | 40000 | - | -,whitefly,False
+insecticide,12,Chlorantraniliprole 18.50 % SC,Fruit borer,30 | 150 | 500 | 03,fruit_borer,False
+insecticide,13,Chlorantraniliprole 35 % WG,,Fruit borer (Helicoverpa armigera) | 30 | 86 | 500 | 03,,False
+insecticide,14,CHLORANTRANILIPROLE 47.85 % w/w SC,Tobacco caterpillar (Spodoptera litura) Fruit borer (Helicoverpa armigera),30 | 50 | 400-500 | 3,fruit_borer,False
+insecticide,15,Chlorfluazuron 05.40 % EC,"Fruit Borer (Helicoverpa amigera), Tobacco Caterpillar (Spodoptera litura)",100 | 2000 | 500 | 3,fruit_borer,False
+insecticide,18,Cyantraniliprole 10.26 % OD,"Leaf miner (Liriomyza trifolii), Aphids (Aphis ossypi), Thrips (Thrips tabaci), Whitefly (Bemesia tabaci), Fruit borer (Helicoverpa armigera)",90 | 900 | 500 | 03,whitefly;fruit_borer,False
+insecticide,20,CYANTRANILIPROLE 18.41% w/w SC,"Thrips, Aphid, White fly, Leaf miner",8.75 | 43.75 | 10 | 75,whitefly,False
+insecticide,20,Cyclobutrifluram 38.4% w/w SC (Import only),Root Knot Nematode (Meloidogyne incognita),168.75 | 375 | 50-100 ml/Plant | -,,False
+insecticide,21,Cypermethrin 25 % EC,Root knot nematode,30 – 40 | 30 – 40 | -,,True
+insecticide,22,Deltamethrin 11% w/w EC,Fruit borers,10 – 12.5 | 100 – 125 | 375 – 500 | 3,fruit_borer,False
+insecticide,24,Diafenthiuron 50 % WP,Whiteflies and Red spider mites,300 | 600 | 500 | 05,whitefly;spider_mites,False
+insecticide,25,DIMPROPYRIDAZ 120 g/l SL,"White fly, Jassids, Aphids",108 - 120 | 900 – 1000 | 500 | 3,whitefly,False
+insecticide,27,Fenazaquin 10 % EC,Two spotted spider mite,125.0 | 1250 | 500 | 07,spider_mites,False
+insecticide,27,Fenazaquin 18.3 % SC,Two Spotted Spider Mite (Tetranychus spp),114.375 | 625 | 500 | 7,spider_mites,False
+insecticide,31,Flonicamid 50 % WG,"Aphids (Aphis gossipy), Jassids (Amrasca bigutulla bigutulla), White fly (Bemisia tabaci)",100 | 200 | 500 | 05,whitefly,False
+insecticide,32,Flubendiamide 20 % WG,Fruit borer,48 | 100 | 375 – 500 | 05,fruit_borer,False
+insecticide,32,Flubendiamide 20 % WG,Fruit borer,50 | 250 | 500 | 05,fruit_borer,False
+insecticide,32,Flubendiamide 39.35 % w/w SC,Fruit borer,48 | 100 | 375 – 500 | 05,fruit_borer,False
+insecticide,33,Fluensulfone 2% GR,Root knot nematode (Meloidogyne incognita),0.02g/plant & 444 to 512 g/ha | 1.0 g/plant & 22.2 to 25.6 Kg/ha | - | 7,,False
+insecticide,33,Fluopyram 34.48 % w/w SC,Root knot nematode (Meloidogyne incognita),250 (2 application) or 500 (Single application) | 625 (2 application) or 1250 (Single application) | 1000 | 05,,False
+insecticide,34,Fluxametamide 10% w/w EC,"Thrips, Fruit borer",40 | 400 | 500 | 5,fruit_borer,False
+insecticide,35,Imidacloprid 70 % WG,Thrips & White fly,35 | 50 | 500 | 05,whitefly,False
+insecticide,36,Imidacloprid 17.80 % SL,Whitefly,30 - 35 | 150 - 175 | 500 | 03,whitefly,True
+insecticide,37,Indoxacarb 14.50 % SC,Fruit borer,60-75 | 400 - 500 | 300 - 600 | 05,fruit_borer,False
+insecticide,38,Lambda-cyhalothrin 04.90 % CS,Fruit borer,15 | 300 | 500 | 05,fruit_borer,False
+insecticide,39,Lambda-cyhalothrin 05 % EC,Fruit borer,15 | 300 | 400 – 600 | 04,fruit_borer,False
+insecticide,41,Novaluron 10 % EC,Fruit borer,75 | 750 | 500 – 1000 | 1-3,fruit_borer,False
+insecticide,42,Oxydemeton-methyl 25 % EC,White fly,250 | 1000 | 500 – 1000 | -,whitefly,False
+insecticide,43,Phosalone 35 % EC,Fruit borer,450 | 1285 | 500 – 1000 | -,fruit_borer,False
+insecticide,45,Quinalphos 20 % AF,Fruit borer,300 – 350 | 1500 – 1750 | 750 – 1000 | 07,fruit_borer,False
+insecticide,46,Quinalphos 25 % EC,Fruit borer,250 | 1000 | 500 – 1000 | -,fruit_borer,False
+insecticide,47,Spinetoram 11.70 % SC,"Fruit borer (Helicoverpa armigera), Tobacco caterpillar (Spodoptera litura), Leaf miner (Liriomyza trifolii), tomato pinworm (Tuta absoluta)",45-54 | 375-450 | 500 | 3,tuta_absoluta;fruit_borer,False
+insecticide,48,Spiromesifen 22.90 % SC,Whiteflies & Mites,150 | 625 | 500 | 03,whitefly;spider_mites,False
+insecticide,49,Tebufenpyrad 20% WP,Red Spider Mites,75-100 | 375-500 | 500 | 20,spider_mites,False
+insecticide,49,Tetraniliprole 18.18% w/w SC,Fruit borer (Helicoverpa armigera); Leaf miner (Liriomyza trifolii),60 | 300 | 500 | 5,fruit_borer,False
+insecticide,52,Thiamethoxam 70 % WS,"Aphids, Thrips",420 | 600 | Use as seed dresser at the time of sowing,,False
+insecticide,52,Thiamethoxam 25 % WG,Whitefly,50 | 200 | 500 | 05,whitefly,False
+insecticide,52,Thiamethoxam 25 % WG,(Apply first spray during initial appearance of pest and repeat 2 – 3 sprays at 10 – 15 days interval depending on the level of pest intensity),,,False
+insecticide,53,Thiamethoxam 25 % WG,White flies,100 | 400 | 500 | 05,whitefly,True
+insecticide,56,Acetamiprid 20% + Chlorantraniliprole 20% WG,"Tomato fruit borer (Helicoverpa armigera), Tobacco caterpillar (Spodoptera litura), Aphid (Aphis gossypii) Leafhopper (Amrasca biguttulla biguttulla) and Whitefly (Bemisia tabaci).",30+30 | 150 | 500 | 7,whitefly;fruit_borer,False
+insecticide,61,Chlorantraniliprole 4.3% +Abamectin 1.7% SC,"Fruit Borer, Leaf Miner, mites",21.5 + 8.5 | 500 | 500 | 5,fruit_borer;spider_mites,False
+insecticide,63,Chlorantraniliprole 0.45% + Fipronil 0.50% + Emamectin Benzoate 0.18% GR,Whitefly & Fruit borer,45 + 50 + 18 | 10 Kg/Ha | NA | 3,whitefly;fruit_borer,False
+insecticide,64,Chlorantraniliprole 09.30 % + Lambda-cyhalothrin 04.60 % ZC,"Helicoverpa armigera, Spodoptera litura, and Leaf Miner",37.5 | 250 | 500 | 5,fruit_borer,False
+insecticide,64,CHLORANTRANILIPROLE 5.2% + NOVALURON 8.5% SC,"Fruit borer (Helicoverpa armigera), Tobacco caterpillar (Spodoptera litura)",26+42.5 | 500 | 500 | 7,fruit_borer,False
+insecticide,65,Chlorantraniliprole 08.80 % + Thiamethoxam 17.50 % w/w SC,"Leaf Miner, Whitefly, Fruit borer","150 (50+100) | 500 Application method-Soil drench (Single application), Application time-8-10 days after transplanting | 50-100 ml/plant | 36",whitefly;fruit_borer,False
+insecticide,66,Cyantraniliprole 16.9% + Lufenuron 16.9% w/w SC,Fruit borer: Helicoverpa armigera Leaf miner: Liriomyza trifolii Thrips: Thrips tabaci,60 (30+30) | 150 | 500 | 5,fruit_borer,False
+insecticide,71,Emamectin benzoate 5 % w/w + Lufenuron 40 % w/w WG,,Fruit Borer and Thrips | 27 (Emamectin benzoate 3.0 + Lufenuron 24.0) | 60 | 500 | 5,,False
+insecticide,72,Fenazaquin 10% + Bifenthrin 4% EC,Red Spider mite (Tetranychus urticae) Whitefly (Bemisia tabaci),125+50 | 1250 | 500 | 5,whitefly;spider_mites,False
+insecticide,73,Fipronil 15% + Deltamethrin 2.5% w/v SC,Tomato fruit borer,75 + 12.5 | 500 | 500 | 7,fruit_borer,False
+insecticide,73,FIPRONIL 12.5% + LAMBDA-CYHALOTHRIN 5% ZC,"Thrips, Whitefly & Fruit borer (Helicoverpa armigera)",50 +20 | 400 | 500 | 7,whitefly;fruit_borer,False
+insecticide,74,Flubendiamide 8.33 % + Deltamethrin 5.56 % w/w SC,Thrips and Fruit borer,36+24 | 400 | 500 | 5,fruit_borer,False
+insecticide,74,Flubendiamide 03.50 % + Hexaconazole 05 % w/w WG,Spodoptera litura Helicoverpa armigera Early blight Leaf spot,Flubendiamid e – 43.75 & Hexaconazole – 62.5 | 1250 | 500 | 5,early_blight;fruit_borer,False
+insecticide,74,Flubendiamide 07.5 % + Kresoxim Methyl 37.5 % w/w SC,Fruit borer (Helicoverpa armigera) Leaf eating caterpillar/ Fruit borer (Spodoptera litura),50 + 250 | 667 | 500 | 07,fruit_borer,False
+insecticide,76,Flonicamid 11.7% + Diafenthiuron 36% WG,"White fly, Aphids, Jassids",73.13+225 | 625 | 500 | 5,whitefly,False
+insecticide,76,Fluxametamide 5.81% + Bifenthrin 5.81 % EC (11.62% EC w/w) (12% EC w/v),Fruit borer (Helicoverpa armigera),37.5 + 37.5 | 625 | 375 | 7,fruit_borer,False
+insecticide,76,Fluxametamide 5.81% + Bifenthrin 5.81 % EC (11.62% EC w/w) (12% EC w/v),Leaf miner (Liriomyza trifolii),30 + 30 | 500 | 375 | 7,,False
+insecticide,78,Indoxacarb 10.0% + Thiamethoxam 10.0% WG,Whitefly and fruit borer,75 + 75 | 750 | 500 | 5,whitefly;fruit_borer,False
+insecticide,80,Novaluron 05.25 % + Indoxacarb 04.50 % SC,Fruit borer (Helicoverpa armigera) & Leaf eating caterpillar (Spodoptera litura),43.31 + 37.13- 45.94 + 39.38 | 825 – 875 | 500 | 05,fruit_borer,False
+insecticide,81,NOVALURON 9.45% + LAMBDA-CYHALOTHRIN 1.9% ZC,"Tomato fruit borer (Helicoverpa armigera), Tobacco caterpillar (Spodoptera litura)",75+15 | 750 | 500 | 7,fruit_borer,False
+insecticide,82,Propargite 50 % + Bifenthrin 5 % w/w SE,"Mite , White fly & Jassids",594 + 59.4 – 621 + 62.1 | 1100 – 1150 | 500 | 05,whitefly;spider_mites,False
+insecticide,85,Spiropidon 30% w/w + Acetamiprid 24% w/w WG,"Thrips (Thrips tabaci), Aphids (Aphis gossypii), Whiteflies (Bemisia tabaci)",108 (Spiropidion 60 + Acetamiprid 48) – 135 (Spiropidion 75 + Acetamiprid 60) | 200 - 250 | 500 | 5,whitefly,False
+insecticide,86,Tetraniliprole 10.81 % w/w + Spirotetramat 21.62 % w/w SC,"Fruit Borer, Leaf miner, Thrips and Whitefly",45 +90 | 375 | 500 | 5,whitefly;fruit_borer,False
+insecticide,87,Thiamethoxam 12.60 % + Lambda-cyhalothrin 09.50 % ZC,"Thrips, Whiteflies & Fruit borer",27.5 | 125 | 500 | 05,whitefly;fruit_borer,False
+bio_fungicide,3,Pseudomonas fluorescens 1.75% WP (T Stanes Pf-1 Strain Accession No. MTCC 5671),Early blight,"05 g/kg seed (Seed treatme nt) | Mix required quantity of the seeds with the required quantity of Pseudomonas fluoresce ns 1.75% WP. Ensure uniform coating, shade dry and sow the seeds. | As per requirement for uniform coating of seeds",early_blight,True
+bio_fungicide,3,Pseudomonas fluorescens 1.75% WP (T Stanes Pf-1 Strain Accession No. MTCC 5671),,3 kg per ha (06 g/litre water) (Foliar spray) | Spray Pseudomonas fluorescens 1.75% WP uniformly on the crop. | 500 lit per ha,,True
+bio_fungicide,3,Bacillus subtilis 1.50% L.F (T Stanes Bs-1 Strain MTCC 25072),Early blight (caused by Alternaria solani),10 ml/ kg seed | Seed treatment | -,early_blight,True
+bio_fungicide,3,Bacillus subtilis 1.50% L.F (T Stanes Bs-1 Strain MTCC 25072),,3.0 lit./ha | Foliar spray | 500,,True
+bio_fungicide,6,Pseudomonas fluorescens 0.5% WP (TNAU Strain Accession No. ITCC BE 0005),Wilt (Fusarium oxysporum F.sp.),"- | 10 g/kg of seeds | Seed Treatment: Mix required quantity of the seeds with the required quantity of Pseudomonas fluorescens0.5% WP and ensure uniform coating, shade dry and sow | Nil",,True
+bio_fungicide,6,Pseudomonas fluorescens 0.5% WP (TNAU Strain Accession No. ITCC BE 0005),,2.5 kg/ha | Soil Treatment: 2.5 kg of Pseudomonas fluorescens 0.5% WP Spread uniformly over a hectare of land | Nil,,True
+bio_fungicide,7,Pseudomonas fluorescens 1.0% WP (IPL/PS-01 Accession No. MTCC5727),"Wilt (Fusarium oxysporum), Damping Off (Pythium aphanidermatum), Root rot (Rhizoctonia spp.)","- | 5 gm/kg of seed | Seed Treatment: Make a thin paste of required quantity of Pseudomonas fluorescens 1.0% WP with the minimum volume of water & coat the seed uniformly, shade dry the seed just before sowing. | Nil",,True
+bio_fungicide,7,Pseudomonas fluorescens 1.0% WP (IPL/PS-01 Accession No. MTCC5727),,- | 2.5 kg/ha | Soil Treatment: Mix 2.5kg of | Nil,,True
+bio_fungicide,8,Pseudomonas fluorescens 1.0% WP (IPL/PS-01 Accession No. MTCC5727),,Pseudomonas fluorescens 1.0% WP with 62.5 kg FYN and broadcast uniformly over a hectare of land.,,True
+bio_fungicide,8,Pseudomonas fluorescens 1.0% WP (IPL/PS-01 Accession No. MTCC5727),,- | 10gm/lit res of water | Seedling Root Dip Treatment: Mix 10 gm of Pseudomonas fluorescens 1.0% WP in one litre of water and dip the tomato seedling root rot for minutes. | Nil,,True
+bio_fungicide,8,Pseudomonas fluorescens 1.0% WP (Strain No. IIHR-PF-2 Accession No. ITCCB0034),,Bacterial Wilt (Ralstonia solanacearum) | Treat the seed with Pseudomonas fluorescens1.0% WP @ 20 gm/kg of seeds & treat the nursery beds with the Pseudomonas fluorescens1.0% WP @ 50gm/sq.m and apply Pseudomonas fluorescens1.0% WP @ 5 kg/ha enriched FYM* @ 5 tons/ha to the soil before transplanting.,,True
+bio_fungicide,8,"Pseudomonas fluorescens 1.5% LF (MTCC no. 5671, Strain designation Pf-1)",Tomato,Wilt of tomato (Fusarium | Seedling dip treatment of AMMA-Pseudo (Pseudomonas fluorescens) 1.5% AS,,True
+bio_fungicide,8,"Pseudomonas fluorescens 1.5% LF (MTCC no. 5671, Strain designation Pf-1)",,oxysporum f.sp. lycopersici),,True
+bio_fungicide,9,"Pseudomonas fluorescens 1.5% LF (MTCC no. 5671, Strain designation Pf-1)",,(AMMFA PF-1) at the time of transplanting and Drenching 15 days after transplanting @ 2500 ml/ha,,True
+bio_fungicide,9,Trichoderma harzianum 1.0% WP (Strain No. IIHR-TH-2 Accessions No. ITCC6888),Wilt (Fusarium oxysporum),Treat the seed with Trichoderma harzianum 1.0% WP @ 20 gm/kg of seeds & treat the nursery beds with the Trichoderma harzianum 1.0% WP @ 50 gm/sq.m and apply Trichoderma harzianum 1.0% WP @ 5 kg/ha enriched FYM*@5tons/ha to the soil before transplanting.,,True
+bio_fungicide,9,Trichoderma harzianum 1.5% AS (CFU 2 x 10 ⁶/mL min.; (AMMFA-TH1 strain; NCMR Accession number MCC 0583),Wilt of tomato (Fusarium oxysporum f.sp. lycopersici),Seedling dip treatment of AMMAtricho-H (Trichoderma harzianum) 1.5% AS (AMMFA TH-1) at the time of transplanting and Drenching 15 days after transplanting @ 2500 ml/ha,,True
+bio_fungicide,9,"Trichoderma viride1.5% AS (CFU count: 2x10^6 /ml Min.), Strain name: AMMFA-TV1 NCMR, Accession Number: MCC 0582",Wilt of tomato (Fusarium oxysporum f.sp. lycopersici),75 | 2500 | 500 | 77,,False
+bio_fungicide,9,"Trichoderma viride1.5% AS (CFU count: 2x10^6 /ml Min.), Strain name: AMMFA-TV1 NCMR, Accession Number: MCC 0582",,,,False
+bio_fungicide,9,"Trichoderma viride1.5% AS (CFU count: 2x10^6 /ml Min.), Strain name: AMMFA-TV1 NCMR, Accession Number:",,,,False
+bio_fungicide,10,Trichoderma viride 0.5% WP,Wilt (Fusarium oxysporum),- | 10 g/kg seed | Seed Treatment- Mix the required quantity of seeds with the required quantity of Trichoderma viride 0.50% WP and ensure uniform | -,,True
+bio_fungicide,11,Trichoderma viride 0.5% WP,,"coating, Shade dry and sow.",,True
+bio_fungicide,14,"Trichoderma viride 1.5% LF (Strain No. TV-1, Accession No. MTCC 5170)",Root wilt (Fusarium oxysporum f.sp.,- | 5ml/ kg | Seed treatment + | Dilution in water-,,True
+bio_fungicide,15,"Trichoderma viride 1.5% LF (Strain No. TV-1, Accession No. MTCC 5170)",lycopersici),seed + 5 ml/ lit wat er + 3000 ml/ha | Seedling dip treatment + Soil treatment | 500 liter/ha,,True
+bio_fungicide,15,"Trichoderma viride 1.5% WP (Strain No. IIHR-TV-5, Accession No. ITCC 6889)",Wilt (Fusarium oxysporum),Treat the seed with Trichoderma viride1.5% WP @ 20 gm/kg of seeds & treat the nursery beds with the Trichoderma viride 1.5% WP @ 50 gm/sq.m and apply Trichoderma viride 1.5% WP @ 5 kg/ha enriched FYM* @ 5 tons/ha to the soil before transplanting.,,True
+bio_fungicide,17,Trichoderma viride 1.0% WP,"Seedling wilt (Fusarium oxysporum), Damping off (Pythium aphanidermatum, Rhizoctonia solani)",- | 9 g/kg seed | Seed Treatment: Mix 9 kg of the product per kg seed. | -,,True
+bio_fungicide,17,Trichoderma viride 1.0% WP,,- | 2.5 kg/ha | Root zone application: Mix thoroughly 2.5 kg of the product in 150 kg of compost or farmyard manure and apply this mixture in the field after sowing/ transplanting of crops | -,,True
+bio_insecticide,2,Azadirachtin 01.00% EC (10000 PPM) Min. Neem Based,Fruit borer (Helicoverpa armigera),- | 1000-1500 | 500 | 03,fruit_borer,False
+bio_insecticide,3,Azadirachtin 05.00% w/w Min. Neem Extract Concentrates,"Aphids, Whitefly, Fruit borer",- | 200.0 | 400 | 05,whitefly;fruit_borer,False
+bio_insecticide,3,"Bacillus thuringiensis var. galleriae 1593 M serotype H 59 5b, 1.3% flowable concentrate Potency 1500 IU/mg",Fruit borer (Helicoverpa armigera),- | 1.0-1.5 | 500 | -,fruit_borer,False
+bio_insecticide,6,"Bacillus firmus 1.5% AS (CFU count: 1 × 10⁸ /ml Min.) Strain name: AMMFA-BF1, NCMR Accession number MCC 0584)",Root knot nematode (Meloidogyne incognita),-- | 5000 | 500 | --,,False
+bio_insecticide,8,"Beauveria bassiana 5.0% SC, Strain: NBAII, Bangalore, Accession No. ITCC-7102, (Strain Isolated by Project Directorate of Bio-logical control, Bangalore)",Fruit borer (Helicoverpa armigera),- | 500 | 500 | -,fruit_borer,False
+bio_insecticide,8,Beauveria bassiana 5.0% AS Strain: BB-AAU-RJP Accession No. MCC – 1024,Fruit borer (Helicoverpa armigera),- | 0.5 | 500 | -,fruit_borer,False
+bio_insecticide,8,Beauveria bassiana 1.5% Liquid Formulation (CFU count 10X108) Accession No.MTCC-5171,Fruit borer (Helicoverpa armigera),2.0 | Foliar spry | 500 | -,fruit_borer,False
+bio_insecticide,9,"Pseudomonas fluorescens 1.0% WP (Strain No. IIHR-PF-2, Accession No. ITCC- B0034)",,Root-knot nematodes (Meloidogyne spp.) | Treat the seed with Pseudomonas fluorescens 1.0% WP @ 20 gm/kg of seeds & treat the nursery beds with the Pseudomonas fluorescens 1.0% WP @ 50 gm/sq.m and apply Pseudomonas fluorescens 1.0% WP @ 5 kg/ha enriched FYM* @ 5 tons/ha to the soil before transplanting.,,True
+bio_insecticide,10,Trichoderma harzianum 1.0% WP (Strain No. IIHR-TH-2 Accessions No. ITCC 6888),Root-knot nematodes (Meloidogyne incognita),Treat the seeds with Trichoderma harzianum 1.0% WP @ 20 gm/kg of seeds & nursery beds with the Trichoderma harzianum 1.0% WP @ 50 gm/sq.m and also apply Trichoderma harzianum 1.0% WP (@ 5 kg/ha enriched FYM* @ 5 tons/ha to the soil before transplanting.,,True
+bio_insecticide,11,Trichoderma harzianum 1.5% WP (Strain No. IIHR-TV-5 Accessions No. ITCC 6889),Root-knot nematodes (Meloidogyne incognita),Treat the seed with Trichoderma harzianum 1.5% WP @ 20 gm/kg of seeds & treat the nursery beds with the Trichoderma harzianum 1.5% WP @ 50gm/sq.m and also apply Trichoderma harzianum 1.5% WP @ 5kg/ha enriched FYM* @ 5 tons/ha to the soil before transplanting.,,True
+bio_insecticide,11,Trichoderma viride 1.5% WP (Strain No. IIHR-TV-5 Accessions No. ITCC 6889),Root-knot nematodes (Meloidogyne incognita),Treat the seeds with Trichoderma viride l.5% WP @ 20 gm/kg of seeds & nursery beds with the Trichoderma viride l.5 % WP @ 50 gm/sq.m. and also apply Trichoderma viride 1.5% WP (@ 5 kg/ha enriched FYM*,,True
+bio_insecticide,12,Trichoderma viride 1.5% WP (Strain No. IIHR-TV-5 Accessions No. ITCC 6889),,@ 5 tons/ha to the soil before transplanting.,,True
+bio_insecticide,12,"Verticillium chlamydosporium 1.0% WP, (2x106 CFU/gm min) Strain – IIHR-VC-3 Accession No – ITCC-6898",Root-knot nematodes (Meloidogyne incognita),Treat the seeds with Verticillium chlamydosporium 1.0% WP @ 20 gm/kg of seeds & nursery beds with the Verticillium chlamydosporium 1.0% WP @ 50 gm/sq.m and also apply Verticillium chlamydosporium 1.0% WP @ 5 kg/ha enriched FYM* @ 5 tons/ha to the soil before transplanting.,,True
+bio_insecticide,13,"Verticillium Lecanii 1.50% Liquid Formulation, (1x108 CFU/ml. min.) Strain – T Stanes VI-1, Accession No – MTCC-5172",White fly (Bemisia tabaci),- | 2000 (Foliar spray) | 500 | -,whitefly,False
+bio_insecticide,13,Nuclear Polyhedrosis Virus of Helicoverpa armigera 0.43% AS (1x109 POB/ml),Helicoverpa armigera,- | 1500 | 400-600 | -,fruit_borer,False
+bio_insecticide,14,"Nuclear Polyhedrosis Virus of Helicoverpa armigera 2.0% AS, Strain No. BIL/HV-9 POB(1x109 POB/ml Min.)",Pod borer (Helicoverpa armigera),- | 250-500 | 500 | -,fruit_borer,False
+bio_insecticide,14,"Nuclear Polyhedrosis Virus of Helicoverpa armigera 0.43% AS, Strain No. BIL/HV-9 (1x109 POB/ml Min.)",Helicoverpa armigera,- | 1500 | 400-600 | -,fruit_borer,False
+bio_insecticide,15,"Paecilomyces lilacinus 01.50% LF (CFU count 1x108/ml min.)(Accession No. MTCC No. 5175, T-Stanes PI-1 Strain)",Root Knot Nematode (Meloidogyne incognita),- | 6000 | 500 | -,,False

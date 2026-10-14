@@ -47,3 +47,58 @@ The documents are not committed: they are publishers' files and add up to about 
   Hindi content.
 - Only TNAU (Tamil Nadu) is covered among the state agricultural universities. Adding
   MPKV (Maharashtra) or PAU (Punjab) would cover regional practices.
+
+## `kb_treatment.csv`: treatment rows (K2)
+
+```bash
+python kb/fetch_sources.py
+uvx --with pdfplumber python kb/build_kb.py
+```
+
+`build_kb.py` reads the table cells of the four CIB&RC lists and keeps every **tomato** row:
+
+- [`cibrc_tomato.csv`](cibrc_tomato.csv) has all 198 rows, as printed (the audit trail).
+- [`kb_treatment.csv`](kb_treatment.csv) has **129 rows**, one per (label, product), with
+  the design doc's columns: `label, product, dose, phi_days, registration_status,
+  source_url (with #page=), kb_version`. Each row also keeps `pest_as_listed`.
+
+| Label | Products | | Label | Products |
+|---|---|---|---|---|
+| early_blight | 40 | | whitefly | 16 |
+| late_blight | 28 | | fruit_borer | 31 |
+| septoria_leaf_spot | 3 | | spider_mites | 9 |
+| bacterial_spot | 1 | | tuta_absoluta | 1 |
+| yellow_leaf_curl_virus | 0 (vector control) | | mosaic_virus | 0 (roguing, vector control) |
+
+**Rules (from L9: numbers are never generated):**
+
+- **Doses are copied, not converted.** A row reads, for example, "500 ml per hectare in
+  500 litres of water". There is no per-litre or per-pump arithmetic. The only inferred
+  part is the unit for a bare number: ml for liquid formulations (EC, SC, SL, OD…), g for
+  solid ones (WP, WG, SP…).
+- **Waiting period.** A range such as "3-5" keeps its longest printed value. A row with
+  "-" (none printed) is not shown as a treatment.
+- **Skipped (46).** Rows were dropped when Laya couldn't state them safely in the spray
+  template:
+  - doses on another basis: per 1,000 seedlings, per kg of seed, nursery, soil granules;
+  - concentrations ("0.2%", "0.8 ml/L");
+  - a per-hectare dose under 25 g or ml, which is a per-litre figure in the wrong column
+    ("3 ml");
+  - a spray volume under 200 L per hectare.
+- **Pest mapping.** Text like "Early & Late blight" maps to both labels. Serpentine leaf
+  miner (*Liriomyza*) is **not** mapped to `tuta_absoluta`; only rows naming Tuta or
+  pinworm are.
+- **Registration.** `registered` means the product appears in a CIB&RC list for tomato
+  against that problem. Nothing else can make a row registered.
+
+`test_kb_treatment.py` checks that:
+
+- every number in a row is printed in its source row;
+- the viruses have no products;
+- leaf miner rows are not Tuta;
+- the L9 safety lexicon names no registered product. This found imidacloprid, which is
+  registered for tomato whitefly and was removed from the lexicon.
+
+**Before release:** an agronomist should review these rows. Choosing which of the 40
+early-blight products to show (for example, by FRAC group rotation, availability or
+price) is a product decision. The responder currently shows the first row.

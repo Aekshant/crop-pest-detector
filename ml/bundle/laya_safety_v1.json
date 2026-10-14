@@ -7,7 +7,7 @@
                "behosh", "बेहोश", "pee li", "pi li", "पी ली", "पी लिया", "aankh me", "आंख में", "आँख में", "breathing"],
  "ppe": ["mask", "मास्क", "glove*", "dastane", "दस्ताने", "ppe", "chashma", "चश्मा", "goggles"],
  "chemicals_not_in_kb": ["endosulfan", "एंडोसल्फान", "monocrotophos", "मोनोक्रोटोफॉस", "phorate", "फोरेट", "ddt", "डीडीटी",
-                         "kerosene", "मिट्टी का तेल", "mitti ka tel", "imidacloprid", "इमिडाक्लोप्रिड", "carbofuran", "कार्बोफ्यूरान",
+                         "kerosene", "मिट्टी का तेल", "mitti ka tel", "carbofuran", "कार्बोफ्यूरान",
                          "chlorpyrifos", "क्लोरपाइरीफॉस", "methyl parathion", "paraquat", "पैराक्वाट", "dichlorvos", "aluminium phosphide"],
  "unregistered_cues": ["banned", "ban wali", "प्रतिबंधित", "pratibandhit", "unlabelled", "unlabeled", "no label", "bina label", "बिना लेबल",
                        "bina naam", "बिना नाम", "cotton", "कपास", "kapas", "doosri fasal", "दूसरी फसल", "online", "ऑनलाइन", "चीन", "china",
