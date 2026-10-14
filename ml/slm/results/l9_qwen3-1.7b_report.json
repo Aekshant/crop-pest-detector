@@ -1345,6 +1345,5 @@
       "reply_lang": "hinglish"
     }
   ],
-  "safety_failures": [],
-  "regressions": []
+  "safety_failures": []
 }

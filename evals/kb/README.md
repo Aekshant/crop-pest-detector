@@ -28,43 +28,59 @@ Modes:
 
 ## Results
 
-The pack is `kb_tomato_v1`: 296 chunks, embedded with
-`paraphrase-multilingual-MiniLM-L12-v2` (384 dimensions). Full output is in
-`results_paraphrase-multilingual-MiniLM-L12-v2.json`.
+```bash
+uvx --with fastembed --with sqlite-vec --with onnxruntime==1.31.0 --with tokenizers python evals/kb/eval_retrieval.py [--pack ...]
+```
 
-| Mode (top-3 hit rate) | all 40 | en | hi | hinglish |
-|---|---|---|---|---|
-| first run: `open` (labels broken, see below) | 38% | 50% | 50% | 8% |
-| first run: `filtered` | 70% | 79% | 79% | 50% |
-| `open` | 38% | 50% | 50% | 8% |
-| `filtered` | 85% | 93% | 86% | 75% |
-| `open+names` (no diagnosis yet) | **57%** | 57% | 71% | 42% |
-| `filtered+names` (diagnosis known) | **88%** | 93% | 86% | 83% |
+Mode names:
 
-**What the eval found:**
+- `hybrid` fuses the vector ranking with a BM25 keyword ranking by reciprocal rank
+  fusion (k = 60).
+- The app uses **`hybrid+names`**, and **`hybrid_filtered+names`** when the diagnosis is
+  known. `KbEndToEndTest` reproduces both numbers on the phone's code path.
 
-- **A labelling bug.** In the NIPHM PDF, the last pest heading carried over to every
-  paragraph after it. Weed descriptions and rodent control were tagged `mosaic_virus` (35
-  chunks), which is why mosaic scored 0% even with the filter. A label now applies to at
-  most 3 paragraphs after its heading, and any other heading ends it. This was a bug fix,
-  not tuning to the queries.
-- **A content gap.** 2 of the 40 queries have no relevant chunk at all: "how do I stop
-  late blight from spreading" (en and hi). Every late-blight management sentence in the
-  sources was a fungicide dose, so all of them were removed (correctly). Non-chemical
-  late-blight practice needs another source, for example a state agricultural university
-  package of practices.
-- **Hinglish is the weak spot.** The embedding model doesn't know romanized Hindi. Name
-  expansion lifts Hinglish from 8% to 42% (open) and from 75% to 83% (filtered). Most of
-  the remaining Hinglish misses use everyday words ("dhabbe", "failta") rather than
-  disease names.
+Top-3 hit rate over all 40 queries. Two of them, late blight "stop it spreading" in
+English and Hindi, have no chunk that passes the relevance rule (see below).
 
-**Caveat:** the queries were seen while fixing the labelling bug, so these numbers are
-not held out. The relevance rule and the name expansion were not tuned on them.
+| Pack / model | open | filtered | open+names | filtered+names | **hybrid+names** | **hybrid_filtered+names** |
+|---|---|---|---|---|---|---|
+| v1: MiniLM-L12, paragraph chunks with the label carry-over bug | 38% | 70% | | | | |
+| v1, label bug fixed | 38% | 85% | 57% | 88% | | |
+| v2 chunks (NIPHM structure), MiniLM-L12 | 45% | 80% | 65% | 90% | 78% | 88% |
+| v2, multilingual-e5-small fp32 | 42% | 92% | 80% | 90% | 82% | 88% |
+| **v2, e5-small int8 (shipped)** | 45% | 95% | 75% | 90% | **80%** | **88%** |
 
-**Next steps:**
+By language for the shipped configuration:
 
-- Try `intfloat/multilingual-e5-small`: same size, usually stronger in Hindi, but it
-  needs a custom ONNX export.
-- Add a BM25 keyword index (sqlite FTS5, already in the pack's sqlite) and combine the
-  two.
-- Add Hindi translations of the TNAU chunks.
+| Mode | en | hi | hinglish |
+|---|---|---|---|
+| hybrid+names | 86% | 86% | 67% |
+| hybrid_filtered+names | 86% | 93% | 83% |
+
+**What changed and why:**
+
+- **Label carry-over bug.** In the NIPHM PDF, the last pest heading carried over to every
+  paragraph after it. Weed and rodent text was tagged `mosaic_virus`, so mosaic scored 0%
+  even with the filter. The fix was to cap the carry-over.
+- **Structure-aware chunking (v2).** The NIPHM package is now chunked by its own
+  structure: table rows, numbered description sections, and in-scope general sections.
+  It is about 100 chunks smaller and has no rodent, weed or calibration text.
+- **Hybrid search.** BM25 helps most without a diagnosis: MiniLM goes from 65% to 78%,
+  and Hinglish from 50% to 75%. With a filter it changes about one query.
+- **e5-small.** It is the same size as MiniLM-L12 (118M parameters, 384 dimensions) and
+  better without a diagnosis (80% vs 65% for open+names). Quantizing it to int8 (113 MB)
+  costs about one query.
+- **Local names.** "agati jhulsa" gets "(Early blight)" appended, using
+  `ml/labels_v1.json`.
+
+**Known gaps:**
+
+- **Late-blight prevention:** the only relevant chunk ("Field sanitation. Destruction of
+  alternate hosts…") doesn't contain the rule's words ("destroy" doesn't match
+  "Destruction"). I left the rule as written, so these 2 queries count as misses.
+- **Hinglish without a diagnosis (67%)** is the weakest cell. The misses use everyday
+  words ("dhabbe", "failta").
+
+**Caveat:** the chunking fixes, the model choice (2 candidates) and hybrid search were all
+decided on these 40 queries, so the numbers are optimistic. A held-out set of real farmer
+questions is needed before release.

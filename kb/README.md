@@ -97,7 +97,10 @@ uvx --with pdfplumber python kb/build_kb.py
 - the viruses have no products;
 - leaf miner rows are not Tuta;
 - the L9 safety lexicon names no registered product. This found imidacloprid, which is
-  registered for tomato whitefly and was removed from the lexicon.
+  registered for tomato whitefly and was removed from the lexicon;
+- every active ingredient in the KB is in the lexicon's `known_actives`. `build_kb.py`
+  writes this list (67 names), so the L9 validator also blocks a real product named in a
+  turn whose KB row is a different product.
 
 **Before release:** an agronomist should review these rows. Choosing which of the 40
 early-blight products to show (for example, by FRAC group rotation, availability or
@@ -107,50 +110,90 @@ price) is a product decision. The responder currently shows the first row.
 
 ```bash
 python kb/fetch_sources.py
-uvx --with pdfplumber python kb/build_kb.py                    # K2 rows (only when the lists change)
-uvx --with fastembed --with sqlite-vec python kb/build_pack.py # the pack: 1.7 MB, about 15 s once the model is cached
+uvx --with pdfplumber python kb/build_kb.py      # K2 rows + known_actives (only when the lists change)
+uvx --with onnx --with onnxruntime==1.31.0 --with huggingface_hub python kb/export_embedder.py   # the on-device model
+uvx --with fastembed --with sqlite-vec --with pdfplumber --with onnxruntime==1.31.0 --with tokenizers python kb/build_pack.py
 ```
+
+`kb/dist/` holds the build outputs and is gitignored:
+
+| File | Size | What |
+|---|---|---|
+| `kb_tomato_v1.sqlite` | 2.1 MB | the pack |
+| `e5_small_int8.onnx` | 113 MB | multilingual-e5-small, dynamic int8 (448 MB at fp32) |
+| `e5_small_vocab.tsv` | 7.8 MB | its 250k-piece vocabulary, for the phone's tokenizer |
 
 A single sqlite file is what the bundle ships (design doc: read-only, replaced by KB pack
 updates). It contains:
 
 | Table | Contents |
 |---|---|
-| `meta` | `kb_version`, `embedding_model`, `embedding_dim`, `built_at` |
+| `meta` | `kb_version`, `embedding_model` (`e5-small-int8`), `embedding_dim` (384), `built_at` |
 | `kb_source` | `sources.csv` |
 | `kb_treatment` | the 129 K2 rows, indexed by label: the only place a product, dose or waiting period lives |
-| `kb_chunk` | 296 advisory text chunks (`label`, `text`, `source_id`, `source_url`) |
-| `vec_chunk` | sqlite-vec `vec0` table with cosine distance; `rowid = kb_chunk.id` |
+| `kb_chunk` | 197 advisory chunks (`label`, `text`, `source_id`, `source_url`) plus `embedding`, a float32 unit vector |
+| `vec_chunk` | the same vectors in a sqlite-vec `vec0` table (cosine distance), for the server and evals |
 
-- **Chunks:**
-  - TNAU pages give one chunk per section (symptoms, identification, management,
-    favourable conditions), prefixed with the pest name.
-  - The NIPHM/NCIPM tomato IPM package gives paragraphs of up to 600 characters, labelled
-    from their own text or the last pest heading.
-  - The ICAR-NBAIR Tuta note is chunked the same way as the NIPHM package.
-- **No doses in chunks:** every sentence with a dose ("@", "200 ml", "0.2%", "per acre")
-  is dropped (107 sentences). Retrieval therefore can't put an old or unregistered dose in
-  front of Laya, and doses come from `kb_treatment` only.
-- **Embeddings:** `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`, 384
-  dimensions, quantized ONNX through fastembed. It is multilingual (Hindi included), so
-  Hindi and Hinglish questions can match the English chunks. On the phone the same ONNX
-  model embeds the question (onnxruntime-android, about 220 MB); that runtime is not
-  wired up yet.
-- `test_pack.py` checks that:
-  - every table is filled;
-  - every label has chunks;
-  - no chunk contains a dose;
-  - a vector query returns the nearest chunk first.
+The phone doesn't use `vec_chunk`. Android's SQLite can't load extensions, so `KbPack.kt`
+reads `kb_chunk.embedding`, and `KbRetriever.kt` searches in memory (brute force over
+about 200 × 384 floats).
 
-  It is skipped when the pack hasn't been built. CI runs only the CSV tests.
+**Chunks** are built from the structure of each source:
+
+- **TNAU pages:** one chunk per section (symptoms, identification, management,
+  favourable conditions), prefixed with the pest name.
+- **NIPHM/NCIPM tomato IPM package:**
+  - its tables become one chunk per pest row: natural enemies, resistant varieties, and
+    crop-stage IPM ("Alternaria blight and late blight (tomato, vegetative stage):
+    Cultural control. Field sanitation…");
+  - its "Description of insect pests / diseases" sections are split at their numbered
+    headings;
+  - general IPM and pesticide-safety sections are kept as general chunks;
+  - weeds, rodents, calibration, references and front matter are left out as outside
+    Laya's scope.
+- **ICAR-NBAIR Tuta note:** chunked as paragraphs, labelled Tuta.
+
+**No doses in chunks:** every sentence with a dose ("@", "200 ml", "0.2%", "per acre") is
+dropped (89 sentences). Doses come from `kb_treatment` only.
+
+**Embedding:** `kb/embedding.py` runs the same int8 ONNX file the phone runs:
+
+1. tokenize;
+2. mean-pool over tokens;
+3. L2-normalize;
+4. prefix `passage: ` for chunks and `query: ` for questions.
+
+**On the phone** (`android/.../kb/`):
+
+- **`UnigramTokenizer`:** a Kotlin port of the XLM-R SentencePiece Unigram tokenizer (NFKC,
+  Metaspace, Viterbi). It gives the same ids as the reference on all 291 test texts.
+- **`EmbeddingModel`:** runs the model on ONNX Runtime 1.31.0 (the same version as the
+  Python build). Its vectors match the reference with cosine ≥ 0.9999999.
+- **`KbRetriever`:** hybrid search, BM25 plus vectors fused by RRF, with local-name
+  expansion and an optional label filter. It ranks the same as the Python eval on all 40
+  queries.
+- **`KbEndToEndTest`** runs question → tokenizer → model → retriever and reproduces the K4
+  hit rates exactly: 32/40 without a diagnosis and 35/40 with one. A search takes about
+  14 ms on a desktop JVM.
+
+These tests skip when `kb/dist/` hasn't been built, which is the case in CI. The ONNX
+Runtime Android library adds about 34 MB (`arm64-v8a`, uncompressed) to the app. An
+arm64-only split or ORT's reduced mobile build would cut that.
+
+**Tests:** `test_pack.py` checks that:
+
+- every table is filled;
+- every label has chunks;
+- no chunk contains a dose;
+- a vector query returns the nearest chunk first.
 
 ## Retrieval eval (K4)
 
-See [`evals/kb/README.md`](../evals/kb/README.md). Top-3 hit rate on 40 en/hi/Hinglish
-questions:
+See [`evals/kb/README.md`](../evals/kb/README.md). Top-3 hit rate on 40 English, Hindi and
+Hinglish questions, using the app's pipeline (hybrid search with local names, int8
+e5-small):
 
-- **88%** when the diagnosis is known (search filtered by label, local names expanded);
-- **57%** without a diagnosis.
+- **88%** when the diagnosis is known (filtered by label);
+- **80%** without a diagnosis.
 
-Hinglish is the weakest language. Non-chemical advice for late blight is missing from the
-sources.
+Hinglish is the weakest language.

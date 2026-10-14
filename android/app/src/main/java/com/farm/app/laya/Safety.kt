@@ -29,7 +29,7 @@ class SafetyResponder(
     private val templates: Templates,
     private val labelNames: Map<String, List<String>>,
 ) {
-    private val validator = SafetyValidator(kb, list("chemicals_not_in_kb"))
+    private val validator = SafetyValidator(kb, list("chemicals_not_in_kb") + list("known_actives"))
 
     fun respond(userText: String, diagnosis: Diagnosis?, lang: Lang): SafetyReply? {
         val text = Grounding.normalize(userText)
@@ -109,10 +109,14 @@ class SafetyResponder(
  * The last gate before any text reaches the farmer (L9): a number may appear
  * only if it came from a KB row used this turn (or the caller vouches for it,
  * e.g. the vision probability), and a product or chemical name only if it is a
- * registered KB product used this turn. Sentences that break this are dropped;
- * if nothing is left, Laya says to consult the KVK.
+ * registered KB product used this turn. [names] are the pesticide names it
+ * knows besides the KB brands: banned chemicals and every active ingredient in
+ * the real KB (laya_safety_v1.json, kept in sync by kb/build_kb.py), so a model
+ * that names a real product from another row ("imidacloprid" when the row is
+ * another product) is caught too. Sentences that break this are dropped; if
+ * nothing is left, Laya says to consult the KVK.
  */
-class SafetyValidator(private val kb: List<KbRow>, private val chemicals: List<String>) {
+class SafetyValidator(private val kb: List<KbRow>, private val names: List<String>) {
 
     /** Why [text] is unsafe, or an empty list. */
     fun violations(text: String, rows: List<KbRow>, extraNumbers: Set<Double> = emptySet()): List<String> {
@@ -124,7 +128,9 @@ class SafetyValidator(private val kb: List<KbRow>, private val chemicals: List<S
         (numbersIn(text) - numbers).forEach { out += "number $it not from the KB" }
         kb.filter { it !in allowed && it.brand.lowercase() !in allowed.map { a -> a.brand.lowercase() } }
             .filter { low.contains(it.brand.lowercase()) }.forEach { out += "product ${it.brand} not allowed" }
-        chemicals.filter { low.containsWord(Grounding.normalize(it)) }.forEach { out += "chemical $it named" }
+        val allowedText = allowed.joinToString(" ") { Grounding.normalize(it.product) }
+        names.map { Grounding.normalize(it) }.filter { low.containsWord(it) && !allowedText.containsWord(it) }
+            .forEach { out += "chemical $it not from this turn's KB rows" }
         return out
     }
 

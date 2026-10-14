@@ -2,7 +2,7 @@
 """K3: build the on-device KB pack (sqlite + sqlite-vec).
 
   python kb/fetch_sources.py
-  uvx --with fastembed --with sqlite-vec python kb/build_pack.py [--model ...]
+  uvx --with fastembed --with sqlite-vec --with pdfplumber python kb/build_pack.py [--model ...]
 
 Pack (kb/dist/kb_tomato_v1.sqlite, design doc "kb_chunk, kb_treatment; read-only,
 replaced by KB pack updates"):
@@ -12,6 +12,8 @@ replaced by KB pack updates"):
   kb_treatment  kb/kb_treatment.csv (K2): the only source of products, doses, waiting periods
   kb_chunk      advisory text chunks (TNAU pages, NIPHM/NCIPM IPM package, ICAR-NBAIR note)
   vec_chunk     sqlite-vec vec0 table, rowid = kb_chunk.id, normalized embeddings
+                (kb_chunk.embedding holds the same vectors as plain blobs: Android's
+                SQLite can't load extensions, and brute force over ~200 chunks is <1 ms)
 
 Chunks never carry doses: any sentence with a dose ("@ 2 g/l", "200 ml",
 "0.2%") is dropped at build time, so retrieval can't put an advisory's
@@ -37,7 +39,7 @@ sys.path.insert(0, str(KB))
 from fetch_sources import CACHE, cache_name  # noqa: E402
 
 KB_VERSION = "2026-10-14"
-DEFAULT_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+DEFAULT_MODEL = "e5-small-int8"  # K4: e5-small beats MiniLM-L12 without a diagnosis; int8 = the on-device file
 OUT = KB / "dist" / "kb_tomato_v1.sqlite"
 
 LABEL_PATTERNS = {
@@ -49,7 +51,7 @@ LABEL_PATTERNS = {
     "mosaic_virus": r"mosaic",
     "tuta_absoluta": r"tuta|pin\s*worm",
     "whitefly": r"white\s*fl(y|ies)|bemisia",
-    "fruit_borer": r"fruit\s*borer|helicoverpa",
+    "fruit_borer": r"fruit\s*borer|helicoverpa|gram\s*pod\s*borer",
     "spider_mites": r"spider\s*mite|red\s*mite|tetranychus|\bmites?\b",
 }
 DOSE = re.compile(r"@|\d+(?:\.\d+)?\s*(?:%|ml|g|gm|gms|kg|l|lit|litre|liter|ppm|ec|sc|wp|wg|sl)\b|/\s*(?:l|lit|litre|acre|ha)\b"
@@ -152,6 +154,75 @@ def pdf_chunks(path, stats, default_label=None):
     return out
 
 
+def prefixed(prefix, text, stats, label=None):
+    """Chunks of one labelled passage, each starting with its heading so it reads on its own."""
+    out = []
+    for c in pack_sentences(clean_sentences(text, stats), max_chars=MAX_CHARS - len(prefix)):
+        labels = labels_in(prefix) or labels_in(c) or ([label] if label else [])
+        out.append({"label": ";".join(dict.fromkeys(labels)), "text": f"{prefix}: {c}"})
+    return out
+
+
+# NIPHM package sections: kept as general advice, or dropped as outside Laya's scope.
+NIPHM_GENERAL = r"AESA based IPM|Ecological engineering|Insecticide resistance|Nutritional deficienc|Safety measures|" \
+                r"Do.s and Don.ts|Safety parameters|Pesticide application techniques"
+NIPHM_DESCRIPTIONS = r"Description of insect pests|Description of diseases"
+
+
+def niphm_chunks(path, stats):
+    """The NIPHM/NCIPM tomato IPM package, by its structure:
+    tables (natural enemies, resistant varieties, crop stage-wise IPM) one row per chunk,
+    'Description of ...' sections split at their numbered headings ("4) Early blight:"),
+    general IPM and safety sections as paragraphs. Weeds, rodents, calibration,
+    references and front matter are left out (outside Laya's scope)."""
+    import pdfplumber
+
+    out = []
+    with pdfplumber.open(path) as pdf:
+        texts = [p.extract_text() or "" for p in pdf.pages]
+        first = next(i for i, t in enumerate(texts) if "Flowering plants that attract natural enemies" in t)
+        last = next(i for i, t in enumerate(texts) if i > first and "Rodent pest management" in t)
+        stage = mgmt = None
+        rows = []  # [stage, management, activity]
+        for page in pdf.pages[first:last + 1]:
+            for table in page.extract_tables():
+                for raw in table:
+                    cells = [re.sub(r"\s+", " ", c or "").strip() for c in raw]
+                    if len(cells) == 4 and cells[1] and cells[1] != "Insect":  # natural enemies table
+                        out += prefixed(f"Natural enemies of {cells[1]}", f"{cells[2]}. {cells[3]}", stats)
+                    elif len(cells) == 2 and cells[0] and cells[0] != "Pest":  # resistant varieties
+                        out += prefixed(f"Resistant or tolerant tomato varieties for {cells[0]}", cells[1], stats)
+                    elif len(cells) == 3 and cells[2] and cells[0] != "Crop stage":
+                        if cells[1]:
+                            stage = cells[0] or stage
+                            rows.append([stage, cells[1], cells[2]])
+                        elif rows:  # continues the previous row (often across a page break)
+                            rows[-1][2] += " " + cells[2]
+        for stage, mgmt, activity in rows:
+            stage_name = re.sub(r"\s*(stage)?\*?$", "", stage or "").strip()
+            prefix = f"{mgmt} (tomato, {stage_name.lower()} stage)" if stage_name else mgmt
+            out += prefixed(prefix, activity.replace("\uf0b7", ". "), stats)
+
+    text = subprocess.run(["pdftotext", str(path), "-"], capture_output=True, text=True, check=True).stdout
+    # "*For management refer to page number----4) Early blight:" glues the next heading on.
+    text = re.sub(r"\*?For management refer to page number-*\s*", "\n", text)
+    heads = [(m.start(), m.group(2)) for m in re.finditer(r"(?m)^\s*([IVX]+)\.\s+(.+)$", text)]
+    for (pos, title), nxt in zip(heads, heads[1:] + [(len(text), "")]):
+        body = text[pos:nxt[0]]
+        if len(body) < 300:  # table of contents entry
+            continue
+        if re.search(NIPHM_DESCRIPTIONS, title, re.I):
+            items = re.split(r"(?m)^\s*\d+\)\s*([A-Z][^:\n]{2,60}):", body)
+            for name, item in zip(items[1::2], items[2::2]):
+                item = re.sub(r"\*For management refer.*", "", item)
+                out += prefixed(name.strip(), item.replace("\uf0b7", ". "), stats)
+        elif re.search(NIPHM_GENERAL, title, re.I):
+            for para in re.split(r"\n\s*\n", body):
+                out += [c for c in prefixed(title.strip().rstrip(":"), para.replace("\uf0b7", ". "), stats)
+                        if len(c["text"]) - len(title) > MIN_CHARS]
+    return out
+
+
 def build_chunks(stats):
     sources = list(csv.DictReader((KB / "sources.csv").open(encoding="utf-8")))
     chunks, seen = [], set()
@@ -167,6 +238,8 @@ def build_chunks(stats):
             continue
         elif "IPM-Schedule-for-vegetables" in s["url"]:
             continue  # covers many crops with 2012 doses; the NIPHM tomato package supersedes it
+        elif "niphm.gov.in" in s["url"]:
+            new = niphm_chunks(path, stats)
         else:
             new = pdf_chunks(path, stats, s["label"] if "nbair" in s["url"] else None)
         seen.add(s["url"])
@@ -183,12 +256,14 @@ def build_chunks(stats):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default=DEFAULT_MODEL)
+    ap.add_argument("--model", default=DEFAULT_MODEL, choices=sorted(__import__("embedding").MODELS))
     ap.add_argument("--out", type=Path, default=OUT)
     args = ap.parse_args()
+    args.out = args.out.resolve()
 
     import sqlite_vec
-    from fastembed import TextEmbedding
+
+    import embedding
 
     stats = {"dose_sentences_dropped": 0}
     print("chunking sources", flush=True)
@@ -196,9 +271,9 @@ def main():
     print(f"{len(chunks)} chunks; dropped {stats['dose_sentences_dropped']} sentences with doses", flush=True)
 
     print(f"embedding with {args.model}", flush=True)
-    model = TextEmbedding(args.model)
+    model = embedding.load(args.model)
     t = time.time()
-    vectors = [v / (sum(x * x for x in v) ** 0.5) for v in model.embed([c["text"] for c in chunks], batch_size=32)]
+    vectors = embedding.embed(model, args.model, [c["text"] for c in chunks], "passage")
     dim = len(vectors[0])
     print(f"  {len(vectors)} x {dim} in {time.time() - t:.0f} s", flush=True)
 
@@ -217,7 +292,8 @@ def main():
                                    kb_version TEXT NOT NULL);
         CREATE INDEX kb_treatment_label ON kb_treatment(label);
         CREATE TABLE kb_chunk (id INTEGER PRIMARY KEY, label TEXT, text TEXT NOT NULL, source_id TEXT NOT NULL,
-                               source_url TEXT NOT NULL, kb_version TEXT NOT NULL);
+                               source_url TEXT NOT NULL, kb_version TEXT NOT NULL,
+                               embedding BLOB NOT NULL);  -- float32 little-endian unit vector, for readers without sqlite-vec
         CREATE VIRTUAL TABLE vec_chunk USING vec0(embedding float[{dim}] distance_metric=cosine);
     """)
     meta = {"kb_version": KB_VERSION, "embedding_model": args.model, "embedding_dim": str(dim),
@@ -232,8 +308,9 @@ def main():
                    "VALUES (?,?,?,?,?,?,?)", [r["label"], r["product"], r["dose"], int(r["phi_days"]),
                                               r["registration_status"], r["source_url"], r["kb_version"]])
     for i, (c, v) in enumerate(zip(chunks, vectors), 1):
-        db.execute("INSERT INTO kb_chunk VALUES (?,?,?,?,?,?)", (i, c["label"], c["text"], c["source_id"], c["url"], KB_VERSION))
-        db.execute("INSERT INTO vec_chunk(rowid, embedding) VALUES (?, ?)", (i, sqlite_vec.serialize_float32([float(x) for x in v])))
+        blob = sqlite_vec.serialize_float32(v)
+        db.execute("INSERT INTO kb_chunk VALUES (?,?,?,?,?,?,?)", (i, c["label"], c["text"], c["source_id"], c["url"], KB_VERSION, blob))
+        db.execute("INSERT INTO vec_chunk(rowid, embedding) VALUES (?, ?)", (i, blob))
     db.commit()
     db.execute("VACUUM")
     db.close()

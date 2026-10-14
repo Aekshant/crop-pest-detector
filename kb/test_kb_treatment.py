@@ -49,6 +49,15 @@ class KbTreatmentTest(unittest.TestCase):
             if r["label"] == "tuta_absoluta":
                 self.assertRegex(r["pest_as_listed"].lower(), r"tuta|pinworm|pin worm")
 
+    def test_validator_knows_every_registered_active(self):
+        import sys
+        sys.path.insert(0, str(KB))
+        from build_kb import actives_in
+        lexicon = json.loads((KB.parent / "ml" / "bundle" / "laya_safety_v1.json").read_text())
+        for r in ROWS:
+            for a in actives_in(r["product"]):
+                self.assertIn(a, lexicon["known_actives"], r["product"])
+
     def test_safety_lexicon_does_not_ban_registered_products(self):
         lexicon = json.loads((KB.parent / "ml" / "bundle" / "laya_safety_v1.json").read_text())["chemicals_not_in_kb"]
         for chem in lexicon:

@@ -21,7 +21,8 @@ class SafetyTest {
     private val kb = JSONObject(kbJson).getJSONArray("rows").let { a -> List(a.length()) { a.getJSONObject(it) } }
         .map { KbRow(it.getString("label"), it.getString("product"), it.getString("dose"), it.getInt("phi_days"),
                      it.getString("registration_status") == "registered") }
-    private val chemicals = JSONObject(lexicon).getJSONArray("chemicals_not_in_kb").let { a -> List(a.length()) { a.getString(it) } }
+    private val chemicals = listOf("chemicals_not_in_kb", "known_actives")
+        .flatMap { k -> JSONObject(lexicon).getJSONArray(k).let { a -> List(a.length()) { a.getString(it) } } }
     private val validator = SafetyValidator(kb, chemicals)
     private val confidentAt = 0.8  // manifest_draft.json thresholds.confident_at_or_above
 

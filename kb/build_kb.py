@@ -16,11 +16,11 @@ that pest or disease.
 """
 
 import csv
+import json
 import re
 import sys
 from pathlib import Path
 
-import pdfplumber
 
 KB = Path(__file__).resolve().parent
 CACHE = KB / "_cache"
@@ -65,6 +65,8 @@ def formulation(product):
 
 
 def extract(path, list_name):
+    import pdfplumber  # only needed to read the PDFs (tests import this module without it)
+
     rows, product, crop, special = [], None, None, False
     with pdfplumber.open(path) as pdf:
         for page_no, page in enumerate(pdf.pages, 1):
@@ -87,6 +89,16 @@ def extract(path, list_name):
                     rows.append({"list": list_name, "page": page_no, "product": product, "crop": crop,
                                  "pest": cells[1], "values": values, "special_basis": special})
     return rows
+
+
+def actives_in(product):
+    """Active ingredient names in a product: "Azoxystrobin 8.3% + Mancozeb 66.7% WG" -> azoxystrobin, mancozeb."""
+    out = []
+    for part in product.split("+"):
+        m = re.match(r"\s*\(?\s*([A-Za-z][A-Za-z\-\s]*?)\s*\d", part)
+        if m and len(m.group(1)) > 3:
+            out.append(re.sub(r"\s+", " ", m.group(1)).lower())
+    return out
 
 
 def label_for(pest):
@@ -172,7 +184,12 @@ def main():
         w = csv.DictWriter(f, fieldnames=list(rows[0]))
         w.writeheader()
         w.writerows(rows)
-    print(f"\nkb_treatment.csv: {len(rows)} rows")
+    actives = sorted({a for r in rows for a in actives_in(r["product"])})
+    lexicon_path = KB.parent / "ml" / "bundle" / "laya_safety_v1.json"
+    lexicon = json.loads(lexicon_path.read_text(encoding="utf-8"))
+    lexicon["known_actives"] = actives
+    lexicon_path.write_text(json.dumps(lexicon, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(f"\nkb_treatment.csv: {len(rows)} rows; {len(actives)} active ingredients -> laya_safety_v1.json known_actives")
     for label in LABEL_PATTERNS:
         print(f"  {label:20s} {sum(r['label'] == label for r in rows)}")
     print(f"skipped (no waiting period printed, not a per-hectare spray, or unclear unit): {len(skipped)}")

@@ -139,6 +139,7 @@ dependencies {
     implementation(libs.coroutines.android)
     implementation(libs.litert.asProvider())
     implementation(libs.litert.gpu)
+    implementation(libs.onnxruntime.android)  // KB question embeddings (e5-small int8)
     implementation(libs.camera.core)
     implementation(libs.camera.camera2)
     implementation(libs.camera.lifecycle)
@@ -148,7 +149,24 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)
     testImplementation(libs.org.json)  // real org.json on the JVM (android.jar only has stubs)
+    testImplementation(libs.sqlite.jdbc)  // reads the KB pack in KbRetrieverTest
+    testImplementation(libs.onnxruntime.jvm)  // desktop ONNX Runtime for EmbeddingModelTest
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.junit)
+}
+
+// Unit tests run on the desktop JVM: use the desktop ONNX Runtime (same ai.onnxruntime API) instead of the Android AAR.
+configurations.matching { it.name.endsWith("UnitTestRuntimeClasspath") }.configureEach {
+    exclude(group = "com.microsoft.onnxruntime", module = "onnxruntime-android")
+}
+
+// Unit tests read repo data at run time (bundle JSON, evals, KB CSVs, kb/dist). Declare it as input,
+// or Gradle reports stale results as up to date after a data-only change.
+tasks.withType<Test>().configureEach {
+    val repo = rootProject.projectDir.parentFile
+    inputs.files(fileTree(repo) {
+        include("ml/bundle/**", "ml/labels_v1.json", "evals/laya/**", "evals/kb/**", "kb/*.csv", "kb/dist/**")
+        exclude("**/__pycache__/**")
+    }).withPathSensitivity(PathSensitivity.RELATIVE).withPropertyName("repoData")
 }

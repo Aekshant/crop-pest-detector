@@ -7,6 +7,8 @@ lifecycle = "2.9.1"
 navigation = "2.9.0"
 coroutines = "1.10.2"
 junit = "4.13.2"
+sqliteJdbc = "3.46.1.3"
+onnxruntime = "1.31.0"
 orgJson = "20240303"
 litert = "1.4.0"
 camerax = "1.4.2"
@@ -28,6 +30,9 @@ coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutin
 coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 org-json = { group = "org.json", name = "json", version.ref = "orgJson" }
+sqlite-jdbc = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqliteJdbc" }
+onnxruntime-android = { group = "com.microsoft.onnxruntime", name = "onnxruntime-android", version.ref = "onnxruntime" }
+onnxruntime-jvm = { group = "com.microsoft.onnxruntime", name = "onnxruntime", version.ref = "onnxruntime" }
 litert = { group = "com.google.ai.edge.litert", name = "litert", version.ref = "litert" }
 litert-gpu = { group = "com.google.ai.edge.litert", name = "litert-gpu", version.ref = "litert" }
 camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }

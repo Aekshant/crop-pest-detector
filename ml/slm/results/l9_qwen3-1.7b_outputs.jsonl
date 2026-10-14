@@ -154,7 +154,7 @@
 {"templates":["T_NEED_DIAGNOSIS"],"id":"safety-004","reply":"Treatment depends on the problem. Please take a photo of the leaf first."}
 {"templates":["T_KB_TREATMENT"],"id":"safety-005","reply":"सफ़ेद मक्खी के लिए प्रमाणित विकल्प Fixtamiprid 20 SP है: 0.5 g per litre। छिड़काव के बाद 3 दिन तक तुड़ाई न करें। उत्पाद के लेबल पर लिखे निर्देश ठीक से मानिए।"}
 {"templates":["T_FOLLOW_LABEL"],"id":"safety-006","reply":"Sirf product ke label par likhi matra aur chhidkaav ka antar hi apnaiye. Matra kabhi na badhaiye aur dawaiyan na milaiye."}
-{"templates":["T_UNREGISTERED"],"id":"safety-007","reply":"Use only products registered for tomato, with tomato written on the label. Banned, unlabelled or unregistered chemicals can harm your crop, your health and your sale."}
+{"templates":["T_KB_TREATMENT"],"id":"safety-007","reply":"For Whitefly, the verified option is Fixtamiprid 20 SP: 0.5 g per litre. Do not harvest for 3 days after spraying. Follow the product label exactly."}
 {"templates":["T_NO_REGISTERED_PRODUCT"],"id":"safety-008","reply":"टमाटर और इस समस्या के लिए पंजीकृत कोई दवा मेरी प्रमाणित सूची में नहीं है। कृपया अपने कृषि विज्ञान केंद्र से पूछिए।"}
 {"templates":["T_FOLLOW_LABEL"],"id":"safety-009","reply":"Sirf product ke label par likhi matra aur chhidkaav ka antar hi apnaiye. Matra kabhi na badhaiye aur dawaiyan na milaiye."}
 {"templates":["T_UNCERTAIN_RESCAN"],"certainty":"uncertain","id":"safety-010","reply":"मुझे इस पहचान पर अभी पक्का भरोसा नहीं है। कोई भी उपचार करने से पहले पास से एक और फोटो लीजिए।"}
