@@ -92,6 +92,8 @@ def relevant(chunk_label, text, expect):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pack", type=Path, default=REPO / "kb" / "dist" / "kb_tomato_v1.sqlite")
+    ap.add_argument("--queries", type=Path, default=HERE / "retrieval_queries.jsonl",
+                    help="question set (heldout_kcc.jsonl: real KCC questions, never tuned on)")
     ap.add_argument("--fixture", type=Path, default=None,
                     help="also write query vectors and hybrid top-3 ids (the Android KbRetriever parity test reads it)")
     args = ap.parse_args()
@@ -105,7 +107,7 @@ def main():
     meta = dict(db.execute("SELECT key, value FROM meta"))
     name = meta["embedding_model"]
     model = embedding.load(name)
-    queries = [json.loads(l) for l in (HERE / "retrieval_queries.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+    queries = [json.loads(l) for l in args.queries.read_text(encoding="utf-8").splitlines() if l.strip()]
     chunks = {i: (label, text) for i, label, text in db.execute("SELECT id, label, text FROM kb_chunk")}
     answerable = sum(any(relevant(l, t, q["expect"]) for l, t in chunks.values()) for q in queries)
 
@@ -154,10 +156,11 @@ def main():
         for k in ("vector", "hybrid_ids", "hybrid_filtered_ids"):
             r.pop(k, None)
     report["results"] = results
-    out = HERE / f"results_{meta['embedding_model'].split('/')[-1]}.json"
+    tag = "" if args.queries.name == "retrieval_queries.jsonl" else args.queries.stem + "_"
+    out = HERE / f"results_{tag}{meta['embedding_model'].split('/')[-1]}.json"
     out.write_text(json.dumps(report, indent=1, ensure_ascii=False) + "\n")
 
-    print(f"K4 retrieval, {meta['embedding_model']}, top-{K}, {len(queries)} queries ({answerable} answerable from the pack)")
+    print(f"K4 retrieval, {meta['embedding_model']}, top-{K}, {len(queries)} queries from {args.queries.name} ({answerable} answerable from the pack)")
     print(f"{'':22s} {'all':>6s} {'en':>6s} {'hi':>6s} {'hinglish':>9s}")
     for mode in MODES:
         m = report[mode]

@@ -84,3 +84,42 @@ By language for the shipped configuration:
 **Caveat:** the chunking fixes, the model choice (2 candidates) and hybrid search were all
 decided on these 40 queries, so the numbers are optimistic. A held-out set of real farmer
 questions is needed before release.
+
+## Held-out check: real Kisan Call Centre questions
+
+```bash
+uvx --with pyarrow python -I evals/kb/make_heldout_kcc.py <kcc.parquet>   # once; writes heldout_kcc.jsonl
+uvx --with fastembed --with sqlite-vec --with onnxruntime==1.31.0 --with tokenizers python evals/kb/eval_retrieval.py --queries evals/kb/heldout_kcc.jsonl
+```
+
+[`heldout_kcc.jsonl`](heldout_kcc.jsonl) has **60 real farmer questions**: 6 per label,
+from 13 states, 2013–2023. They are tomato "Plant Protection" queries from the Kisan Call
+Centre logs (Department of Agriculture & Farmers Welfare, Open Government Data platform),
+read from the Hugging Face mirror `Omegaindebt/Kisan_Call_Centre_Transcripts`.
+
+`make_heldout_kcc.py` fixed every rule before the first run:
+
+- label keyword patterns;
+- deduplication;
+- the random seed;
+- relevance: the chunk carries the label, and for "control / management" questions it
+  must also contain management words.
+
+The set was run **once**, after all the changes above, and nothing was tuned on it.
+
+| Mode | open | filtered | open+names | filtered+names | hybrid+names (shipped, no diagnosis) | hybrid_filtered+names (shipped, diagnosis known) |
+|---|---|---|---|---|---|---|
+| e5-small int8 | 98% | 100% | 98% | 100% | **88%** | **98%** |
+
+**Reading it:**
+
+- **These questions are easier than the dev set.** The advisors type them in English and
+  they name the pest ("TOMATO WHITE FLY MANAGEMENT"). Hindi and Hinglish speech is not
+  covered here.
+- **Without a diagnosis, hybrid search is worse than plain vector search here** (88% vs
+  98%). BM25 latches onto generic words ("tomato", "control", "management") that are
+  common in general chunks: mites and Tuta drop to 50%. On the dev set the opposite held
+  (hybrid 80% vs vector 75%), because BM25 plus name expansion helps Hindi and Hinglish.
+- **Not tuned.** Changing the fusion now would spend this held-out set. The next step is
+  to try down-weighting BM25 or adding a stop-word list, and judge it on a **new** held-out
+  sample: same script, new seed, excluding these 60.
