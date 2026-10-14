@@ -1,0 +1,248 @@
+{
+  "device": {
+    "manufacturer": "Xiaomi",
+    "model": "24066PC95I",
+    "device": "breeze",
+    "soc": "QTI SM4450",
+    "android": "16",
+    "sdk": 36,
+    "abi": "arm64-v8a",
+    "ram_gb": 7.8,
+    "cores": 8,
+    "emulator": false,
+    "low_ram_device": false
+  },
+  "model_version": "vision-v3b-lite0",
+  "runs": [
+    {
+      "config": "gpu_fp16",
+      "threads": 2,
+      "pinned_cpus": [
+        6,
+        7
+      ],
+      "perf_hint": false,
+      "frame_gap_ms": 0,
+      "hint_target_ms": 25,
+      "backend": "GPU",
+      "create_ms": 3355.038645,
+      "warmup_ms": 28.89948,
+      "gpu_fallback": "",
+      "golden_correct": 7,
+      "golden_gradable": 7,
+      "inference_ms_p50": 19.99276,
+      "inference_ms_p90": 21.053123,
+      "preprocess_ms_p50": 4.084323,
+      "gate_ms_p50": 6.23724,
+      "gate_ms_p90": 8.46099
+    },
+    {
+      "config": "gpu_fp16_plain",
+      "threads": 2,
+      "pinned_cpus": [],
+      "perf_hint": false,
+      "frame_gap_ms": 0,
+      "hint_target_ms": 25,
+      "backend": "GPU",
+      "create_ms": 3552.420728,
+      "warmup_ms": 34.96422,
+      "gpu_fallback": "",
+      "golden_correct": 7,
+      "golden_gradable": 7,
+      "inference_ms_p50": 19.610937,
+      "inference_ms_p90": 22.592447,
+      "preprocess_ms_p50": 2.556458,
+      "gate_ms_p50": 6.268541,
+      "gate_ms_p90": 13.90026
+    },
+    {
+      "config": "gpu_fp16_paced",
+      "threads": 2,
+      "pinned_cpus": [
+        6,
+        7
+      ],
+      "perf_hint": false,
+      "frame_gap_ms": 15,
+      "hint_target_ms": 25,
+      "backend": "GPU",
+      "create_ms": 4263.25854,
+      "warmup_ms": 52.524532,
+      "gpu_fallback": "",
+      "golden_correct": 7,
+      "golden_gradable": 7,
+      "inference_ms_p50": 20.034166,
+      "inference_ms_p90": 23.865105,
+      "preprocess_ms_p50": 2.577343,
+      "gate_ms_p50": 5.200365,
+      "gate_ms_p90": 8.810417
+    },
+    {
+      "config": "gpu_fp16_paced_plain",
+      "threads": 2,
+      "pinned_cpus": [],
+      "perf_hint": false,
+      "frame_gap_ms": 15,
+      "hint_target_ms": 25,
+      "backend": "GPU",
+      "create_ms": 3513.13755,
+      "warmup_ms": 29.07901,
+      "gpu_fallback": "",
+      "golden_correct": 7,
+      "golden_gradable": 7,
+      "inference_ms_p50": 19.272448,
+      "inference_ms_p90": 21.709583,
+      "preprocess_ms_p50": 3.703802,
+      "gate_ms_p50": 7.01474,
+      "gate_ms_p90": 8.421719
+    },
+    {
+      "config": "cpu_int8_t1",
+      "threads": 1,
+      "pinned_cpus": [],
+      "perf_hint": false,
+      "frame_gap_ms": 0,
+      "hint_target_ms": 25,
+      "backend": "CPU",
+      "create_ms": 60.011094,
+      "warmup_ms": 43.165417,
+      "gpu_fallback": "GPU disabled",
+      "golden_correct": 7,
+      "golden_gradable": 7,
+      "inference_ms_p50": 42.602085,
+      "inference_ms_p90": 42.845623,
+      "preprocess_ms_p50": 2.239739,
+      "gate_ms_p50": 2.726406,
+      "gate_ms_p90": 2.928855
+    },
+    {
+      "config": "cpu_int8_t2",
+      "threads": 2,
+      "pinned_cpus": [],
+      "perf_hint": false,
+      "frame_gap_ms": 0,
+      "hint_target_ms": 25,
+      "backend": "CPU",
+      "create_ms": 36.446666,
+      "warmup_ms": 24.108698,
+      "gpu_fallback": "GPU disabled",
+      "golden_correct": 7,
+      "golden_gradable": 7,
+      "inference_ms_p50": 25.292915,
+      "inference_ms_p90": 37.85396,
+      "preprocess_ms_p50": 2.243802,
+      "gate_ms_p50": 2.713907,
+      "gate_ms_p90": 2.9275
+    },
+    {
+      "config": "cpu_int8_t4",
+      "threads": 4,
+      "pinned_cpus": [],
+      "perf_hint": false,
+      "frame_gap_ms": 0,
+      "hint_target_ms": 25,
+      "backend": "CPU",
+      "create_ms": 100.844323,
+      "warmup_ms": 87.525475,
+      "gpu_fallback": "GPU disabled",
+      "golden_correct": 7,
+      "golden_gradable": 7,
+      "inference_ms_p50": 71.3438,
+      "inference_ms_p90": 80.51786,
+      "preprocess_ms_p50": 2.256354,
+      "gate_ms_p50": 2.806354,
+      "gate_ms_p90": 4.041406
+    },
+    {
+      "config": "cpu_int8_default",
+      "threads": 2,
+      "pinned_cpus": [
+        6,
+        7
+      ],
+      "perf_hint": false,
+      "frame_gap_ms": 0,
+      "hint_target_ms": 25,
+      "backend": "CPU",
+      "create_ms": 100.06974,
+      "warmup_ms": 79.89385,
+      "gpu_fallback": "GPU disabled",
+      "golden_correct": 7,
+      "golden_gradable": 7,
+      "inference_ms_p50": 31.939947,
+      "inference_ms_p90": 37.80969,
+      "preprocess_ms_p50": 2.247136,
+      "gate_ms_p50": 2.747708,
+      "gate_ms_p90": 2.927916
+    },
+    {
+      "config": "cpu_int8_default_paced",
+      "threads": 2,
+      "pinned_cpus": [
+        6,
+        7
+      ],
+      "perf_hint": false,
+      "frame_gap_ms": 15,
+      "hint_target_ms": 25,
+      "backend": "CPU",
+      "create_ms": 55.202657,
+      "warmup_ms": 32.882446,
+      "gpu_fallback": "GPU disabled",
+      "golden_correct": 7,
+      "golden_gradable": 7,
+      "inference_ms_p50": 45.157917,
+      "inference_ms_p90": 70.087555,
+      "preprocess_ms_p50": 3.687813,
+      "gate_ms_p50": 4.684583,
+      "gate_ms_p90": 7.997604
+    }
+  ],
+  "budget": {
+    "gpu_fp16": {
+      "inference_p50_within_budget": true,
+      "limit_ms": 80,
+      "gate_p50_within_10ms": true
+    },
+    "gpu_fp16_plain": {
+      "inference_p50_within_budget": true,
+      "limit_ms": 80,
+      "gate_p50_within_10ms": true
+    },
+    "gpu_fp16_paced": {
+      "inference_p50_within_budget": true,
+      "limit_ms": 80,
+      "gate_p50_within_10ms": true
+    },
+    "gpu_fp16_paced_plain": {
+      "inference_p50_within_budget": true,
+      "limit_ms": 80,
+      "gate_p50_within_10ms": true
+    },
+    "cpu_int8_t1": {
+      "inference_p50_within_budget": true,
+      "limit_ms": 150,
+      "gate_p50_within_10ms": true
+    },
+    "cpu_int8_t2": {
+      "inference_p50_within_budget": true,
+      "limit_ms": 150,
+      "gate_p50_within_10ms": true
+    },
+    "cpu_int8_t4": {
+      "inference_p50_within_budget": true,
+      "limit_ms": 150,
+      "gate_p50_within_10ms": true
+    },
+    "cpu_int8_default": {
+      "inference_p50_within_budget": true,
+      "limit_ms": 150,
+      "gate_p50_within_10ms": true
+    },
+    "cpu_int8_default_paced": {
+      "inference_p50_within_budget": true,
+      "limit_ms": 150,
+      "gate_p50_within_10ms": true
+    }
+  }
+}

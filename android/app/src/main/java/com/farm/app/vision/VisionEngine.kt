@@ -63,22 +63,33 @@ class VisionEngine private constructor(
     val backend: Backend,
     val warmupMs: Float,
     val gpuFallbackReason: String,
+    private val hint: FrameHint?,
 ) : AutoCloseable {
+    /** True when frames report to an ADPF performance hint session ([FrameHint]). */
+    val perfHint: Boolean get() = hint != null
     private val out = FloatArray(VisionNative.PROBS + config.labels.size)
 
     /** Analyzes a CameraX YUV_420_888 frame without copying its planes. */
     fun analyze(image: ImageProxy): VisionOutcome {
         val (y, u, v) = image.planes
-        val code = VisionNative.nativeAnalyzeYuv(
-            handle, y.buffer, u.buffer, v.buffer, image.width, image.height,
-            y.rowStride, u.rowStride, u.pixelStride, image.imageInfo.rotationDegrees, config.labels.size, out,
-        )
-        return outcome(code)
+        return timed {
+            VisionNative.nativeAnalyzeYuv(
+                handle, y.buffer, u.buffer, v.buffer, image.width, image.height,
+                y.rowStride, u.rowStride, u.pixelStride, image.imageInfo.rotationDegrees, config.labels.size, out,
+            )
+        }
     }
 
     /** Analyzes an RGB8 image (golden tests, gallery photos). */
     fun analyzeRgb(rgb: ByteArray, width: Int, height: Int, rotationDegrees: Int = 0): VisionOutcome =
-        outcome(VisionNative.nativeAnalyzeRgb(handle, rgb, width, height, rotationDegrees, config.labels.size, out))
+        timed { VisionNative.nativeAnalyzeRgb(handle, rgb, width, height, rotationDegrees, config.labels.size, out) }
+
+    private inline fun timed(frame: () -> Int): VisionOutcome {
+        val t0 = System.nanoTime()
+        val code = frame()
+        hint?.report(System.nanoTime() - t0)
+        return outcome(code)
+    }
 
     private fun outcome(code: Int) = if (code == VisionNative.OK) VisionOutcome.Ok(result()) else VisionOutcome.Failed(code)
 
@@ -103,17 +114,52 @@ class VisionEngine private constructor(
 
     /** Idempotent; afterwards every call returns INVALID_HANDLE instead of crashing. */
     override fun close() {
+        hint?.close()
         if (handle != 0L) VisionNative.nativeRelease(handle)
         handle = 0L
     }
 
     companion object {
         /**
-         * XNNPACK worker threads spin-wait at every layer boundary, so asking for
-         * more threads than cores slows inference down badly. DeviceProfiler can
-         * refine this from its benchmark.
+         * XNNPACK worker threads spin-wait at every layer boundary, so the slowest
+         * thread sets the pace: on big.LITTLE phones, threads that land on little
+         * cores make inference slower. S4 on a POCO M6 Plus (SM4450: 2 big + 6
+         * little cores): 1 thread 42 ms, 2 threads 24 ms, 4 threads 68 ms. So use
+         * the fast cores only, at most 4. DeviceProfiler can refine this.
          */
-        fun defaultThreads(): Int = Runtime.getRuntime().availableProcessors().coerceIn(1, 4)
+        /** Gate + preprocess + inference target per frame for the ADPF hint. */
+        const val FRAME_TARGET_MS = 25L
+
+        /** CPUs the last create() pinned its thread to (empty: not pinned). For the benchmark and Status screen. */
+        @Volatile var pinnedCpus: List<Int> = emptyList()
+            private set
+
+        fun defaultThreads(): Int = threadsFor(readCpuValues("cpu_capacity"), readCpuValues("cpufreq/cpuinfo_max_freq"),
+                                               Runtime.getRuntime().availableProcessors())
+
+        fun threadsFor(capacities: List<Long>, maxFreqs: List<Long>, cores: Int): Int =
+            (fastCpusFor(capacities, maxFreqs)?.size ?: cores).coerceIn(1, 4)
+
+        /** The fast cores on a big.LITTLE phone, or null when all cores are alike (or unknown). */
+        fun fastCpus(): IntArray? = fastCpusFor(readCpuValues("cpu_capacity"), readCpuValues("cpufreq/cpuinfo_max_freq"))
+            ?.takeIf { it.size < Runtime.getRuntime().availableProcessors() }
+
+        /** Fast cores: capacity >= 60% of the fastest (else max frequency >= 90%); null if neither is readable. */
+        fun fastCpusFor(capacities: List<Long>, maxFreqs: List<Long>): IntArray? {
+            fun fast(values: List<Long>, share: Double) = values.indices.filter { values[it] >= share * values.max() }.toIntArray()
+            return when {
+                capacities.size >= 2 -> fast(capacities, 0.6)
+                maxFreqs.size >= 2 -> fast(maxFreqs, 0.9)
+                else -> null
+            }
+        }
+
+        private fun readCpuValues(file: String): List<Long> {
+            val values = (0 until Runtime.getRuntime().availableProcessors()).map { cpu ->
+                runCatching { java.io.File("/sys/devices/system/cpu/cpu$cpu/$file").readText().trim().toLong() }.getOrNull()
+            }
+            return if (values.all { it != null }) values.map { it!! } else emptyList()  // indices must line up with CPU ids
+        }
 
         /**
          * True on Android emulators: their GPU is a software renderer on which the
@@ -128,7 +174,17 @@ class VisionEngine private constructor(
          * The GPU is not tried on emulators. On phones, DeviceProfiler (later task) should validate the GPU
          * path once with a timeout and pass allowGpu = false where it hangs or gives wrong golden output.
          */
-        fun create(context: Context, allowGpu: Boolean = !isEmulator, threads: Int = defaultThreads()): VisionEngine {
+        fun create(
+            context: Context,
+            allowGpu: Boolean = !isEmulator,
+            threads: Int = defaultThreads(),
+            pinToFastCores: Boolean = true,
+            perfHint: Boolean = true,
+            frameTargetMs: Long = FRAME_TARGET_MS,
+        ): VisionEngine {
+            // Before nativeCreate, so XNNPACK's worker threads inherit the mask.
+            val fast = if (pinToFastCores) fastCpus() else null
+            pinnedCpus = fast?.takeIf { VisionNative.nativePinThread(it) == 0 }?.toList().orEmpty()
             val config = VisionConfig.load(context)
             val params = floatArrayOf(
                 config.fp16.temperature, config.fp16.rejectBelow, config.int8.temperature, config.int8.rejectBelow,
@@ -147,6 +203,7 @@ class VisionEngine private constructor(
                 backend = if (info[0] == 0f) Backend.GPU else Backend.CPU,
                 warmupMs = info[1],
                 gpuFallbackReason = VisionNative.nativeGpuFallbackReason(handle),
+                hint = if (perfHint) FrameHint.create(context, frameTargetMs) else null,
             )
         }
     }

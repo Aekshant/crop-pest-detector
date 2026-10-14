@@ -14,6 +14,12 @@ inline uint8_t Clip8(int64_t v) {
   return static_cast<uint8_t>(v >> kPrecisionBits);
 }
 
+inline uint8_t Clip8(int32_t v) {
+  if (v >= (1 << kPrecisionBits << 8)) return 255;
+  if (v <= 0) return 0;
+  return static_cast<uint8_t>(v >> kPrecisionBits);
+}
+
 inline double Triangle(double x) {
   x = std::fabs(x);
   return x < 1.0 ? 1.0 - x : 0.0;
@@ -87,13 +93,25 @@ void BilinearResizer::Resize(const uint8_t* src, int src_w, int src_h, int src_s
     for (int y = 0; y < hrows; ++y) {
       const uint8_t* row = src + static_cast<size_t>(y + y_first) * src_stride;
       uint8_t* out = &tmp_[static_cast<size_t>(y) * dst_w * channels];
-      for (int xx = 0; xx < dst_w; ++xx) {
-        const int xmin = h_.bounds[xx * 2], xmax = h_.bounds[xx * 2 + 1];
-        const int32_t* k = &h_.k[static_cast<size_t>(xx) * h_.ksize];
-        for (int c = 0; c < channels; ++c) {
-          int64_t ss = int64_t{1} << (kPrecisionBits - 1);
-          for (int x = 0; x < xmax; ++x) ss += static_cast<int64_t>(row[(x + xmin) * channels + c]) * k[x];
-          out[xx * channels + c] = Clip8(ss);
+      // 32-bit accumulators, as Pillow's 8bpc path: 255 * 2^22 * (sum of weights ~ 1) + 2^21 < 2^31.
+      if (channels == 1) {
+        for (int xx = 0; xx < dst_w; ++xx) {
+          const int xmin = h_.bounds[xx * 2], xmax = h_.bounds[xx * 2 + 1];
+          const int32_t* k = &h_.k[static_cast<size_t>(xx) * h_.ksize];
+          const uint8_t* p = row + xmin;
+          int32_t ss = 1 << (kPrecisionBits - 1);
+          for (int x = 0; x < xmax; ++x) ss += p[x] * k[x];
+          out[xx] = Clip8(ss);
+        }
+      } else {
+        for (int xx = 0; xx < dst_w; ++xx) {
+          const int xmin = h_.bounds[xx * 2], xmax = h_.bounds[xx * 2 + 1];
+          const int32_t* k = &h_.k[static_cast<size_t>(xx) * h_.ksize];
+          for (int c = 0; c < channels; ++c) {
+            int32_t ss = 1 << (kPrecisionBits - 1);
+            for (int x = 0; x < xmax; ++x) ss += row[(x + xmin) * channels + c] * k[x];
+            out[xx * channels + c] = Clip8(ss);
+          }
         }
       }
     }
@@ -110,39 +128,62 @@ void BilinearResizer::Resize(const uint8_t* src, int src_w, int src_h, int src_s
                   dst + static_cast<size_t>(y) * width * channels);
     return;
   }
+  // Row by row (not column by column): the same sums, read in memory order.
+  const int n = width * channels;
+  acc_.resize(static_cast<size_t>(n));
   for (int yy = 0; yy < dst_h; ++yy) {
     const int ymin = v_.bounds[yy * 2] - y_first, ymax = v_.bounds[yy * 2 + 1];
     const int32_t* k = &v_.k[static_cast<size_t>(yy) * v_.ksize];
-    uint8_t* out = dst + static_cast<size_t>(yy) * width * channels;
-    for (int x = 0; x < width * channels; ++x) {
-      int64_t ss = int64_t{1} << (kPrecisionBits - 1);
-      for (int y = 0; y < ymax; ++y) ss += static_cast<int64_t>(hsrc[static_cast<size_t>(y + ymin) * hstride + x]) * k[y];
-      out[x] = Clip8(ss);
+    int32_t* acc = acc_.data();
+    std::fill_n(acc, n, 1 << (kPrecisionBits - 1));
+    for (int y = 0; y < ymax; ++y) {
+      const uint8_t* row = hsrc + static_cast<size_t>(y + ymin) * hstride;
+      const int32_t ky = k[y];
+      for (int x = 0; x < n; ++x) acc[x] += row[x] * ky;
     }
+    uint8_t* out = dst + static_cast<size_t>(yy) * n;
+    for (int x = 0; x < n; ++x) out[x] = Clip8(acc[x]);
   }
 }
 
 namespace {
 
-// One Pillow ImagingLineBoxBlur8 pass for an integer radius: clamped window
-// sum, 24-bit fixed-point mean (fractional-radius term is 0).
-void BoxBlurLine(const uint8_t* in, int n, int step, int radius, uint8_t* out, int out_step) {
-  const uint32_t ww = static_cast<uint32_t>(static_cast<float>(1 << 24) / (radius * 2 + 1));
-  auto at = [&](int i) { return static_cast<uint32_t>(in[static_cast<size_t>(std::clamp(i, 0, n - 1)) * step]); };
-  uint32_t acc = 0;
-  for (int i = -radius; i <= radius; ++i) acc += at(i);
-  for (int x = 0; x < n; ++x) {
-    out[static_cast<size_t>(x) * out_step] = static_cast<uint8_t>((static_cast<uint64_t>(acc) * ww + (1u << 23)) >> 24);
-    acc += at(x + radius + 1) - at(x - radius);
-  }
+// Pillow's ImagingLineBoxBlur8 for an integer radius: clamped (edge-replicated)
+// window sum, then a 24-bit fixed-point mean (fractional-radius term is 0).
+inline uint8_t BoxMean(uint32_t acc, uint32_t ww) {
+  return static_cast<uint8_t>((static_cast<uint64_t>(acc) * ww + (1u << 23)) >> 24);
 }
 
 }  // namespace
 
 void BoxBlur(const uint8_t* src, int w, int h, int radius, uint8_t* dst, std::vector<uint8_t>* tmp) {
+  const uint32_t ww = static_cast<uint32_t>(static_cast<float>(1 << 24) / (radius * 2 + 1));
   tmp->resize(static_cast<size_t>(w) * h);
-  for (int y = 0; y < h; ++y) BoxBlurLine(src + static_cast<size_t>(y) * w, w, 1, radius, tmp->data() + static_cast<size_t>(y) * w, 1);
-  for (int x = 0; x < w; ++x) BoxBlurLine(tmp->data() + x, h, w, radius, dst + x, w);
+  // Horizontal: one sliding window per row.
+  for (int y = 0; y < h; ++y) {
+    const uint8_t* in = src + static_cast<size_t>(y) * w;
+    uint8_t* out = tmp->data() + static_cast<size_t>(y) * w;
+    uint32_t acc = 0;
+    for (int i = -radius; i <= radius; ++i) acc += in[std::clamp(i, 0, w - 1)];
+    for (int x = 0; x < w; ++x) {
+      out[x] = BoxMean(acc, ww);
+      acc += in[std::min(x + radius + 1, w - 1)] - in[std::max(x - radius, 0)];
+    }
+  }
+  // Vertical: a row of per-column windows slid down the image (memory order, vectorizable).
+  std::vector<uint32_t> acc(static_cast<size_t>(w), 0);
+  const uint8_t* t = tmp->data();
+  for (int i = -radius; i <= radius; ++i) {
+    const uint8_t* row = t + static_cast<size_t>(std::clamp(i, 0, h - 1)) * w;
+    for (int x = 0; x < w; ++x) acc[x] += row[x];
+  }
+  for (int y = 0; y < h; ++y) {
+    uint8_t* out = dst + static_cast<size_t>(y) * w;
+    for (int x = 0; x < w; ++x) out[x] = BoxMean(acc[x], ww);
+    const uint8_t* add = t + static_cast<size_t>(std::min(y + radius + 1, h - 1)) * w;
+    const uint8_t* sub = t + static_cast<size_t>(std::max(y - radius, 0)) * w;
+    for (int x = 0; x < w; ++x) acc[x] += add[x] - sub[x];
+  }
 }
 
 void RgbToLuma(const uint8_t* rgb, int w, int h, int stride, uint8_t* dst) {

@@ -21,13 +21,13 @@ Tiers (from the design doc):
 
 | ID   | Path                                       | Tier A/B        | Tier C          | Cloud path         | Measured |
 |------|--------------------------------------------|-----------------|-----------------|--------------------|----------|
-| L1   | Quality gate (blur + exposure, no ML)      | < 10 ms         | < 15 ms         | —                  | —        |
-| L2   | Vision inference, warm                     | < 80 ms (GPU)   | < 150 ms (CPU INT8) | < 1.2 s round trip on 4G | — |
+| L1   | Quality gate (blur + exposure, no ML)      | < 10 ms         | < 15 ms         | —                  | 5.2–6.2 ms GPU mode, 2.7 ms CPU mode (POCO M6 Plus, tier A, S4) |
+| L2   | Vision inference, warm                     | < 80 ms (GPU)   | < 150 ms (CPU INT8) | < 1.2 s round trip on 4G | 20 ms GPU FP16; 25–45 ms CPU INT8, 2 threads (POCO M6 Plus, S4) |
 | L3   | Shutter → result, warm model               | < 150 ms        | —               | —                  | —        |
 | L4   | Photo → spoken diagnosis (template)        | < 2 s           | < 2.5 s         | —                  | —        |
 | L5   | Laya time to first token                   | < 1.5 s         | — (cloud)       | < 1.5 s on 4G      | —        |
 | L6   | Laya UNDERSTAND step (≤ 64 tokens)         | < 4 s           | —               | < 2 s              | —        |
-| L7   | App cold start → camera ready              | < 2.5 s         | < 3.5 s         | —                  | —        |
+| L7   | App cold start → camera ready              | < 2.5 s         | < 3.5 s         | —                  | 1.1 s to first frame, release build (POCO M6 Plus; camera-ready not timed separately) |
 
 ## 2. Memory
 

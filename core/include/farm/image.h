@@ -29,6 +29,7 @@ class BilinearResizer {
   static void Compute(int in, int out, Coeffs* c);
   Coeffs h_, v_;
   std::vector<uint8_t> tmp_;  // horizontal pass output
+  std::vector<int32_t> acc_;  // vertical pass row accumulators
 };
 
 // PIL BoxBlur with integer radius on a single-channel image (edges replicated).

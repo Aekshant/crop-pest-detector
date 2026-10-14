@@ -41,13 +41,16 @@ class DeviceBenchmark {
     private fun pct(xs: List<Float>, p: Double) = xs.sorted()[((xs.size - 1) * p).toInt()]
 
     /** Runs one backend configuration on its own thread (engines are thread-confined). */
-    private fun measure(name: String, allowGpu: Boolean, threads: Int, goldens: List<Golden>, timeoutS: Long): JSONObject {
+    private fun measure(name: String, allowGpu: Boolean, threads: Int, goldens: List<Golden>, timeoutS: Long,
+                        pin: Boolean = true, hint: Boolean = true, frameGapMs: Long = 0,
+                        targetMs: Long = VisionEngine.FRAME_TARGET_MS): JSONObject {
         val result = JSONObject().put("config", name).put("threads", threads)
         val exec = Executors.newSingleThreadExecutor()
         val job = exec.submit<JSONObject> {
             val t0 = System.nanoTime()
-            VisionEngine.create(appContext, allowGpu = allowGpu, threads = threads).use { e ->
-                result.put("backend", e.backend.name).put("create_ms", (System.nanoTime() - t0) / 1e6)
+            VisionEngine.create(appContext, allowGpu = allowGpu, threads = threads, pinToFastCores = pin, perfHint = hint,
+                                frameTargetMs = targetMs).use { e ->
+                result.put("pinned_cpus", JSONArray(VisionEngine.pinnedCpus)).put("perf_hint", e.perfHint).put("frame_gap_ms", frameGapMs).put("hint_target_ms", targetMs).put("backend", e.backend.name).put("create_ms", (System.nanoTime() - t0) / 1e6)
                     .put("warmup_ms", e.warmupMs).put("gpu_fallback", e.gpuFallbackReason)
                 var correct = 0
                 var gradable = 0
@@ -55,8 +58,9 @@ class DeviceBenchmark {
                 val prep = mutableListOf<Float>()
                 val gate = mutableListOf<Float>()
                 repeat(3) { e.analyzeRgb(goldens[1].rgb, goldens[1].w, goldens[1].h) }  // settle clocks/caches
-                for (round in 0 until 5) {
+                for (round in 0 until 10) {
                     for (g in goldens) {
+                        if (frameGapMs > 0) Thread.sleep(frameGapMs)  // camera-like pacing instead of back-to-back frames
                         val r = e.analyzeRgb(g.rgb, g.w, g.h).resultOrNull() ?: continue
                         gate += r.qualityMs
                         if (r.decision == Decision.RETAKE) continue
@@ -103,8 +107,22 @@ class DeviceBenchmark {
     @Test fun benchmark() {
         val goldens = goldens()
         val runs = JSONArray()
-        if (!VisionEngine.isEmulator) runs.put(measure("gpu_fp16", allowGpu = true, threads = VisionEngine.defaultThreads(), goldens = goldens, timeoutS = 60))
-        for (t in listOf(1, 2, 4)) runs.put(measure("cpu_int8_t$t", allowGpu = false, threads = t, goldens = goldens, timeoutS = 180))
+        val auto = VisionEngine.defaultThreads()
+        if (!VisionEngine.isEmulator) {
+            // The app's setting (pinned to fast cores + ADPF hint), then each part off, to show what each does
+            // to the CPU-only quality gate while the GPU runs inference.
+            // The app's setting (fast-core pinning + ADPF hint) vs. neither, back-to-back and camera-paced
+            // (~33 ms per frame). Paced is the real case: between frames the CPU idles and clocks drop.
+            runs.put(measure("gpu_fp16", allowGpu = true, threads = auto, goldens = goldens, timeoutS = 60))
+            runs.put(measure("gpu_fp16_plain", allowGpu = true, threads = auto, goldens = goldens, timeoutS = 60, pin = false, hint = false))
+            runs.put(measure("gpu_fp16_paced", allowGpu = true, threads = auto, goldens = goldens, timeoutS = 90, frameGapMs = 15))
+            runs.put(measure("gpu_fp16_paced_plain", allowGpu = true, threads = auto, goldens = goldens, timeoutS = 90,
+                             pin = false, hint = false, frameGapMs = 15))
+        }
+        // Fixed thread counts: no pinning or hint, to show the raw big.LITTLE effect; "default" is what the app does.
+        for (t in listOf(1, 2, 4)) runs.put(measure("cpu_int8_t$t", allowGpu = false, threads = t, goldens = goldens, timeoutS = 180, pin = false, hint = false))
+        runs.put(measure("cpu_int8_default", allowGpu = false, threads = auto, goldens = goldens, timeoutS = 180))
+        runs.put(measure("cpu_int8_default_paced", allowGpu = false, threads = auto, goldens = goldens, timeoutS = 180, frameGapMs = 15))
 
         val budget = JSONObject()
         for (i in 0 until runs.length()) {

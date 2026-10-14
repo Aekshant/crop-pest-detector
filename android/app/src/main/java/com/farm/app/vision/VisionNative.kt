@@ -38,6 +38,9 @@ internal object VisionNative {
         inputSize: Int, threads: Int, allowGpu: Boolean, severityLabels: BooleanArray,
     ): Long
 
+    /** Pins the calling thread to these CPUs (0 or -errno). Threads it starts later inherit it. */
+    external fun nativePinThread(cpus: IntArray): Int
+
     external fun nativeRelease(handle: Long): Int
     external fun nativeInfo(handle: Long, out: FloatArray): Int
     external fun nativeGpuFallbackReason(handle: Long): String

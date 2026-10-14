@@ -5,10 +5,12 @@
 #include "farm/core.h"
 
 void RunVisionTests();
+void RunFastPathTests();
 
 int main() {
   CHECK(farm::version().rfind("farm-core", 0) == 0);
   RunVisionTests();
+  RunFastPathTests();
   if (farm_test::failures()) {
     std::fprintf(stderr, "%d check(s) failed\n", farm_test::failures());
     return 1;

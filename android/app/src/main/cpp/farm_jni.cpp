@@ -11,6 +11,9 @@
 
 #include <android/log.h>
 #include <jni.h>
+#include <sched.h>
+
+#include <cerrno>
 
 #include <chrono>
 #include <exception>
@@ -141,6 +144,22 @@ JNIEXPORT jstring JNICALL Java_com_farm_app_NativeCore_version(JNIEnv* env, jobj
 
 // params: [tempGpu, rejectGpu, tempCpu, rejectCpu, confidentAt, minSharpness, minBrightness, maxBrightness]
 // Returns a handle, or 0 with an IllegalStateException pending (creation is not a per-frame call).
+// Pins the calling thread (and threads it creates later, e.g. XNNPACK workers) to the given
+// CPUs. On big.LITTLE phones the vision thread otherwise drifts to little cores while it
+// waits for the GPU, and the CPU-only quality gate then runs ~2x slower. 0 or -errno.
+JNIEXPORT jint JNICALL Java_com_farm_app_vision_VisionNative_nativePinThread(JNIEnv* env, jobject, jintArray cpus) {
+  if (cpus == nullptr) return -EINVAL;
+  const jsize n = env->GetArrayLength(cpus);
+  jint* ids = env->GetIntArrayElements(cpus, nullptr);
+  cpu_set_t set;
+  CPU_ZERO(&set);
+  for (jsize i = 0; i < n; ++i) {
+    if (ids[i] >= 0 && ids[i] < CPU_SETSIZE) CPU_SET(ids[i], &set);
+  }
+  env->ReleaseIntArrayElements(cpus, ids, JNI_ABORT);
+  return sched_setaffinity(0, sizeof(set), &set) == 0 ? 0 : -errno;
+}
+
 JNIEXPORT jlong JNICALL Java_com_farm_app_vision_VisionNative_nativeCreate(
     JNIEnv* env, jobject, jobject fp16, jobject int8, jfloatArray params, jint num_labels, jint unknown_index,
     jint input_size, jint threads, jboolean allow_gpu, jbooleanArray severity_labels) {
