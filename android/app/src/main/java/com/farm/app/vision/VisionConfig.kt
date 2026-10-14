@@ -27,12 +27,12 @@ data class VisionConfig(
     val maxBrightness: Float,
 ) {
     companion object {
-        private const val DIR = "vision"
+        fun load(context: Context): VisionConfig = load(VisionFiles.assets(context))
 
-        fun load(context: Context): VisionConfig {
-            val v = JSONObject(readText(context, "$DIR/manifest.json")).getJSONObject("vision")
+        fun load(files: VisionFiles): VisionConfig {
+            val v = JSONObject(readText(files, "manifest.json")).getJSONObject("vision")
             val ids = v.getJSONArray("labels").let { a -> List(a.length()) { a.getString(it) } }
-            val names = JSONObject(readText(context, "$DIR/labels_v1.json")).getJSONArray("labels")
+            val names = JSONObject(readText(files, "labels_v1.json")).getJSONArray("labels")
             val byId = (0 until names.length()).map { names.getJSONObject(it) }.associateBy { it.getString("id") }
             val labels = ids.map { id ->
                 val n = byId.getValue(id)
@@ -57,12 +57,13 @@ data class VisionConfig(
             )
         }
 
-        fun modelBuffer(context: Context, name: String): ByteBuffer {
-            val bytes = context.assets.open("$DIR/$name").use { it.readBytes() }
+        fun modelBuffer(context: Context, name: String): ByteBuffer = modelBuffer(VisionFiles.assets(context), name)
+
+        fun modelBuffer(files: VisionFiles, name: String): ByteBuffer {
+            val bytes = files.open(name).use { it.readBytes() }
             return ByteBuffer.allocateDirect(bytes.size).order(ByteOrder.nativeOrder()).put(bytes).apply { rewind() }
         }
 
-        private fun readText(context: Context, path: String) =
-            context.assets.open(path).bufferedReader().use { it.readText() }
+        private fun readText(files: VisionFiles, name: String) = files.open(name).bufferedReader().use { it.readText() }
     }
 }

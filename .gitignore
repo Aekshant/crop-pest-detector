@@ -22,3 +22,4 @@ ml/slm/_models/
 kb/_cache/
 kb/dist/
 core/build*/
+dist/

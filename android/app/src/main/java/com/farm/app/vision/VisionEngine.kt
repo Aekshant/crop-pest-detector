@@ -181,18 +181,19 @@ class VisionEngine private constructor(
             pinToFastCores: Boolean = true,
             perfHint: Boolean = true,
             frameTargetMs: Long = FRAME_TARGET_MS,
+            files: VisionFiles = VisionFiles.assets(context),
         ): VisionEngine {
             // Before nativeCreate, so XNNPACK's worker threads inherit the mask.
             val fast = if (pinToFastCores) fastCpus() else null
             pinnedCpus = fast?.takeIf { VisionNative.nativePinThread(it) == 0 }?.toList().orEmpty()
-            val config = VisionConfig.load(context)
+            val config = VisionConfig.load(files)
             val params = floatArrayOf(
                 config.fp16.temperature, config.fp16.rejectBelow, config.int8.temperature, config.int8.rejectBelow,
                 config.confidentAt, config.minSharpness, config.minBrightness, config.maxBrightness,
             )
             val handle = VisionNative.nativeCreate(
-                if (allowGpu) VisionConfig.modelBuffer(context, "vision_fp16.tflite") else null,
-                VisionConfig.modelBuffer(context, "vision_int8.tflite"),
+                if (allowGpu) VisionConfig.modelBuffer(files, "vision_fp16.tflite") else null,
+                VisionConfig.modelBuffer(files, "vision_int8.tflite"),
                 params, config.labels.size, config.unknownIndex, config.inputSize, threads, allowGpu,
                 BooleanArray(config.labels.size) { config.labels[it].isDisease },
             )

@@ -19,6 +19,21 @@ val extractLiteRt by tasks.registering(Sync::class) {
 
 // Model files and manifests the app loads at startup (Git LFS in ml/).
 val visionAssets = layout.buildDirectory.dir("generated/visionAssets")
+// The bundle smoke test's golden images (BundleSmoke): the app owns the expected answers.
+val copySmokeAssets by tasks.registering(Sync::class) {
+    from(repoRoot.resolve("core/tests/golden")) {
+        include("golden.json", "00_healthy.rgb", "02_late_blight.rgb", "04_yellow_leaf_curl_virus.rgb", "05_spider_mites.rgb", "06_whitefly.rgb")
+    }
+    into(visionAssets.map { it.dir("smoke") })
+}
+
+// Ed25519 public keys trusted for model bundles (ml/bundle/bundle_public_keys.json), compiled in.
+val bundlePublicKeys: String = run {
+    @Suppress("UNCHECKED_CAST")
+    val keys = (groovy.json.JsonSlurper().parse(repoRoot.resolve("ml/bundle/bundle_public_keys.json")) as Map<String, Any>)["keys"] as Map<String, String>
+    keys.entries.joinToString(";") { "${it.key}=${it.value}" }
+}
+
 val copyVisionAssets by tasks.registering(Sync::class) {
     from(repoRoot.resolve("ml/runs/v3b_lite0_cpu/export")) { include("vision_fp16.tflite", "vision_int8.tflite") }
     from(repoRoot.resolve("ml/bundle/manifest_draft.json")) { rename { "manifest.json" } }
@@ -55,6 +70,9 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "BUNDLE_PUBLIC_KEYS", "\"$bundlePublicKeys\"")
+        // Where model bundles are hosted (ml/bundle/build_bundle.py output). Empty: no updates.
+        buildConfigField("String", "BUNDLE_BASE_URL", "\"${providers.gradleProperty("farm.bundleBaseUrl").getOrElse("")}\"")
 
         externalNativeBuild {
             cmake {
@@ -124,7 +142,7 @@ android {
     }
 }
 
-tasks.named("preBuild") { dependsOn(extractLiteRt, copyVisionAssets, copyAsanRuntime) }
+tasks.named("preBuild") { dependsOn(extractLiteRt, copyVisionAssets, copySmokeAssets, copyAsanRuntime) }
 
 // wrap.sh only runs when native libs are extracted to disk.
 androidComponents {
@@ -132,7 +150,7 @@ androidComponents {
 }
 tasks.configureEach {
     if (name.startsWith("configureCMake") || name.startsWith("buildCMake")) dependsOn(extractLiteRt)
-    if (name.contains("Assets", ignoreCase = true) && name.startsWith("merge")) dependsOn(copyVisionAssets)
+    if (name.contains("Assets", ignoreCase = true) && name.startsWith("merge")) dependsOn(copyVisionAssets, copySmokeAssets)
 }
 
 dependencies {
@@ -152,6 +170,8 @@ dependencies {
     implementation(libs.litert.asProvider())
     implementation(libs.litert.gpu)
     implementation(libs.onnxruntime.android)  // KB question embeddings (e5-small int8)
+    implementation(libs.bouncycastle)  // Ed25519 bundle signatures (java.security has it only from API 33)
+    implementation(libs.work.runtime)  // background bundle updates
     implementation(libs.camera.core)
     implementation(libs.camera.camera2)
     implementation(libs.camera.lifecycle)

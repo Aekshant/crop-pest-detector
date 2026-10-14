@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        com.farm.app.bundle.BundleWorker.schedule(this)
         enableEdgeToEdge()
         // Load + warm up the vision model at start, so the first photo is fast.
         lifecycleScope.launch { VisionRepository.warmUp(applicationContext) }

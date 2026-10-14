@@ -1,0 +1,6 @@
+{
+  "note": "Ed25519 public keys the app trusts for bundles, by key id (raw 32 bytes, base64).",
+  "keys": {
+    "dev-2026-10": "9SkH8I+mjqs0TJXRQGATCz1o/ozom3vdrbBnOv4RWDo="
+  }
+}
