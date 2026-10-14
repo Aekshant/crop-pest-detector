@@ -56,9 +56,6 @@ android {
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        ndk {
-            abiFilters += listOf("arm64-v8a", "x86_64")
-        }
         externalNativeBuild {
             cmake {
                 arguments += "-DFARM_CORE_LITERT_DIR=${litertDir.get().asFile.absolutePath}"
@@ -67,6 +64,17 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            ndk { abiFilters += listOf("arm64-v8a", "x86_64") }  // x86_64 for the emulator
+        }
+        // Phones only (arm64-v8a): x86_64 alone is ~55 MB of native libraries (ONNX Runtime 41 MB).
+        // Unsigned until a release keystore exists (signingConfig goes here).
+        getByName("release") {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            ndk { abiFilters += listOf("arm64-v8a") }
+        }
         // Debug build with AddressSanitizer on all our native code:
         //   ./gradlew assembleAsan
         //   ./gradlew assembleAsanAndroidTest -Pfarm.testBuildType=asan

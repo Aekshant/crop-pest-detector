@@ -258,3 +258,40 @@ passage.
 - Sentences were split at the decimal point in "20.27".
 
 Both are fixed and covered by `SafetyTest`.
+
+## Shipping it: model bundle and app size
+
+```bash
+python kb/update_manifest.py   # after build_pack.py / export_embedder.py: writes the "kb" entry of ml/bundle/manifest_draft.json
+```
+
+The KB files travel in the **downloadable model bundle**, not in the APK. That is about
+122 MB: the pack (2.1 MB), the e5-small int8 model (112.6 MB) and its vocabulary
+(7.4 MB).
+
+The manifest's `kb` entry records:
+
+- `kb_version` and the embedding model;
+- the query prefix and the ONNX Runtime version;
+- the review counts;
+- for each file, its size in bytes and its sha256.
+
+On the device, `KbBundle.verify()` checks each file's size and sha256 once, after
+download and before activation. `KbBundle.open()` then loads the pack, the embedder and
+the retriever. The downloader itself (WorkManager, resumable) is part of the bundle
+update flow and isn't written yet.
+
+**App size:**
+
+| Build | ABIs | APK | Download (gzip estimate) |
+|---|---|---|---|
+| debug | arm64-v8a + x86_64 (emulator) | 116 MB | n/a |
+| **release** (R8 and resource shrinking) | arm64-v8a only | **54 MB** | **about 26 MB** |
+
+- ONNX Runtime is 34 MB of the release APK. Native libraries are stored uncompressed so
+  they can be memory-mapped.
+- The next big cut would be running the embedder on LiteRT, which the app already ships
+  for vision, and dropping ONNX Runtime. That needs the e5-small model converted to
+  TFLite and the parity tests re-run.
+- The release build is unsigned (no release keystore yet). It hasn't been run on a
+  device: it's arm64-only, so it needs the phone (S4).

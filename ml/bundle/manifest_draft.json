@@ -89,5 +89,33 @@
     "tool_schema_version": 1,
     "tool_schema": "ml/bundle/tools_schema_v1.json",
     "note": "The app refuses a bundle whose tool_schema_version it does not support (design doc, update flow step 3)."
+  },
+  "kb": {
+    "kb_version": "2026-10-14",
+    "embedding_model": "e5-small-int8",
+    "embedding_dim": 384,
+    "query_prefix": "query: ",
+    "onnxruntime": "1.31.0",
+    "treatment_review": {
+      "pending": 129
+    },
+    "files": {
+      "pack": {
+        "file": "kb_tomato_v1.sqlite",
+        "bytes": 2211840,
+        "sha256": "e09c3cb75931191712e0d71fa8cb0af8e118f672ee24d271e041cc5e98adbc6d"
+      },
+      "embedding_model": {
+        "file": "e5_small_int8.onnx",
+        "bytes": 118101091,
+        "sha256": "8da4c9ba0ad59f58e8566839425d7fd6339d31414d0ce5cba2d7d0afb75dd8b6"
+      },
+      "vocab": {
+        "file": "e5_small_vocab.tsv",
+        "bytes": 7763089,
+        "sha256": "62fce312d72594ad30235447483680a6d1bbce5d7e219bbe29a241539e449f92"
+      }
+    },
+    "note": "Built by kb/build_pack.py and kb/export_embedder.py; the app opens them only after KbBundle.verify()."
   }
 }
