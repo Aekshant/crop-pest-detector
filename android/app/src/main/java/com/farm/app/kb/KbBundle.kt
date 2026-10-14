@@ -45,6 +45,13 @@ class KbBundle(private val dir: File, manifestJson: String) {
     }
 
     companion object {
+        /** Opens a KB from explicit files (a model bundle's kb, kb_embedder and kb_vocab artifacts). */
+        fun open(pack: File, model: File, vocab: File, labelsJson: String, includeUnreviewed: Boolean = false): Loaded {
+            val p = KbPack.open(pack, includeUnreviewed)
+            val m = EmbeddingModel(model, vocab)
+            return Loaded(p, m, KbRetriever(p.chunks, KbRetriever.namesFromLabels(labelsJson)))
+        }
+
         fun sha256(f: File): String {
             val md = MessageDigest.getInstance("SHA-256")
             f.inputStream().use { input ->

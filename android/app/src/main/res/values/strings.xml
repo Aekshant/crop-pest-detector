@@ -32,4 +32,8 @@
     <string name="status_tier">Device tier</string>
     <string name="status_network">Network</string>
     <string name="status_not_measured">Not measured yet</string>
+    <string name="status_bundle">Model bundle</string>
+    <string name="status_bundle_builtin">Built-in</string>
+    <string name="status_kb">Knowledge base</string>
+    <string name="status_kb_none">Not downloaded yet</string>
 </resources>

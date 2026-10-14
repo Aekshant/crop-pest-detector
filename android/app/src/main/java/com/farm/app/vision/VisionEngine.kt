@@ -191,10 +191,11 @@ class VisionEngine private constructor(
                 config.fp16.temperature, config.fp16.rejectBelow, config.int8.temperature, config.int8.rejectBelow,
                 config.confidentAt, config.minSharpness, config.minBrightness, config.maxBrightness,
             )
+            val gpu = allowGpu && files.has("vision_fp16.tflite")  // tier C bundles ship no FP16 model
             val handle = VisionNative.nativeCreate(
-                if (allowGpu) VisionConfig.modelBuffer(files, "vision_fp16.tflite") else null,
+                if (gpu) VisionConfig.modelBuffer(files, "vision_fp16.tflite") else null,
                 VisionConfig.modelBuffer(files, "vision_int8.tflite"),
-                params, config.labels.size, config.unknownIndex, config.inputSize, threads, allowGpu,
+                params, config.labels.size, config.unknownIndex, config.inputSize, threads, gpu,
                 BooleanArray(config.labels.size) { config.labels[it].isDisease },
             )
             val info = FloatArray(2)

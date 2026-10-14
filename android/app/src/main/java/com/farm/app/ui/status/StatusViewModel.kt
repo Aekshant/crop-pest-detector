@@ -1,9 +1,12 @@
 package com.farm.app.ui.status
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.farm.app.BuildConfig
 import com.farm.app.NativeCore
+import com.farm.app.bundle.ActiveBundle
+import com.farm.app.bundle.DeviceTier
 import com.farm.app.vision.EngineStatus
 import com.farm.app.vision.VisionRepository
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +25,8 @@ data class StatusUiState(
     /** Filled by DeviceProfiler, HealthMonitor and NetworkMonitor in later tasks. */
     val deviceTier: String? = null,
     val network: String? = null,
+    /** The active model bundle with a KB, e.g. "2026.10.15 (current)"; null: none downloaded. */
+    val kbBundle: String? = null,
 )
 
 /**
@@ -31,6 +36,15 @@ data class StatusUiState(
 class StatusViewModel(
     private val coreVersion: suspend () -> String = { NativeCore.version() },
 ) : ViewModel() {
+    /** Reads which bundles are activated (cheap: signature + file sizes, no model loading). */
+    fun loadBundles(context: Context) {
+        viewModelScope.launch {
+            val tier = withContext(Dispatchers.IO) { DeviceTier.current(context) }
+            val kb = withContext(Dispatchers.IO) { ActiveBundle.candidates(context, tier).firstOrNull { it.hasKb }?.toString() }
+            _state.update { it.copy(deviceTier = tier, kbBundle = kb) }
+        }
+    }
+
     private val _state = MutableStateFlow(StatusUiState(appVersion = BuildConfig.VERSION_NAME))
     val state: StateFlow<StatusUiState> = _state.asStateFlow()
 

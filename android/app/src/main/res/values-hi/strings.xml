@@ -31,4 +31,8 @@
     <string name="status_tier">डिवाइस श्रेणी</string>
     <string name="status_network">नेटवर्क</string>
     <string name="status_not_measured">अभी मापा नहीं गया</string>
+    <string name="status_bundle">मॉडल बंडल</string>
+    <string name="status_bundle_builtin">ऐप में शामिल</string>
+    <string name="status_kb">ज्ञान भंडार</string>
+    <string name="status_kb_none">अभी डाउनलोड नहीं हुआ</string>
 </resources>

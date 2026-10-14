@@ -116,11 +116,27 @@ adb shell am instrument -w -e class com.farm.app.bundle.BundleDeviceTest -e bund
     com.farm.app.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
+**Using the bundle.** `ActiveBundle` lists the activated bundles, current then previous.
+Each is re-checked when loaded: the signature of its stored manifest and the size of every
+artifact. Hashes were verified at download.
+
+- **Vision** (`VisionRepository`) tries the current bundle, then the previous one, then
+  the APK's built-in models, and uses the first that loads. GPU is tried only when that
+  source ships the FP16 model.
+- **KB** (`KbRepository`) comes from the active bundle. The APK has none, so until a
+  bundle is activated, treatment questions get the "ask your KVK" template.
+- **The Status screen** shows the bundle in use, the KB, the tier, and any bundle skipped
+  as damaged.
+
+On the POCO M6 Plus, after the real bundle was installed: "Vision model … GPU, warm-up
+32 ms", "Model bundle 2026.10.15 (current)", "Knowledge base 2026.10.15 (current)",
+"Device tier A". With that bundle's INT8 model then truncated on the phone, the app
+started on the built-in model and listed the bundle as skipped, with no crash.
+
 **Not done yet:**
 
 - the bundle host, plus a production signing key;
-- making the app *use* the activated bundle: vision and Laya still read the factory
-  assets, and the next step is to prefer `BundleStore.currentDir()` (`VisionFiles.dir`,
-  `KbBundle`);
+- Laya's runtime (Ask Laya tab) doesn't exist yet; when it does, it reads its JSON
+  files and the KB from `ActiveBundle` / `KbRepository`;
 - the Laya smoke step;
 - a tier rule that accounts for GPU delegate failures (DeviceProfiler).

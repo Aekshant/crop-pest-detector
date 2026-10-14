@@ -2,6 +2,7 @@ package com.farm.app.vision
 
 import android.content.Context
 import android.util.Log
+import com.farm.app.bundle.ActiveBundle
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +15,10 @@ data class EngineStatus(
     val gpuFallbackReason: String = "",
     val modelVersion: String = "",
     val error: String? = null,
+    /** Where the model came from: "2026.10.15 (current)", "built-in", ... */
+    val source: String = "",
+    /** Sources that failed before this one loaded (e.g. a broken current bundle). */
+    val skipped: List<String> = emptyList(),
 )
 
 /**
@@ -32,18 +37,31 @@ object VisionRepository {
     fun obtain(context: Context): VisionEngine? {
         check(VisionThread.isCurrent()) { "vision engine used off the vision thread" }
         engine?.let { return it }
-        return try {
-            val create = { allowGpu: Boolean -> VisionEngine.create(context.applicationContext, allowGpu = allowGpu) }
-            (if (gpuBroken) create(false) else create(!VisionEngine.isEmulator)).also {
-                engine = it
-                _status.value = EngineStatus(true, it.backend, it.warmupMs, it.gpuFallbackReason, it.config.modelVersion)
-                Log.i(TAG, "engine ready: ${it.backend} warm-up ${"%.1f".format(it.warmupMs)} ms ${it.gpuFallbackReason}")
+        val app = context.applicationContext
+        val skipped = runCatching { ActiveBundle.rejected(app) }.getOrDefault(emptyList())
+            .map { "$it: damaged or not trusted" }.toMutableList()
+        var lastError: Exception? = null
+        // Downloaded bundles first (current, then previous), then the APK's built-in models.
+        for ((name, files) in sources(app)) {
+            try {
+                val e = VisionEngine.create(app, allowGpu = !gpuBroken && !VisionEngine.isEmulator, files = files)
+                engine = e
+                _status.value = EngineStatus(true, e.backend, e.warmupMs, e.gpuFallbackReason, e.config.modelVersion, null, name, skipped)
+                Log.i(TAG, "engine ready from $name: ${e.backend} warm-up ${"%.1f".format(e.warmupMs)} ms ${e.gpuFallbackReason}")
+                return e
+            } catch (e: Exception) {
+                Log.e(TAG, "engine from $name failed", e)
+                skipped += "$name: ${e.message ?: e}"
+                lastError = e
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "engine creation failed", e)
-            _status.value = EngineStatus(error = e.message ?: e.toString())
-            null
         }
+        _status.value = EngineStatus(error = lastError?.message ?: "no vision model", skipped = skipped)
+        return null
+    }
+
+    private fun sources(context: Context): List<Pair<String, VisionFiles>> {
+        val bundles = runCatching { ActiveBundle.candidates(context) }.getOrDefault(emptyList()).filter { it.hasVision }
+        return bundles.map { it.toString() to VisionFiles.dir(it.dir) } + ("built-in" to VisionFiles.assets(context))
     }
 
     /** Warm the engine up off the main thread (called at app start). */
