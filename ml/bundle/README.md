@@ -74,6 +74,12 @@ WorkManager requests, since constraints can't express "or"; a lock serializes th
    by an atomic rename. If it fails, the candidate is deleted and the failure reported.
 7. The old bundle stays as `previous`, and anything older is deleted.
 
+**R8 and reflection.** The first release build with WorkManager crashed at launch. Room
+creates `WorkDatabase_Impl` by reflection, and full-mode R8 had removed its constructor. A
+keep rule in `proguard-rules.pro` fixes it. Debug builds and CI don't shrink, so after
+adding a dependency, launch a release build on a phone:
+`./gradlew assembleRelease -Pfarm.signReleaseWithDebugKey` and `adb install`.
+
 Release builds are HTTPS-only (Android's default). Debug builds allow cleartext to
 `127.0.0.1` only, for the device test below.
 
