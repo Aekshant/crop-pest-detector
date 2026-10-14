@@ -21,3 +21,4 @@ ml/slm/_deps/
 ml/slm/_models/
 kb/_cache/
 kb/dist/
+core/build*/
