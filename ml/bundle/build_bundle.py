@@ -38,7 +38,8 @@ ARTIFACTS = [  # name, source path, tiers (None = all); vision files keep the ap
     ("fewshot", "ml/bundle/laya_fewshot_v1.json", None),
     ("safety", "ml/bundle/laya_safety_v1.json", None),
     ("kb", "kb/dist/kb_tomato_v1.sqlite", None),
-    ("kb_embedder", "kb/dist/e5_small_int8.onnx", None),
+    ("kb_embedder", "kb/dist/e5_small_encoder.tflite", None),
+    ("kb_table", "kb/dist/e5_small_table.bin", None),
     ("kb_vocab", "kb/dist/e5_small_vocab.tsv", None),
 ]
 SLM = ("laya", "ml/slm/_models/Qwen3-1.7B-Q4_K_M.gguf", ["A", "B"])

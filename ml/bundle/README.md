@@ -16,7 +16,7 @@ The app is built with the host URL:
 `./gradlew assembleRelease -Pfarm.bundleBaseUrl=https://…`. If the URL is empty, the app
 never updates (the current state: there's no host yet).
 
-**Artifacts in `2026.10.15` (133 MB):**
+**Artifacts in `2026.10.16` (134 MB):**
 
 | Artifact | Contents | Size |
 |---|---|---|
@@ -25,7 +25,8 @@ never updates (the current state: there's no host yet).
 | vision_config, labels | vision config and labels | small |
 | tool_schema, templates, fewshot, safety | Laya's JSON files | small |
 | kb | KB pack | 2.1 MB |
-| kb_embedder | e5-small int8 | 112.6 MB |
+| kb_embedder | e5-small encoder (LiteRT) | 21.4 MB |
+| kb_table | e5-small word table (int8) | 92.5 MB |
 | kb_vocab | vocabulary | 7.4 MB |
 | laya (`--with-slm`) | Qwen3 1.7B GGUF (tiers A/B) | about 1.1 GB |
 

@@ -39,7 +39,7 @@ sys.path.insert(0, str(KB))
 from fetch_sources import CACHE, cache_name  # noqa: E402
 
 KB_VERSION = "2026-10-14"
-DEFAULT_MODEL = "e5-small-int8"  # K4: e5-small beats MiniLM-L12 without a diagnosis; int8 = the on-device file
+DEFAULT_MODEL = "e5-small-litert"  # e5-small via LiteRT (int8 table + int8-weight encoder): cosine >= 0.999 to fp32
 OUT = KB / "dist" / "kb_tomato_v1.sqlite"
 
 LABEL_PATTERNS = {

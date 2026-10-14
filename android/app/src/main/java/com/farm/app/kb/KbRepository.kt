@@ -23,7 +23,7 @@ object KbRepository {
         for (b in bundles) {
             try {
                 // Debug builds may use rows still pending agronomist review; release builds only approved rows.
-                val kb = KbBundle.open(b.file("kb")!!, b.file("kb_embedder")!!, b.file("kb_vocab")!!, labels, includeUnreviewed = BuildConfig.DEBUG)
+                val kb = KbBundle.open(b.file("kb")!!, b.file("kb_embedder")!!, b.file("kb_table")!!, b.file("kb_vocab")!!, labels, includeUnreviewed = BuildConfig.DEBUG)
                 loaded = b.version to kb
                 Log.i(TAG, "KB ${kb.pack.meta["kb_version"]} from bundle $b")
                 return kb

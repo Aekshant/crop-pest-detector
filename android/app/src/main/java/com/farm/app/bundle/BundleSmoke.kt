@@ -1,7 +1,7 @@
 package com.farm.app.bundle
 
 import android.content.Context
-import com.farm.app.kb.EmbeddingModel
+import com.farm.app.kb.LiteRtEmbeddingModel
 import com.farm.app.kb.KbPack
 import com.farm.app.laya.Templates
 import com.farm.app.laya.ToolSchema
@@ -38,7 +38,7 @@ class BundleSmoke(private val context: Context, private val tier: String) : Smok
         val pack = runCatching { KbPack.open(files.getValue("kb")) }.getOrElse { return "KB pack: ${it.message}" }
         if (pack.chunks.isEmpty() || pack.treatments.isEmpty()) return "KB pack is empty"
         runCatching {
-            EmbeddingModel(files.getValue("kb_embedder"), files.getValue("kb_vocab")).use { m ->
+            LiteRtEmbeddingModel(files.getValue("kb_embedder"), files.getValue("kb_table"), files.getValue("kb_vocab")).use { m ->
                 val v = m.embed("tomato leaf with brown spots")
                 val norm = v.sumOf { (it * it).toDouble() }
                 check(v.size == pack.meta["embedding_dim"]?.toInt() && norm in 0.99..1.01) { "bad embedding" }
@@ -73,7 +73,7 @@ class BundleSmoke(private val context: Context, private val tier: String) : Smok
     }
 
     companion object {
-        val REQUIRED = listOf("vision", "vision_config", "labels", "tool_schema", "templates", "safety", "kb", "kb_embedder", "kb_vocab")
+        val REQUIRED = listOf("vision", "vision_config", "labels", "tool_schema", "templates", "safety", "kb", "kb_embedder", "kb_table", "kb_vocab")
         const val MIN_GOLDENS = 5
     }
 }

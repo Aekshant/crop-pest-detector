@@ -8,7 +8,6 @@ navigation = "2.9.0"
 coroutines = "1.10.2"
 junit = "4.13.2"
 sqliteJdbc = "3.46.1.3"
-onnxruntime = "1.31.0"
 bouncycastle = "1.78.1"
 work = "2.9.1"
 orgJson = "20240303"
@@ -33,8 +32,6 @@ coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 org-json = { group = "org.json", name = "json", version.ref = "orgJson" }
 sqlite-jdbc = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqliteJdbc" }
-onnxruntime-android = { group = "com.microsoft.onnxruntime", name = "onnxruntime-android", version.ref = "onnxruntime" }
-onnxruntime-jvm = { group = "com.microsoft.onnxruntime", name = "onnxruntime", version.ref = "onnxruntime" }
 bouncycastle = { group = "org.bouncycastle", name = "bcprov-jdk18on", version.ref = "bouncycastle" }
 work-runtime = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 litert = { group = "com.google.ai.edge.litert", name = "litert", version.ref = "litert" }

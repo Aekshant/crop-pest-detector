@@ -18,7 +18,7 @@ class ActiveBundle(val version: String, val dir: File, val manifest: BundleManif
         ?.let { File(dir, it.file) }?.takeIf { it.isFile }
 
     val hasVision get() = file("vision") != null && file("vision_config") != null && file("labels") != null
-    val hasKb get() = file("kb") != null && file("kb_embedder") != null && file("kb_vocab") != null
+    val hasKb get() = file("kb") != null && file("kb_embedder") != null && file("kb_table") != null && file("kb_vocab") != null
 
     override fun toString() = "$version ($role)"
 

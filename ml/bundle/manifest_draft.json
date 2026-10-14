@@ -92,10 +92,10 @@
   },
   "kb": {
     "kb_version": "2026-10-14",
-    "embedding_model": "e5-small-int8",
+    "embedding_model": "e5-small-litert",
     "embedding_dim": 384,
     "query_prefix": "query: ",
-    "onnxruntime": "1.31.0",
+    "runtime": "LiteRT (encoder) + int8 word table",
     "treatment_review": {
       "pending": 129
     },
@@ -103,12 +103,17 @@
       "pack": {
         "file": "kb_tomato_v1.sqlite",
         "bytes": 2211840,
-        "sha256": "e09c3cb75931191712e0d71fa8cb0af8e118f672ee24d271e041cc5e98adbc6d"
+        "sha256": "6f31c0d14475940e1f20e09c55963f7be10a0a6b9e0b45ff4cdb6f2dee73ac09"
       },
       "embedding_model": {
-        "file": "e5_small_int8.onnx",
-        "bytes": 118101091,
-        "sha256": "8da4c9ba0ad59f58e8566839425d7fd6339d31414d0ce5cba2d7d0afb75dd8b6"
+        "file": "e5_small_encoder.tflite",
+        "bytes": 22404400,
+        "sha256": "61cdd4334e4eed0d5531a34baf7d0c1b7ff7f72011da73028b1a24f023cb98d9"
+      },
+      "embedding_table": {
+        "file": "e5_small_table.bin",
+        "bytes": 97014368,
+        "sha256": "3f7fe36e909f48c81d5d644cbbe3f31b024e2099c1253c8dfb3af11c6f21603a"
       },
       "vocab": {
         "file": "e5_small_vocab.tsv",
@@ -116,6 +121,6 @@
         "sha256": "62fce312d72594ad30235447483680a6d1bbce5d7e219bbe29a241539e449f92"
       }
     },
-    "note": "Built by kb/build_pack.py and kb/export_embedder.py; the app opens them only after KbBundle.verify()."
+    "note": "Built by kb/build_pack.py and kb/export_litert.py; the app opens them only after KbBundle.verify()."
   }
 }

@@ -36,19 +36,19 @@ class KbBundle(private val dir: File, manifestJson: String) {
     fun open(labelsJson: String, includeUnreviewed: Boolean = false): Loaded {
         val pack = KbPack.open(file("pack"), includeUnreviewed)
         check(pack.meta["embedding_model"] == kb.getString("embedding_model")) { "pack and manifest disagree on the embedding model" }
-        val model = EmbeddingModel(file("embedding_model"), file("vocab"))
+        val model = LiteRtEmbeddingModel(file("embedding_model"), file("embedding_table"), file("vocab"))
         return Loaded(pack, model, KbRetriever(pack.chunks, KbRetriever.namesFromLabels(labelsJson)))
     }
 
-    class Loaded(val pack: KbPack, val model: EmbeddingModel, val retriever: KbRetriever) : AutoCloseable {
+    class Loaded(val pack: KbPack, val model: LiteRtEmbeddingModel, val retriever: KbRetriever) : AutoCloseable {
         override fun close() = model.close()
     }
 
     companion object {
         /** Opens a KB from explicit files (a model bundle's kb, kb_embedder and kb_vocab artifacts). */
-        fun open(pack: File, model: File, vocab: File, labelsJson: String, includeUnreviewed: Boolean = false): Loaded {
+        fun open(pack: File, encoder: File, table: File, vocab: File, labelsJson: String, includeUnreviewed: Boolean = false): Loaded {
             val p = KbPack.open(pack, includeUnreviewed)
-            val m = EmbeddingModel(model, vocab)
+            val m = LiteRtEmbeddingModel(encoder, table, vocab)
             return Loaded(p, m, KbRetriever(p.chunks, KbRetriever.namesFromLabels(labelsJson)))
         }
 

@@ -29,7 +29,7 @@ Modes:
 ## Results
 
 ```bash
-uvx --with fastembed --with sqlite-vec --with onnxruntime==1.31.0 --with tokenizers python evals/kb/eval_retrieval.py [--pack ...]
+uvx --python 3.11 --with fastembed --with sqlite-vec --with tokenizers --with ai-edge-litert python evals/kb/eval_retrieval.py [--pack ...]
 ```
 
 Mode names:
@@ -48,9 +48,10 @@ English and Hindi, have no chunk that passes the relevance rule (see below).
 | v1, label bug fixed | 38% | 85% | 57% | 88% | | |
 | v2 chunks (NIPHM structure), MiniLM-L12 | 45% | 80% | 65% | 90% | 78% | 88% |
 | v2, multilingual-e5-small fp32 | 42% | 92% | 80% | 90% | 82% | 88% |
-| **v2, e5-small int8 (shipped)** | 45% | 95% | 75% | 90% | **80%** | **88%** |
+| v2, e5-small ONNX int8 (until 2026-10-15) | 45% | 95% | 75% | 90% | 80% | 88% |
+| **v2, e5-small LiteRT (shipped)** | 42% | 92% | 78% | 90% | **82%** | **88%** |
 
-By language for the shipped configuration:
+By language for the ONNX int8 configuration:
 
 | Mode | en | hi | hinglish |
 |---|---|---|---|
@@ -68,8 +69,9 @@ By language for the shipped configuration:
 - **Hybrid search.** BM25 helps most without a diagnosis: MiniLM goes from 65% to 78%,
   and Hinglish from 50% to 75%. With a filter it changes about one query.
 - **e5-small.** It is the same size as MiniLM-L12 (118M parameters, 384 dimensions) and
-  better without a diagnosis (80% vs 65% for open+names). Quantizing it to int8 (113 MB)
-  costs about one query.
+  better without a diagnosis (80% vs 65% for open+names). The shipped LiteRT export (int8
+  word table plus int8-weight encoder) stays within cosine 0.999 of fp32 and scores like
+  fp32: 82% / 88%.
 - **Local names.** "agati jhulsa" gets "(Early blight)" appended, using
   `ml/labels_v1.json`.
 
@@ -89,7 +91,7 @@ questions is needed before release.
 
 ```bash
 uvx --with pyarrow python -I evals/kb/make_heldout_kcc.py <kcc.parquet>   # once; writes heldout_kcc.jsonl
-uvx --with fastembed --with sqlite-vec --with onnxruntime==1.31.0 --with tokenizers python evals/kb/eval_retrieval.py --queries evals/kb/heldout_kcc.jsonl
+uvx --python 3.11 --with fastembed --with sqlite-vec --with tokenizers --with ai-edge-litert python evals/kb/eval_retrieval.py --queries evals/kb/heldout_kcc.jsonl
 ```
 
 [`heldout_kcc.jsonl`](heldout_kcc.jsonl) has **60 real farmer questions**: 6 per label,
@@ -109,7 +111,8 @@ The set was run **once**, after all the changes above, and nothing was tuned on 
 
 | Mode | open | filtered | open+names | filtered+names | hybrid+names (shipped, no diagnosis) | hybrid_filtered+names (shipped, diagnosis known) |
 |---|---|---|---|---|---|---|
-| e5-small int8 | 98% | 100% | 98% | 100% | **88%** | **98%** |
+| e5-small ONNX int8 | 98% | 100% | 98% | 100% | 88% | 98% |
+| **e5-small LiteRT (shipped)** | 100% | 100% | — | — | **87%** | **98%** |
 
 **Reading it:**
 

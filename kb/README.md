@@ -111,8 +111,8 @@ price) is a product decision. The responder currently shows the first row.
 ```bash
 python kb/fetch_sources.py
 uvx --with pdfplumber python kb/build_kb.py      # K2 rows + known_actives (only when the lists change)
-uvx --with onnx --with onnxruntime==1.31.0 --with huggingface_hub python kb/export_embedder.py   # the on-device model
-uvx --with fastembed --with sqlite-vec --with pdfplumber --with onnxruntime==1.31.0 --with tokenizers python kb/build_pack.py
+uvx --python 3.11 --extra-index-url https://download.pytorch.org/whl/cpu --index-strategy unsafe-best-match --with "torch==2.4.1+cpu" --with tensorflow-cpu==2.17.0 --with tf-keras==2.17.0 --with transformers==4.44.2 python kb/export_litert.py   # the on-device model (once)
+uvx --python 3.11 --with fastembed --with sqlite-vec --with pdfplumber --with tokenizers --with ai-edge-litert python kb/build_pack.py
 ```
 
 `kb/dist/` holds the build outputs and is gitignored:
@@ -120,15 +120,16 @@ uvx --with fastembed --with sqlite-vec --with pdfplumber --with onnxruntime==1.3
 | File | Size | What |
 |---|---|---|
 | `kb_tomato_v1.sqlite` | 2.1 MB | the pack |
-| `e5_small_int8.onnx` | 113 MB | multilingual-e5-small, dynamic int8 (448 MB at fp32) |
-| `e5_small_vocab.tsv` | 7.8 MB | its 250k-piece vocabulary, for the phone's tokenizer |
+| `e5_small_encoder.tflite` | 21.4 MB | multilingual-e5-small's network on LiteRT: word vectors in, mean-pooled unit vector out; int8 weights |
+| `e5_small_table.bin` | 92.5 MB | its 250k × 384 word table, int8 with a scale per row (memory-mapped by the app) |
+| `e5_small_vocab.tsv` | 7.4 MB | its vocabulary, for the phone's tokenizer |
 
 A single sqlite file is what the bundle ships (design doc: read-only, replaced by KB pack
 updates). It contains:
 
 | Table | Contents |
 |---|---|
-| `meta` | `kb_version`, `embedding_model` (`e5-small-int8`), `embedding_dim` (384), `built_at` |
+| `meta` | `kb_version`, `embedding_model` (`e5-small-litert`), `embedding_dim` (384), `built_at` |
 | `kb_source` | `sources.csv` |
 | `kb_treatment` | the 129 K2 rows, indexed by label: the only place a product, dose or waiting period lives |
 | `kb_chunk` | 197 advisory chunks (`label`, `text`, `source_id`, `source_url`) plus `embedding`, a float32 unit vector |
@@ -156,29 +157,47 @@ about 200 × 384 floats).
 **No doses in chunks:** every sentence with a dose ("@", "200 ml", "0.2%", "per acre") is
 dropped (89 sentences). Doses come from `kb_treatment` only.
 
-**Embedding:** `kb/embedding.py` runs the same int8 ONNX file the phone runs:
+**Embedding:** e5-small is about 96M parameters of word table plus a 21M-parameter
+network, so `kb/export_litert.py` ships it in two parts:
 
-1. tokenize;
-2. mean-pool over tokens;
-3. L2-normalize;
-4. prefix `passage: ` for chunks and `query: ` for questions.
+- **the word table**, as int8 with a scale per row (max error 0.005), which the app
+  memory-maps and reads directly;
+- **the network**, converted to LiteRT with int8 weights. Mean pooling and L2
+  normalisation are inside the model.
+
+`kb/embedding.py` (`e5-small-litert`) runs exactly what the phone runs: tokenize, look up
+the table, run the encoder, with `passage: ` / `query: ` prefixes.
+
+Its vectors are **closer to the original fp32 model** than the earlier ONNX Runtime int8
+export, which also quantized activations:
+
+| vs fp32, 237 KB texts | min cosine | median |
+|---|---|---|
+| **LiteRT (shipped)** | **0.9992** | 0.9996 |
+| ONNX int8 (until 2026-10-15) | 0.9586 | 0.9883 |
 
 **On the phone** (`android/.../kb/`):
 
 - **`UnigramTokenizer`:** a Kotlin port of the XLM-R SentencePiece Unigram tokenizer (NFKC,
-  Metaspace, Viterbi). It gives the same ids as the reference on all 291 test texts.
-- **`EmbeddingModel`:** runs the model on ONNX Runtime 1.31.0 (the same version as the
-  Python build). Its vectors match the reference with cosine ≥ 0.9999999.
+  Metaspace, Viterbi). It gives the same ids as the reference on all 291 test texts
+  (`TokenizerTest`, on the JVM).
+- **`LiteRtEmbeddingModel`:** the memory-mapped table plus the LiteRT interpreter the app
+  already ships for vision.
 - **`KbRetriever`:** hybrid search, BM25 plus vectors fused by RRF, with local-name
   expansion and an optional label filter. It ranks the same as the Python eval on all 40
-  queries.
-- **`KbEndToEndTest`** runs question → tokenizer → model → retriever and reproduces the K4
-  hit rates exactly: 32/40 without a diagnosis and 35/40 with one. A search takes about
-  14 ms on a desktop JVM.
-
-These tests skip when `kb/dist/` hasn't been built, which is the case in CI. The ONNX
-Runtime Android library adds about 34 MB (`arm64-v8a`, uncompressed) to the app. An
-arm64-only split or ORT's reduced mobile build would cut that.
+  queries for fixed vectors (`KbRetrieverTest`, on the JVM).
+- **`KbDeviceTest`** runs on the phone (LiteRT has no desktop JVM build). It loads the KB
+  from the installed bundle through `KbRepository`. On the POCO M6 Plus:
+  - embeddings match the Python reference with a worst cosine of 0.9995 (ARM vs x86
+    kernels), at 21.7 ms per embedding;
+  - **K4 end to end**: 32/40 without a diagnosis and 35/40 with one. Python on x86 gets
+    33/40 and 35/40. The one difference is a near-tie at rank 3 (`kbq-040`, "fal chhedak
+    ke liye kaunse trap lagaye?"), and the test allows at most one such flip per mode
+    and prints it;
+  - 25 ms per search;
+  - a Laya treatment turn through `LayaSession`.
+- **The release build** (R8) was checked on the phone through the Status screen's
+  knowledge-base check (tap the row). It loads the KB in 828 ms and searches in 31 ms.
 
 **Tests:** `test_pack.py` checks that:
 
@@ -262,36 +281,33 @@ Both are fixed and covered by `SafetyTest`.
 ## Shipping it: model bundle and app size
 
 ```bash
-python kb/update_manifest.py   # after build_pack.py / export_embedder.py: writes the "kb" entry of ml/bundle/manifest_draft.json
+python kb/update_manifest.py   # after build_pack.py / export_litert.py: writes the "kb" entry of ml/bundle/manifest_draft.json
 ```
 
 The KB files travel in the **downloadable model bundle**, not in the APK. That is about
-122 MB: the pack (2.1 MB), the e5-small int8 model (112.6 MB) and its vocabulary
-(7.4 MB).
+123 MB: the pack (2.1 MB), the encoder (21.4 MB), the word table (92.5 MB) and the
+vocabulary (7.4 MB).
 
 The manifest's `kb` entry records:
 
 - `kb_version` and the embedding model;
-- the query prefix and the ONNX Runtime version;
+- the query prefix and the runtime;
 - the review counts;
 - for each file, its size in bytes and its sha256.
 
 On the device, `KbBundle.verify()` checks each file's size and sha256 once, after
 download and before activation. `KbBundle.open()` then loads the pack, the embedder and
-the retriever. The downloader itself (WorkManager, resumable) is part of the bundle
-update flow and isn't written yet.
+the retriever. The downloader is described in `ml/bundle/README.md`.
 
 **App size:**
 
 | Build | ABIs | APK | Download (gzip estimate) |
 |---|---|---|---|
-| debug | arm64-v8a + x86_64 (emulator) | 116 MB | n/a |
-| **release** (R8 and resource shrinking) | arm64-v8a only | **54 MB** | **about 26 MB** |
+| debug | arm64-v8a + x86_64 (emulator) | 43.2 MB | n/a |
+| release with ONNX Runtime (until 2026-10-15) | arm64-v8a | 54 MB | about 26 MB |
+| **release** (R8 and resource shrinking, LiteRT only) | arm64-v8a only | **21.6 MB** | **about 15.8 MB** |
 
-- ONNX Runtime is 34 MB of the release APK. Native libraries are stored uncompressed so
-  they can be memory-mapped.
-- The next big cut would be running the embedder on LiteRT, which the app already ships
-  for vision, and dropping ONNX Runtime. That needs the e5-small model converted to
-  TFLite and the parity tests re-run.
-- The release build is unsigned (no release keystore yet). It hasn't been run on a
-  device: it's arm64-only, so it needs the phone (S4).
+- Dropping ONNX Runtime removed 34 MB of native code, along with its telemetry provider.
+- The embedder now runs on LiteRT, which the app already ships for vision.
+- The release build is unsigned until a release keystore exists. It has been run on the
+  POCO M6 Plus.

@@ -19,6 +19,18 @@ val extractLiteRt by tasks.registering(Sync::class) {
 
 // Model files and manifests the app loads at startup (Git LFS in ml/).
 val visionAssets = layout.buildDirectory.dir("generated/visionAssets")
+// KbDeviceTest fixtures (built in kb/dist and evals/kb by the Python tools; empty if not built yet).
+val kbTestAssets = layout.buildDirectory.dir("generated/kbTestAssets")
+val copyKbTestAssets by tasks.registering(Sync::class) {
+    from(repoRoot.resolve("kb/dist")) { include("retrieval_fixture.json") }
+    from(repoRoot.resolve("evals/kb")) {
+        include("retrieval_queries.jsonl", "results_e5-small-litert.json")
+        rename("results_e5-small-litert.json", "results.json")
+    }
+    from(repoRoot.resolve("ml/bundle")) { include("laya_templates_v1.json", "tools_schema_v1.json") }
+    into(kbTestAssets.map { it.dir("kbtest") })
+}
+
 // The bundle smoke test's golden images (BundleSmoke): the app owns the expected answers.
 val copySmokeAssets by tasks.registering(Sync::class) {
     from(repoRoot.resolve("core/tests/golden")) {
@@ -123,6 +135,7 @@ android {
         getByName("asan").resources.directories += asanFiles.get().dir("resources").asFile.absolutePath
         // Golden images + Python reference outputs for the on-device test.
         getByName("androidTest").assets.directories += repoRoot.resolve("core/tests/golden").absolutePath
+        getByName("androidTest").assets.directories += kbTestAssets.get().asFile.absolutePath
     }
 
     androidResources {
@@ -142,7 +155,7 @@ android {
     }
 }
 
-tasks.named("preBuild") { dependsOn(extractLiteRt, copyVisionAssets, copySmokeAssets, copyAsanRuntime) }
+tasks.named("preBuild") { dependsOn(extractLiteRt, copyVisionAssets, copySmokeAssets, copyKbTestAssets, copyAsanRuntime) }
 
 // wrap.sh only runs when native libs are extracted to disk.
 androidComponents {
@@ -150,7 +163,7 @@ androidComponents {
 }
 tasks.configureEach {
     if (name.startsWith("configureCMake") || name.startsWith("buildCMake")) dependsOn(extractLiteRt)
-    if (name.contains("Assets", ignoreCase = true) && name.startsWith("merge")) dependsOn(copyVisionAssets, copySmokeAssets)
+    if (name.contains("Assets", ignoreCase = true) && name.startsWith("merge")) dependsOn(copyVisionAssets, copySmokeAssets, copyKbTestAssets)
 }
 
 dependencies {
@@ -169,7 +182,6 @@ dependencies {
     implementation(libs.coroutines.android)
     implementation(libs.litert.asProvider())
     implementation(libs.litert.gpu)
-    implementation(libs.onnxruntime.android)  // KB question embeddings (e5-small int8)
     implementation(libs.bouncycastle)  // Ed25519 bundle signatures (java.security has it only from API 33)
     implementation(libs.work.runtime)  // background bundle updates
     implementation(libs.camera.core)
@@ -182,16 +194,11 @@ dependencies {
     testImplementation(libs.coroutines.test)
     testImplementation(libs.org.json)  // real org.json on the JVM (android.jar only has stubs)
     testImplementation(libs.sqlite.jdbc)  // reads the KB pack in KbRetrieverTest
-    testImplementation(libs.onnxruntime.jvm)  // desktop ONNX Runtime for EmbeddingModelTest
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.junit)
 }
 
-// Unit tests run on the desktop JVM: use the desktop ONNX Runtime (same ai.onnxruntime API) instead of the Android AAR.
-configurations.matching { it.name.endsWith("UnitTestRuntimeClasspath") }.configureEach {
-    exclude(group = "com.microsoft.onnxruntime", module = "onnxruntime-android")
-}
 
 // Unit tests read repo data at run time (bundle JSON, evals, KB CSVs, kb/dist). Declare it as input,
 // or Gradle reports stale results as up to date after a data-only change.

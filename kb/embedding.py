@@ -4,10 +4,11 @@ build_pack.py and every reader (evals, the app) embed the same way.
 A model may need prefixes: e5 models expect "query: " for questions and
 "passage: " for documents.
 
-"e5-small-int8" is the on-device model: kb/export_embedder.py writes the int8
-ONNX file and tokenizer to kb/dist/, and this module runs them exactly as the
-phone does (EmbeddingModel.kt): tokenize, run, mean-pool over the attention
-mask, L2-normalize. The other models go through fastembed (comparison only).
+"e5-small-litert" is the on-device model: kb/export_litert.py writes the LiteRT
+encoder, the int8 word table and the tokenizer to kb/dist/, and LiteRtEmbedder runs
+them exactly as the phone does (LiteRtEmbeddingModel.kt). The others go through
+fastembed (comparison only). An ONNX Runtime int8 export was used before 2026-10-15:
+cosine to fp32 >= 0.959, vs >= 0.999 for LiteRT (evals/kb/results_e5-small-int8.json).
 """
 
 from pathlib import Path
@@ -16,42 +17,55 @@ DIST = Path(__file__).resolve().parent / "dist"
 MAX_TOKENS = 512
 
 MODELS = {
-    "e5-small-int8": {"query": "query: ", "passage": "passage: ",
-                      "onnx": "e5_small_int8.onnx", "tokenizer": "e5_small_tokenizer.json"},
+    "e5-small-litert": {"query": "query: ", "passage": "passage: ", "litert": "e5_small_encoder.tflite",
+                        "table": "e5_small_table.bin", "tokenizer": "e5_small_tokenizer.json"},
     "intfloat/multilingual-e5-small": {"query": "query: ", "passage": "passage: ",
                                        "custom": {"dim": 384, "model_file": "onnx/model.onnx"}},
     "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2": {"query": "", "passage": ""},
 }
 
 
-class OnnxEmbedder:
+class LiteRtEmbedder:
+    """The phone's pipeline (LiteRtEmbeddingModel.kt): tokenize, look word vectors up in the
+    int8 table (q * row scale), run the LiteRT encoder (mean-pooled, normalized inside)."""
+
     def __init__(self, spec):
-        import onnxruntime as ort
+        import numpy as np
+        from ai_edge_litert.interpreter import Interpreter
         from tokenizers import Tokenizer
-        missing = [f for f in (spec["onnx"], spec["tokenizer"]) if not (DIST / f).exists()]
+        missing = [f for f in (spec["litert"], spec["table"], spec["tokenizer"]) if not (DIST / f).exists()]
         if missing:
-            raise SystemExit(f"missing {missing} in kb/dist: run kb/export_embedder.py")
+            raise SystemExit(f"missing {missing} in kb/dist: run kb/export_litert.py")
         self.tokenizer = Tokenizer.from_file(str(DIST / spec["tokenizer"]))
-        self.session = ort.InferenceSession(str(DIST / spec["onnx"]), providers=["CPUExecutionProvider"])
+        raw = (DIST / spec["table"]).read_bytes()
+        assert raw[:4] == b"E5T1"
+        rows, dim = np.frombuffer(raw[4:12], "<i4")
+        self.scale = np.frombuffer(raw[12:12 + 4 * rows], "<f4")
+        self.q = np.frombuffer(raw[12 + 4 * rows:], np.int8).reshape(rows, dim)
+        self.interp = Interpreter(model_path=str(DIST / spec["litert"]))
+        self.inp = self.interp.get_input_details()[0]["index"]
+        self.out = self.interp.get_output_details()[0]["index"]
 
     def ids(self, text):
-        """<s> pieces </s>, cut to MAX_TOKENS keeping the closing </s> (id 2)."""
         ids = self.tokenizer.encode(text).ids
         return ids if len(ids) <= MAX_TOKENS else ids[:MAX_TOKENS - 1] + [2]
 
     def embed(self, texts, batch_size=1):
         import numpy as np
         for t in texts:
-            ids = np.array([self.ids(t)], dtype=np.int64)
-            mask = np.ones_like(ids)
-            out = self.session.run(None, {"input_ids": ids, "attention_mask": mask, "token_type_ids": np.zeros_like(ids)})[0]
-            yield out[0].mean(axis=0)  # mean over tokens (no padding: one text per run)
+            ids = np.array(self.ids(t))
+            x = (self.q[ids].astype(np.float32) * self.scale[ids, None])[None]
+            self.interp.resize_tensor_input(self.inp, x.shape)
+            self.interp.allocate_tensors()
+            self.interp.set_tensor(self.inp, x)
+            self.interp.invoke()
+            yield self.interp.get_tensor(self.out)[0]
 
 
 def load(name):
     spec = MODELS[name]
-    if "onnx" in spec:
-        return OnnxEmbedder(spec)
+    if "litert" in spec:
+        return LiteRtEmbedder(spec)
     from fastembed import TextEmbedding
     if "custom" in spec:
         from fastembed.common.model_description import ModelSource, PoolingType

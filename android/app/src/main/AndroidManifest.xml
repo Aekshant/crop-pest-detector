@@ -25,10 +25,5 @@
             </intent-filter>
         </activity>
 
-        <!-- ONNX Runtime 1.31 starts a telemetry HTTP client at app launch. No telemetry from FarmLens. -->
-        <provider
-            android:name="ai.onnxruntime.TelemetryInitializer"
-            android:authorities="${applicationId}.onnxruntime_telemetry_initializer"
-            tools:node="remove" />
     </application>
 </manifest>
