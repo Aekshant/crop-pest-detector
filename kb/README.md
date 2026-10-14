@@ -143,3 +143,14 @@ updates). It contains:
   - a vector query returns the nearest chunk first.
 
   It is skipped when the pack hasn't been built. CI runs only the CSV tests.
+
+## Retrieval eval (K4)
+
+See [`evals/kb/README.md`](../evals/kb/README.md). Top-3 hit rate on 40 en/hi/Hinglish
+questions:
+
+- **88%** when the diagnosis is known (search filtered by label, local names expanded);
+- **57%** without a diagnosis.
+
+Hinglish is the weakest language. Non-chemical advice for late blight is missing from the
+sources.

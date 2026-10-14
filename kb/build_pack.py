@@ -57,6 +57,7 @@ DOSE = re.compile(r"@|\d+(?:\.\d+)?\s*(?:%|ml|g|gm|gms|kg|l|lit|litre|liter|ppm|
 JUNK = re.compile(r"https?://|www\.|blogspot|\.com\b|^\s*\d+\s*$|^(fig|figure|table|plate)\b|crop production guide|"
                   r"photo cou|courtesy|professor|\bdr\.|department of|horticulture \d{4}|^source", re.I)
 MAX_CHARS, MIN_CHARS = 600, 80
+CARRY_PARAGRAPHS = 3  # paragraphs a pest heading's label applies to (PDF sections run on without end markers)
 
 
 def labels_in(text):
@@ -131,17 +132,23 @@ def tnau_chunks(path, label, stats):
 def pdf_chunks(path, stats, default_label=None):
     """A PDF as paragraphs; labels from the text itself or the last pest/disease heading."""
     text = subprocess.run(["pdftotext", str(path), "-"], capture_output=True, text=True, check=True).stdout
-    out, current = [], default_label
+    out, current, carry = [], default_label, 0
     for para in re.split(r"\n\s*\n", text):
         p = para.strip()
         found = labels_in(p)
-        if len(p) < 60 and found:  # a heading such as "Early blight"
-            current = found[0]
-            continue
+        if len(p) < 60:
+            # A heading: "Early blight" sets the label for the next few paragraphs; any other
+            # heading ("V. Rodent pest management", "Major kharif weeds") ends it.
+            current, carry = (found[0], CARRY_PARAGRAPHS) if found else (default_label, 0)
+            if found:
+                continue
         sents = clean_sentences(p, stats)
-        for c in pack_sentences(sents, min_chars=MIN_CHARS):
-            labels = labels_in(c) or ([current] if current else [])
+        chunks = pack_sentences(sents, min_chars=MIN_CHARS)
+        for c in chunks:
+            labels = labels_in(c) or ([current] if current and (carry > 0 or current == default_label) else [])
             out.append({"label": ";".join(labels), "text": c})
+        if chunks and carry > 0:
+            carry -= 1
     return out
 
 
