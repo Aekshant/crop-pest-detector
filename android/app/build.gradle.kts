@@ -74,6 +74,10 @@ android {
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             ndk { abiFilters += listOf("arm64-v8a") }
+            // Local device testing only: ./gradlew assembleRelease -Pfarm.signReleaseWithDebugKey
+            if (providers.gradleProperty("farm.signReleaseWithDebugKey").isPresent) {
+                signingConfig = signingConfigs.getByName("debug")
+            }
         }
         // Debug build with AddressSanitizer on all our native code:
         //   ./gradlew assembleAsan
@@ -178,3 +182,27 @@ tasks.withType<Test>().configureEach {
         exclude("**/__pycache__/**")
     }).withPathSensitivity(PathSensitivity.RELATIVE).withPropertyName("repoData")
 }
+
+// The merged manifest must not regain what libraries sneak in (ONNX Runtime telemetry, permissions
+// implied by LiteRT GPU). Run in CI: ./gradlew checkMergedManifests
+val forbiddenInManifest = listOf(
+    "ai.onnxruntime.TelemetryInitializer",
+    "android.permission.READ_PHONE_STATE",
+    "android.permission.READ_EXTERNAL_STORAGE",
+    "android.permission.WRITE_EXTERNAL_STORAGE",
+)
+tasks.register("checkMergedManifests") {
+    dependsOn("processDebugManifest", "processReleaseManifest")
+    val manifests = listOf("debug", "release").map {
+        layout.buildDirectory.file("intermediates/merged_manifests/$it/process${it.replaceFirstChar(Char::uppercase)}Manifest/AndroidManifest.xml")
+    }
+    inputs.files(manifests)
+    doLast {
+        manifests.forEach { m ->
+            val text = m.get().asFile.readText()
+            val found = forbiddenInManifest.filter { text.contains(it) }
+            check(found.isEmpty()) { "${m.get().asFile}: must not contain $found" }
+        }
+    }
+}
+

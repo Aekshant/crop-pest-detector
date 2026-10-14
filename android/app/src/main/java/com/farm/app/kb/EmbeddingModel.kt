@@ -14,7 +14,7 @@ import kotlin.math.sqrt
  * the same space as the passages. Not thread-safe; load once, off the main thread.
  */
 class EmbeddingModel(model: File, vocab: File) : QueryEmbedder, AutoCloseable {
-    private val env = OrtEnvironment.getEnvironment()
+    private val env = OrtEnvironment.getEnvironment().apply { setTelemetry(false) }  // no telemetry from FarmLens
     private val session: OrtSession = env.createSession(model.path, OrtSession.SessionOptions())
     val tokenizer: UnigramTokenizer = vocab.bufferedReader().use { UnigramTokenizer.load(it) }
 
