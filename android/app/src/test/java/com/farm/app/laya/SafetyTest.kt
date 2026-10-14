@@ -98,10 +98,38 @@ class SafetyTest {
         assertEquals(templates.safety("T_NO_KB_CONSULT", Lang.EN), validator.enforce("Spray monocrotophos.", emptyList(), Lang.EN, templates))
     }
 
+    @Test fun combinationProductsAndDecimalsSurviveTheValidator() {
+        val combo = KbRow("late_blight", "Ametoctradin 27%+ Dimethomorph 20.27% w/w SC", "800-1000ml per hectare in 500 litres of water", 3, true)
+        val other = KbRow("late_blight", "Dimethomorph 50% WP", "1 kg per hectare", 5, true)
+        val v = SafetyValidator(listOf(combo, other), emptyList())
+        val text = "Use Ametoctradin 27%+ Dimethomorph 20.27% w/w SC: 800-1000ml per hectare in 500 litres of water. Wait 3 days."
+        assertEquals(emptyList<String>(), v.violations(text, listOf(combo)))
+        assertEquals("Use Ametoctradin 27%+ Dimethomorph 20.27% w/w SC: 800-1000ml per hectare in 500 litres of water.",
+                     v.clean("$text Or use 1 kg per hectare.", listOf(combo))!!.substringBefore(" Wait"))
+        // The other row's product is still blocked when it is not the row of this turn.
+        assertTrue(v.violations("Dimethomorph 50% WP is fine too.", listOf(KbRow("x", "Fixturezole 25 EC", "1 ml", 7, true))).isNotEmpty())
+    }
+
     @Test fun kbTreatmentIsFilledFromTheKb() {
         val r = responder.respond("How much Fixturezole should I put in a 15 litre pump?", Diagnosis("early_blight", 0.9, true), Lang.EN)!!
         assertEquals(listOf("T_KB_TREATMENT"), r.templates)
         assertTrue(r.text, r.text.contains("1 ml per litre") && r.text.contains("7 days") && !r.text.contains("15"))
+    }
+
+    @Test fun onlyApprovedRowsAreNamedBestRankFirst() {
+        fun responder(rows: String) = SafetyResponder.load(lexicon, """{"rows": [$rows]}""", templates, File(repo, "ml/labels_v1.json").readText())
+        val row = { product: String, status: String, rank: String ->
+            """{"label": "early_blight", "product": "$product", "dose": "1 ml per litre", "phi_days": 7,
+                "registration_status": "registered", "review_status": "$status", "display_rank": "$rank"}"""
+        }
+        val d = Diagnosis("early_blight", 0.9, true)
+        val ranked = responder(row("Fixturezole 25 EC", "approved", "2") + "," + row("Fixtobest 5 SC", "approved", "1"))
+            .respond("How much should I spray?", d, Lang.EN)!!
+        assertEquals("Fixtobest 5 SC", ranked.rows.single().product)
+        val pending = responder(row("Fixturezole 25 EC", "pending", "")).respond("How much should I spray?", d, Lang.EN)!!
+        assertEquals(listOf("T_NO_KB_CONSULT"), pending.templates)
+        val rejected = responder(row("Fixturezole 25 EC", "rejected", "")).respond("How much should I spray?", d, Lang.EN)!!
+        assertEquals(listOf("T_NO_KB_CONSULT"), rejected.templates)
     }
 
     @Test fun nonSafetyMessageReturnsNull() {

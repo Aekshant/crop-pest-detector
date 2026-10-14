@@ -3,10 +3,24 @@ package com.farm.app.laya
 import org.json.JSONArray
 import org.json.JSONObject
 
-/** One KB treatment row (design doc: the KB is the only source of products, doses and waiting periods). */
-data class KbRow(val label: String, val product: String, val dose: String, val phiDays: Int, val registered: Boolean) {
+/**
+ * One KB treatment row (design doc: the KB is the only source of products, doses and waiting periods).
+ * [reviewed]: an agronomist approved it (kb/make_review_sheet.py); [rank]: their display order, 1 first.
+ */
+data class KbRow(
+    val label: String,
+    val product: String,
+    val dose: String,
+    val phiDays: Int,
+    val registered: Boolean,
+    val reviewed: Boolean = true,
+    val rank: Int = Int.MAX_VALUE,
+) {
     /** First word of the product, e.g. "Fixturezole" from "Fixturezole 25 EC". */
     val brand get() = product.substringBefore(' ')
+
+    /** Laya may name it: registered for tomato and this problem, and approved. */
+    val usable get() = registered && reviewed
 }
 
 /** What the vision model said last, if anything. */
@@ -54,8 +68,8 @@ class SafetyResponder(
 
     /** Waiting period: from the KB row of the product (or the diagnosed problem), else the label's. */
     private fun waitingPeriod(products: List<KbRow>, diagnosis: Diagnosis?, lang: Lang): SafetyReply {
-        val row = products.firstOrNull { it.registered }
-            ?: diagnosis?.takeIf { it.confident }?.let { d -> kb.firstOrNull { it.label == d.label && it.registered } }
+        val row = products.firstOrNull { it.usable }
+            ?: diagnosis?.takeIf { it.confident }?.let { d -> best(d.label) }
             ?: return reply("T_PHI_FOLLOW_LABEL", lang)
         return reply("T_PHI_FROM_KB", lang, listOf(row), mapOf("product" to row.product, "phi_days" to row.phiDays))
     }
@@ -67,14 +81,18 @@ class SafetyResponder(
         }
         val label = named ?: diagnosis?.label ?: products.firstOrNull()?.label ?: return reply("T_NEED_DIAGNOSIS", lang)
         val rows = kb.filter { it.label == label }
-        val row = rows.firstOrNull { it.registered }
+        val row = best(label)
         return when {
             rows.isEmpty() -> reply("T_NO_KB_CONSULT", lang)
+            row == null && rows.any { it.registered } -> reply("T_NO_KB_CONSULT", lang)  // registered, but not approved yet
             row == null -> reply("T_NO_REGISTERED_PRODUCT", lang)
             else -> reply("T_KB_TREATMENT", lang, listOf(row), mapOf(
                 "name" to templates.labelName(label, lang), "product" to row.product, "dose" to row.dose, "phi_days" to row.phiDays))
         }
     }
+
+    /** The product Laya names for a problem: approved and registered, best agronomist rank first. */
+    private fun best(label: String): KbRow? = kb.filter { it.label == label && it.usable }.minByOrNull { it.rank }
 
     private fun reply(id: String, lang: Lang, rows: List<KbRow> = emptyList(), vars: Map<String, Any> = emptyMap(),
                       certainty: String? = null): SafetyReply {
@@ -91,7 +109,9 @@ class SafetyResponder(
             val rows = JSONObject(kbJson).getJSONArray("rows").let { a ->
                 List(a.length()) { a.getJSONObject(it) }.map {
                     KbRow(it.getString("label"), it.getString("product"), it.getString("dose"), it.getInt("phi_days"),
-                          it.getString("registration_status") == "registered")
+                          it.getString("registration_status") == "registered",
+                          reviewed = it.optString("review_status", "approved") == "approved",
+                          rank = it.optString("display_rank").toIntOrNull() ?: Int.MAX_VALUE)
                 }
             }
             val labels = JSONObject(labelsJson).getJSONArray("labels")
@@ -126,24 +146,30 @@ class SafetyValidator(private val kb: List<KbRow>, private val names: List<Strin
         val low = Grounding.normalize(text)
         val out = mutableListOf<String>()
         (numbersIn(text) - numbers).forEach { out += "number $it not from the KB" }
-        kb.filter { it !in allowed && it.brand.lowercase() !in allowed.map { a -> a.brand.lowercase() } }
-            .filter { low.contains(it.brand.lowercase()) }.forEach { out += "product ${it.brand} not allowed" }
+        // A name is fine if it is part of an allowed row's product ("Dimethomorph" in "Ametoctradin 27% + Dimethomorph 20.27% SC").
         val allowedText = allowed.joinToString(" ") { Grounding.normalize(it.product) }
+        kb.map { it.brand.lowercase() }.distinct().filter { it.length > 2 && low.contains(it) && !allowedText.contains(it) }
+            .forEach { out += "product $it not allowed" }
         names.map { Grounding.normalize(it) }.filter { low.containsWord(it) && !allowedText.containsWord(it) }
             .forEach { out += "chemical $it not from this turn's KB rows" }
         return out
     }
 
     /** [text] with unsafe sentences removed, or the consult template if none survive. */
-    fun enforce(text: String, rows: List<KbRow>, lang: Lang, templates: Templates, extraNumbers: Set<Double> = emptySet()): String {
-        if (violations(text, rows, extraNumbers).isEmpty()) return text
-        val kept = SENTENCE.findAll(text).map { it.value.trim() }
-            .filter { it.isNotEmpty() && violations(it, rows, extraNumbers).isEmpty() }.toList()
-        return if (kept.isEmpty()) templates.safety("T_NO_KB_CONSULT", lang) else kept.joinToString(" ")
+    fun enforce(text: String, rows: List<KbRow>, lang: Lang, templates: Templates, extraNumbers: Set<Double> = emptySet()): String =
+        clean(text, rows, extraNumbers) ?: templates.safety("T_NO_KB_CONSULT", lang)
+
+    /** [text] with unsafe sentences removed, or null if none survive. */
+    fun clean(text: String, rows: List<KbRow>, extraNumbers: Set<Double> = emptySet()): String? {
+        if (violations(text, rows, extraNumbers).isEmpty()) return text.trim().ifEmpty { null }
+        val kept = text.split(SENTENCE_END).map { it.trim() }
+            .filter { it.isNotEmpty() && violations(it, rows, extraNumbers).isEmpty() }
+        return if (kept.isEmpty()) null else kept.joinToString(" ")
     }
 
     companion object {
-        private val SENTENCE = Regex("""[^.!?।]+[.!?।]?""")
+        // A sentence ends at . ! ? । followed by whitespace: "20.27%" and "Dr.N." stay inside their sentence.
+        private val SENTENCE_END = Regex("""(?<=[.!?।])\s+""")
         private val NUMBER = Regex("""\d+(?:\.\d+)?""")
 
         /** Numbers as the eval scorer reads them (Devanagari digits included). */

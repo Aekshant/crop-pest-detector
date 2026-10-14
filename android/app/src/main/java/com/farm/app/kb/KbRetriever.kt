@@ -6,8 +6,16 @@ import java.nio.ByteOrder
 import java.text.Normalizer
 import kotlin.math.ln
 
-/** One advisory passage from the KB pack (kb_chunk), with its unit embedding. */
-class KbChunk(val id: Int, val labels: Set<String>, val text: String, val vector: FloatArray)
+/** One advisory passage from the KB pack (kb_chunk), with its unit embedding and where it came from. */
+class KbChunk(
+    val id: Int,
+    val labels: Set<String>,
+    val text: String,
+    val vector: FloatArray,
+    val sourceUrl: String = "",
+    /** Short publisher name for attribution, e.g. "TNAU Agritech Portal". */
+    val source: String = "",
+)
 
 /** Embeds a question with the pack's model (meta.embedding_model), including its query prefix, as a unit vector. */
 fun interface QueryEmbedder {

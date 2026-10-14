@@ -197,3 +197,64 @@ e5-small):
 - **80%** without a diagnosis.
 
 Hinglish is the weakest language.
+
+## Agronomist review: which rows Laya may name, and in what order
+
+```bash
+uvx --with openpyxl python kb/make_review_sheet.py            # -> kb/review/treatment_review.xlsx (send to the agronomist)
+uvx --with openpyxl python kb/make_review_sheet.py --import   # the filled sheet -> kb/review_decisions.csv
+uvx --with pdfplumber python kb/build_kb.py                   # applies it: review_status, display_rank
+```
+
+**The sheet.** It has one row per (label, product), with columns for decision
+(`approve` / `reject`, as a dropdown), `rank` (1 = the product Laya names first),
+`reviewer` and `notes`.
+
+- Helper columns: `type` (biological or chemical), `actives`, the waiting period, and
+  the CIB&RC page.
+- `suggested_rank` is a transparent default only: biological first, then single active
+  ingredient, then shortest waiting period. It is not advice.
+- Decisions are keyed by (label, product), so they survive rebuilds when the CIB&RC
+  lists are updated.
+
+**In the app:**
+
+- `KbRow.usable` = registered **and** approved.
+- The safety responder and `get_treatment_info` name the best-ranked usable row.
+- A problem with registered but unapproved rows gets "ask your KVK" (`T_NO_KB_CONSULT`).
+- `KbPack.open(includeUnreviewed = true)` lets debug builds use pending rows. Rejected
+  rows are never used.
+
+Until the review is done, every row is `pending`.
+
+## Laya's KB answers (`android/.../kb/KbAnswers.kt`)
+
+- **`KbTools`:** the `get_treatment_info` tool. It returns the label's approved rows,
+  best rank first, plus the top 3 prevention passages for the label.
+- **`KbAnswers.treatment()`:** `T_KB_TREATMENT` for the best row (or the consult
+  template), followed by "To prevent it:" and the best passage, quoted verbatim with its
+  source ("TNAU Agritech Portal ke anusaar (English mein): …").
+- **`KbAnswers.explain()`** answers "why?" and "what do I do?", following the design doc:
+  1. retrieve passages for the question, filtered by label;
+  2. `ExplanationModel` (the edge or cloud SLM) answers in the farmer's language from those
+     passages only;
+  3. the `SafetyValidator` removes numbers and product names;
+  4. a language check confirms the reply is in the farmer's language.
+
+  If the model fails, writes in the wrong language, or nothing survives the validator,
+  the answer falls back to the label's template description plus an attributed passage.
+- **Only clean passages are quoted.** A passage sentence with any number (for example
+  "24-29 degree C") is never quoted, because the validator allows no numbers outside the
+  KB rows.
+
+`KbEndToEndTest` runs a whole turn on the real pack: "pachheti jhulsa ka ilaj batao" →
+`LayaSession` → `KbTools` → a Hinglish treatment answer with a late-blight prevention
+passage.
+
+**Two validator bugs** came up on real KB data, with no effect on the fixture eval:
+
+- A combination product ("Ametoctradin 27% + Dimethomorph 20.27% SC") was blocked,
+  because "Dimethomorph" is another row's first word.
+- Sentences were split at the decimal point in "20.27".
+
+Both are fixed and covered by `SafetyTest`.

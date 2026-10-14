@@ -158,6 +158,10 @@ def prefixed(prefix, text, stats, label=None):
     """Chunks of one labelled passage, each starting with its heading so it reads on its own."""
     out = []
     for c in pack_sentences(clean_sentences(text, stats), max_chars=MAX_CHARS - len(prefix)):
+        # A section heading whose content was all doses ("... Chemical control.") is left dangling: drop it.
+        c = re.sub(r"\s*\b(Chemical|Biological|Cultural|Mechanical)( and \w+)? (control|practices)\s*:?\.?\s*$", "", c).strip()
+        if len(c) < 30:
+            continue
         labels = labels_in(prefix) or labels_in(c) or ([label] if label else [])
         out.append({"label": ";".join(dict.fromkeys(labels)), "text": f"{prefix}: {c}"})
     return out
@@ -289,7 +293,9 @@ def main():
                                 url TEXT, doc_date TEXT, accessed TEXT, sha256 TEXT);
         CREATE TABLE kb_treatment (id INTEGER PRIMARY KEY, label TEXT NOT NULL, product TEXT NOT NULL, dose TEXT NOT NULL,
                                    phi_days INTEGER NOT NULL, registration_status TEXT NOT NULL, source_url TEXT NOT NULL,
-                                   kb_version TEXT NOT NULL);
+                                   kb_version TEXT NOT NULL,
+                                   review_status TEXT NOT NULL,  -- pending / approved / rejected (agronomist, make_review_sheet.py)
+                                   display_rank INTEGER);        -- 1 = named first; NULL = unranked
         CREATE INDEX kb_treatment_label ON kb_treatment(label);
         CREATE TABLE kb_chunk (id INTEGER PRIMARY KEY, label TEXT, text TEXT NOT NULL, source_id TEXT NOT NULL,
                                source_url TEXT NOT NULL, kb_version TEXT NOT NULL,
@@ -304,9 +310,10 @@ def main():
         db.execute("INSERT INTO kb_source VALUES (?,?,?,?,?,?,?,?,?)",
                    [s[k] for k in ("id", "label", "kind", "publisher", "title", "url", "doc_date", "accessed", "sha256")])
     for r in csv.DictReader((KB / "kb_treatment.csv").open(encoding="utf-8")):
-        db.execute("INSERT INTO kb_treatment (label, product, dose, phi_days, registration_status, source_url, kb_version) "
-                   "VALUES (?,?,?,?,?,?,?)", [r["label"], r["product"], r["dose"], int(r["phi_days"]),
-                                              r["registration_status"], r["source_url"], r["kb_version"]])
+        db.execute("INSERT INTO kb_treatment (label, product, dose, phi_days, registration_status, source_url, kb_version, "
+                   "review_status, display_rank) VALUES (?,?,?,?,?,?,?,?,?)",
+                   [r["label"], r["product"], r["dose"], int(r["phi_days"]), r["registration_status"], r["source_url"],
+                    r["kb_version"], r["review_status"], int(r["display_rank"]) if r["display_rank"] else None])
     for i, (c, v) in enumerate(zip(chunks, vectors), 1):
         blob = sqlite_vec.serialize_float32(v)
         db.execute("INSERT INTO kb_chunk VALUES (?,?,?,?,?,?,?)", (i, c["label"], c["text"], c["source_id"], c["url"], KB_VERSION, blob))

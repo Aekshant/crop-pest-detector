@@ -101,6 +101,28 @@ def actives_in(product):
     return out
 
 
+def apply_review(rows, path=None):
+    """The agronomist's decisions (kb/review_decisions.csv, from make_review_sheet.py --import):
+    review_status approved/rejected per (label, product), and display_rank (1 = shown first).
+    Rows without a decision stay 'pending'; the app shows only approved rows."""
+    path = path or KB / "review_decisions.csv"
+    if not path.exists():
+        print("no kb/review_decisions.csv: every row is pending review")
+        return
+    decisions = {(d["label"], d["product"]): d for d in csv.DictReader(path.open(encoding="utf-8"))}
+    used = set()
+    for r in rows:
+        d = decisions.get((r["label"], r["product"]))
+        if d and d["decision"] in ("approve", "reject"):
+            r["review_status"] = "approved" if d["decision"] == "approve" else "rejected"
+            r["display_rank"] = d.get("rank", "") if d["decision"] == "approve" else ""
+            used.add((r["label"], r["product"]))
+    stale = set(decisions) - used - {k for k, d in decisions.items() if d["decision"] not in ("approve", "reject")}
+    print(f"review: {sum(r['review_status'] == 'approved' for r in rows)} approved, "
+          f"{sum(r['review_status'] == 'rejected' for r in rows)} rejected, "
+          f"{sum(r['review_status'] == 'pending' for r in rows)} pending" + (f"; {len(stale)} decisions match no row" if stale else ""))
+
+
 def label_for(pest):
     p = pest.lower()
     return [label for label, pat in LABEL_PATTERNS.items() if re.search(pat, p)]
@@ -178,8 +200,10 @@ def main():
             key = (label, r["product"])
             out.setdefault(key, {"label": label, "product": r["product"], "dose": dose, "phi_days": phi,
                                  "registration_status": "registered", "pest_as_listed": r["pest"],
-                                 "source_url": f"{r['url']}#page={r['page']}", "kb_version": KB_VERSION})
+                                 "source_url": f"{r['url']}#page={r['page']}", "kb_version": KB_VERSION,
+                                 "list": r["list"], "review_status": "pending", "display_rank": ""})
     rows = sorted(out.values(), key=lambda x: (x["label"], x["product"].lower()))
+    apply_review(rows)
     with (KB / "kb_treatment.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0]))
         w.writeheader()

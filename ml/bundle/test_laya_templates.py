@@ -26,7 +26,7 @@ def texts(node, path=""):
 
 
 def all_texts():
-    for section in ("diagnosis", "severity_levels", "clarify", "respond", "tools", "fallback", "safety"):
+    for section in ("diagnosis", "severity_levels", "clarify", "respond", "tools", "fallback", "safety", "kb"):
         yield from texts(T[section], section)
     for label, by_lang in T["labels"].items():
         for lang in LANGS:

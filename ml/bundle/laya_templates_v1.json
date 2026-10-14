@@ -16,7 +16,9 @@
   "product",
   "dose",
   "phi_days",
-  "count"
+  "count",
+  "source",
+  "passage"
  ],
  "labels": {
   "unknown": {
@@ -453,6 +455,23 @@
    "en": "Get medical help immediately and take the product label with you. Do not try home remedies.",
    "hi": "तुरंत डॉक्टर के पास जाइए और दवा का लेबल साथ ले जाइए। घरेलू उपाय मत आज़माइए।",
    "hinglish": "Turant doctor ke paas jaiye aur dawa ka label saath le jaiye. Gharelu upay mat aazmaiye."
+  }
+ },
+ "kb": {
+  "from_source": {
+   "en": "From {source}: {passage}",
+   "hi": "{source} के अनुसार (अंग्रेज़ी में): {passage}",
+   "hinglish": "{source} ke anusaar (English mein): {passage}"
+  },
+  "prevention_heading": {
+   "en": "To prevent it:",
+   "hi": "रोकथाम के लिए:",
+   "hinglish": "Rokthaam ke liye:"
+  },
+  "no_passage": {
+   "en": "I don't have more verified information on this yet.",
+   "hi": "इस बारे में अभी मेरे पास और प्रमाणित जानकारी नहीं है।",
+   "hinglish": "Is baare mein abhi mere paas aur pramanit jaankari nahi hai."
   }
  }
 }
